@@ -8,14 +8,13 @@ Bu doküman, Sport AI Twin projesinin sesli geri bildirim (koçluk) katmanının
 
 Aşağıdaki şema, ham görüntü verisinden sesli koçluk çıktısına kadar olan süreci ve kullanılan araçları göstermektedir:
 
-![Voice Workflow](https://www.plantuml.com/plantuml/svg/TLJ1Rjf04BtlLqo9L2M7g9H4GA8eYi60a82WWD9BBnFl65ROkzRkEeHM_VVEsYc1YlZccJTlthmP-y5vjBxCC_55KgeqmTEWlunceya0aWoT4swZT84MStZ1PBEofjIoRp9ZmLlKZbEa_G6AQR3C_D1eFyESuB7qgVe4i52_2BvVYuDinPyOgyb2gtcGS6kKPglq2bBC71tMOEBLg_8x-2s0dzv_EizIcRRfgiuPAyc-nrljxejiLV78MhCz3lyvR96Ol32Q9ptTu-vkh8lItz_3sN0OTvhDqw1dvPJH0TNjz0U3tcdKnAnK4a0ttM7lfdiQ58q38ewZPXoVHh3nUqdjg-jE6CWhdn54OtWsAY7e6qpMmT8VncxIp6pXlAw2HvtjBeJ8AFNW3LYrMdkGoX9RRRGG1NV35K6ZcXick2FRgBpvSAhHv_rRX6_mh2GPM7XBc3VWmonqm9WWRCyNQSnsJhbFAEV64SJaQnq_zVcKfCAvAkWY4EyDPkRf_BZqgUJH1th5HyvryvrV6msLrrNfFzUvCY2FHOtXwxjbfsKDYMJuF614GTHelhoyDZpuY7AbLSLVBOp99vFfSUsItZmisPw2A5bpzMD1cZikbukZGdu_4XLJfbx9xZwH59LI6QZNoQJCZXko5UF-CfXr4IucyF8YuFBodcs3MtZ2RRqqmQyXMfbtowsqpD5k84QFeWg6BC_4oJdPrDWSDTiq9MzLuaJ810IBPyGCVManWxrT3DDAX6G0LLeOLaklpqM81z8o_A3-0W00)
+![Voice Workflow](https://www.plantuml.com/plantuml/svg/TLF1Rjf04BtlLuoI2nnGI8A0L14AJZ2Ab0PKM-c5oyOUmmfxrzeTXzAg_zvPsqtSYlXaptlpPjxpxfqZQQagSk7sIfVIoW9UPRBVMbFfzDxanW9PgHr3gAd3IZ6JLKwXqVGi2uHLHPdwX12fdmYNemvOooV6QhHmEUm0RYTJSr1w2vdC7OeE91DIRugEy4i0Fy5_QvvdQJR6wmOpDaNRrg_6qzVqggxFhJM7Vyk_koCIKvH6iz7JCsvlOwksMxIp6Po7uSDaE3nDUthwwYatqp2ucNwY54UUCftSBnR1QGf7MbRKp1fVZoP-LrAK8ymVuSMe1669dA0aPJHyDtQVvUO0lPNEZotUIFI5o34Z80Ey_uuWLHOJtoN4X-MpwEW82rYy-QyBsEWNvRnoQ_eCklwb-rllIh1nw2tNyM1aM669XTAglz7jcWWn_Y3uXexv3hrWanIByKjNg2R61g8ICTbjT6zLecRR75k_NgIEpoyHHzs-UPKgqzhche3_j-CprfJdwyUw-JrOxezyu4AqNc0mcFbLu0kiqMR65b9pZ0-IfF1b3_D4XfybLLRc42Ac_iRKreJ7FATMPLOpDoABVBek8AYoZ0CJTwXJV-d-0000)
 
 ### Kullanılan Araçlar:
-*   **MediaPipe:** Video stream üzerinden vücut landmark'larının (poz tespiti) anlık çıkarılması.
-*   **Custom Rule Engine (Python):** Hareketin doğruluğunu, hızını ve stabilitesini ölçen matematiksel mantık katmanı.
-*   **GPT-4o / Gemini:** Teknik metrikleri (örn: "Diz açısı 45 derece") doğal ve motive edici bir dille ("Dizlerini biraz daha kırarsan mükemmel olacak!") koçluk cümlesine çeviren zekâ katmanı.
-*   **OpenAI TTS:** Metni yüksek kaliteli ve doğal bir insan sesine dönüştüren katman.
-*   **Web Audio API:** Browser tarafında sesin gecikmesiz çalınmasını sağlayan katman.
+*   **System/Vision Trigger:** Analiz katmanından gelen "Hata yapıldı" veya "Set bitti" gibi olay bazlı tetikleyiciler.
+*   **GPT-4o / Gemini:** Teknik veriyi doğal bir koçluk cümlesine çeviren LLM katmanı.
+*   **OpenAI TTS:** Metni yüksek kaliteli ses dosyasına dönüştüren model.
+*   **Web Audio API:** Tarayıcı üzerinden sesi kullanıcıya ulaştıran çıkış katmanı.
 
 ---
 
