@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #0d1b3f;
+    background: #f3f9fd;
+    --page: #f5fbff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at top left, rgba(205, 234, 249, 0.55), transparent 32%),
+      linear-gradient(180deg, #f8fcff 0%, #f3f9fd 100%);
+    font-family: "Manrope", sans-serif;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+@layer utilities {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+      transform: translate3d(0, -16px, 0);
+    }
+  }
+
+  .animate-rise {
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-drift {
+    animation: drift 10s ease-in-out infinite;
+  }
+
+  .animate-drift-delayed {
+    animation: drift 13s ease-in-out -4s infinite;
+  }
+}
