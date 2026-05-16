@@ -1,5 +1,7 @@
 # Ideas List
 
+- https://www.loot-drop.io/ideas
+
 ## 1. SECURE OPEN SOURCE DEVOPS PLATFORM
 **Votes:** +43
 
