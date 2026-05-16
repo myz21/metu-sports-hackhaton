@@ -14,6 +14,7 @@ Sistemimiz bir sporcunun antrenörü gibi çalışır. Süreç şu şekilde iler
     *   **GPT-4o / Gemini** (zekâ katmanı) müziği "dinler" ve havasını anlar (Bu müzik hüzünlü mü, yoksa gaza getirici mi?).
 3.  **Kişisel Koçluk Planı:** Sistem, ritim noktalarıyla müziğin havasını birleştirir. Sadece "Zıpla" demek yerine, *"Müzik burada yükseliyor, tam bu ritimle beraber zıpla!"* gibi doğal ve motive edici cümleler hazırlar.
 4.  **Sesli Geri Bildirim:** Hazırlanan bu cümleler, **OpenAI TTS** ile gerçek bir insan sesi kalitesinde seslendirilir ve sporcuya tam vaktinde iletilir.
+5.  **Görsel Özet ve Metin Raporu:** Sesli komutların tamamı, antrenman sonunda bir **"Koçluk Özeti"** olarak ekranda listelenir. Böylece sporcu duyduğu tavsiyeleri daha sonra yazılı olarak da inceleyebilir.
 
 ---
 
@@ -30,6 +31,7 @@ Sistem, müziği hem matematiksel (Librosa) hem de anlamsal (LLM) olarak analiz 
 *   **Analiz Katmanı (Librosa):** Supabase'den çekilen müziğin BPM ve ritim noktalarını matematiksel olarak analiz eder.
 *   **Zekâ Katmanı (GPT-4o / Gemini):** Teknik verileri, müziğin atmosferiyle birleştirerek kişiselleştirilmiş koçluk metni üretir.
 *   **Sentez Katmanı (OpenAI TTS):** Metni doğal bir insan sesine dönüştürür.
+*   **Görsel Katman (Coaching Dashboard):** Üretilen koçluk metinlerini ve analiz sonuçlarını sporcuya yazılı bir rapor olarak sunar.
 *   **İletim Katmanı (Web Audio API):** Sesi tarayıcıda gecikmesiz olarak çalar.
 
 ---

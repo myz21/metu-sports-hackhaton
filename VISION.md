@@ -1,53 +1,80 @@
 # 👁️ Vision (Görüntü İşleme) Stratejisi
 
-Bu doküman, SkateSync AI projesinin görüntü işleme katmanını, vücut analiz mantığını ve video-müzik senkronizasyon stratejisini detaylandırır.
+Bu katman, SkateSync AI'ın "Gözü"dür. Ancak bu göz sadece bakmaz; aynı zamanda müziği "duyar" ve **sporcunun hareketlerinin müziğin ritmiyle ne kadar uyumlu olduğunu** analiz eder.
+
+> [!IMPORTANT]
+> **Ortak Müzik Motoru (Common Music Core):** Vision modülü, ritim ve duygu analizi için [VOICE.md](file:///home/neo/Downloads/METU%20SPORTS%20HACKHATON/metu-sports-hackhaton/VOICE.md) dosyasında detaylandırılan **Librosa + LLM** hibrit altyapısını ortak bir servis olarak kullanır. Bu sayede müzik ve video analizi %100 aynı referans noktaları üzerinden gerçekleştirilir.
+
+## 🧒 Vision Süreci: 6 Yaşındaki Çocuk Versiyonu
+
+Sistemimiz sporcuyu izleyen sihirli bir göz gibi çalışır:
+
+1.  **Ritim Dedektifi:** Sistem aynı zamanda çalan müziği de dinler. Sen tam davul vurduğunda mı zıpladın? Yoksa geç mi kaldın? Sistem bunu hemen anlar.
+2.  **Nokta Birleştirme (Classic):** Vücuduna görünmez noktalar koyar. "Müzik hızlandığında sen de hızlandın mı?" diye kontrol eder.
+3.  **Akıllı Yorumcu (VLM):** Hareketlerine bakıp "Müziğin ruhuna ne kadar da yakışmışsın!" gibi moral verici yorumlar yapar.
 
 ---
 
-## 👁️ Süreç Nasıl İşliyor? (Basitçe Anlatım)
+## 🟢 Seçenek A: Landmark Tabanlı Analiz (MediaPipe)
 
-Sistemimiz sporcunun her hareketini milimetrik olarak takip eden dijital bir göz gibi çalışır:
+Bu senaryoda analiz tamamen **zamanlama ve koordinat** üzerinedir.
 
-1.  **Görmek:** Telefonun kamerası sporcuyu kaydederken, **MediaPipe** teknolojisi sporcunun eklemlerini (omuz, diz, ayak bileği vb.) gerçek zamanlı olarak işaretler.
-2.  **Analiz Etmek:** Sistem, bu işaretlerin arasındaki açıları ve hareket hızını ölçer. Örneğin; bir sıçrama anında dizin ne kadar kırıldığını veya havada kaç derece dönüldüğünü matematiksel olarak hesaplar.
-3.  **Hataları Yakalamak:** Elde edilen veriler, "mükemmel form" verileriyle karşılaştırılır. Eğer sporcu dengesini kaybediyorsa veya ritimden kopuyorsa sistem bunu anında tespit eder.
-4.  **Raporlamak:** Tüm bu görsel analiz sonuçları, kullanıcının gelişimini takip edebilmesi için **Supabase** veri tabanına kaydedilir.
+### Senaryo 1: Video + Ayrı Müzik Dosyası + Offset (Pro Mod)
+Sporcu, yüksek kaliteli müzik dosyasını video dosyasından bağımsız olarak yükler. Sistem, **müzik ses dosyasının videonun tam olarak kaçıncı saniyesinde (offset) çalmaya başlaması gerektiğini** kullanıcı ayarı olarak alır ve analizini bu zaman kaymasına göre milisaniyelik doğrulukla yapar.
+![Vision Workflow Classic Sync](./workflows/vision_workflow_classic_sync.svg)
+*   **Avantaj:** En yüksek ses kalitesi ve milisaniyelik doğruluk.
+*   **Süreç:** Müzik dosyası referans alınır, videodaki hareketler belirtilen "offset" değerine göre kaydırılarak senkronize edilir.
 
----
-
-## 1. İş Akışı (Workflow)
-
-![Vision Workflow](./workflows/vision_workflow.svg)
-
-### Kullanılan Araçlar:
-*   **MediaPipe:** Vücut landmark'larını (33 adet eklem noktası) 3D koordinat olarak çıkaran motor.
-*   **Custom Rule Engine (Python):** Landmark verilerini kullanarak "Açı", "Denge" ve "Hız" gibi spor odaklı metrikleri hesaplayan mantık katmanı.
-*   **Supabase (Local):** Ham videoların ve analiz edilmiş metadata sonuçlarının saklandığı merkez.
+### Senaryo 2: Sadece Video (Gömülü Ses Analizi)
+Sporcu sadece video yükler, sistem videonun içindeki sesi ayıklar.
+![Vision Workflow Classic Embedded](./workflows/vision_workflow_classic_embedded.svg)
+*   **Avantaj:** Hızlı kullanım, ek dosya gerektirmez.
+*   **Süreç:** Videodaki ses dalgaları (waveform) analiz edilerek ritim vuruşları (beats) otomatik tespit edilir.
 
 ---
 
-## 2. Teknik Süreç (Sequence Diagram)
+## 🟣 Seçenek B: VLM Tabanlı Analiz (Gemini / GPT-4o)
 
-![Vision Sequence](./workflows/vision_sequence.svg)
+Bu senaryoda analiz **estetik ve karakter** üzerinedir.
 
----
+### Senaryo 1: Video + Ayrı Müzik + Offset (Derin Analiz)
+VLM'e video karelerinin yanı sıra, müziğin karakteri ve **müziğin videonun kaçıncı saniyesinde devreye girmesi gerektiği (sync offset)** bilgisi birer bağlamsal veri (context) olarak iletilir.
+![Vision Workflow VLM Sync](./workflows/vision_workflow_vlm_sync.svg)
+*   **Avantaj:** Müziğin teknik yapısıyla hareketin sanatsal uyumu sorgulanabilir.
+*   **Süreç:** "Müzik bu saniyede çok dramatikleşiyor, sporcu o an doğru duyguyu yansıtıyor mu?" analizi yapılır.
 
-## 3. Video ve Müzik Senkronizasyonu (Önemli Detaylar)
-
-Paten gibi ritim odaklı sporlarda video ve müzik arasındaki uyum kritiktir. Karşılaşılan teknik zorluklar ve çözümlerimiz:
-
-### Video Kaydı Sırasında Müzik Sesi Ne Oluyor?
-*   **Sorun:** Çoğu telefon video kaydına başladığında mikrofonu kullandığı için sistem sesini (müziği) dışarı vermeyi durdurur veya kısar.
-*   **Çözüm:** Uygulamamız, müziği video kaydıyla **eş zamanlı olarak dijital bir timestamp (zaman damgası)** ile başlatır. Videonun 0. saniyesi, müziğin 0. saniyesine kilitlenir. Videonun içindeki sesin (ortam gürültüsü) kalitesi analizi etkilemez çünkü biz dijital müzik dosyasını referans alırız.
-
-### Sporcunun Kulağında Müzik Varken Ne Oluyor?
-*   **Senaryo:** Sporcu kulaklıkla kendi müziğini dinleyerek kayıyor.
-*   **Teknik Yaklaşım:** Uygulama, sporcunun kulağına giden müzikle kameranın kaydettiği görüntüyü "Master Sync" sinyaliyle birleştirir. Sporcu kulaklığında müziğin vuruşunu (beat) duyduğu anda, AI sistemi de o anın müzikteki hangi milisaniyeye denk geldiğini bildiği için **"Müzik-Hareket Uyumu" (Rhythm Consistency)** puanlamasını tam doğrulukla yapar.
+### Senaryo 2: Sadece Video (Multimodal Analiz)
+VLM, videoyu hem görür hem duyar (full multimodal).
+![Vision Workflow VLM Embedded](./workflows/vision_workflow_vlm_embedded.svg)
+*   **Avantaj:** En doğal ve insansı yorumlama.
+*   **Süreç:** Model videoyu bir bütün olarak izler ve "Duyduğum müzik ile gördüğüm hareketler birbiriyle dans ediyor" gibi sonuçlar üretir.
 
 ---
 
-## 4. Stratejik Notlar
+## 🟠 Seçenek C: Planlı Program Analizi (C Planı - Script Match)
 
-*   **Düşük Gecikme:** Analizler kare bazlı (frame-by-frame) yapıldığı için sporcu antrenmanı bitirdiği anda raporu hazır olur.
-*   **Işık ve Arka Plan:** MediaPipe kullanımı sayesinde, çok karmaşık olmayan arka planlarda ve standart buz pisti ışıklandırmasında yüksek doğruluk sağlanır.
-*   **Gizlilik:** Görüntüler sadece analiz amaçlı kullanılır ve yerel (local) Supabase üzerinde saklanarak veri güvenliği en üst düzeyde tutulur.
+Bu senaryo, projenin [CONTEXT.md](file:///home/neo/Downloads/METU%20SPORTS%20HACKHATON/metu-sports-hackhaton/CONTEXT.md) dosyasında belirtilen **Program Planlama** modülünden gelen "Hareket Listesi" (Script) üzerinden yapılan analizdir. "Cevap Anahtarı" belli olduğu için en hızlı ve karşılaştırmalı sonuç veren yöntemdir.
+
+### 1. İş Akışı (Workflow)
+![Vision Workflow Plan C](./workflows/vision_workflow_plan_c.svg)
+
+### 2. Teknik Süreç (Sequence Diagram)
+![Vision Sequence Plan C](./workflows/vision_sequence_plan_c.svg)
+
+### Temel Özellikler:
+*   **Hazır Liste Kıyaslaması:** Sistem, "10. saniyede Spin yapmalısın" bilgisini bilir. Videoda o saniyede ne yapıldığını MediaPipe veya VLM ile kontrol eder.
+*   **Benzerlik Skoru:** Sporcunun plana ne kadar sadık kaldığını (Readiness Score) ölçer.
+*   **Hata Tespiti:** "Plana göre burada Jump vardı ama sen Step yaptın" gibi doğrudan karşılaştırmalı geri bildirim verir.
+
+---
+
+## ❓ VLM Varken MediaPipe Gerekli mi?
+
+**Ritim analizi için EVET.**
+Çünkü müziğin vuruşuyla hareketin vuruşunu milisaniye bazında yakalamak için MediaPipe'ın sağladığı sayısal veri hızı kritik önemdedir. VLM bu konuda henüz MediaPipe kadar "milisaniyelik" hassasiyet sunamaz.
+
+---
+
+## 3. Video ve Müzik Senkronizasyonu (Digital Timestamping)
+
+Videonun 0. milisaniyesi ile dijital müzik dosyasının 0. milisaniyesi birbirine kilitlenir. Bu sayede sporcu kulaklık taksa bile, sistem videodaki görüntünün müzikteki hangi notaya denk geldiğini %100 doğrulukla bilir.
