@@ -8,6 +8,8 @@ A collection of startups with verified revenue in the health and fitness industr
 
 ## Summary Table
 
+gymvision.app
+
 | Startup | Revenue (30d) | MRR | Total Revenue | Status |
 |:---|:---|:---|:---|:---|
 | TrimRx | $203k | $236k | $12M | - |
