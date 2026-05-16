@@ -17,7 +17,7 @@ Sistemimiz sporcunun her hareketini milimetrik olarak takip eden dijital bir gö
 
 ## 1. İş Akışı (Workflow)
 
-![Vision Workflow](./vision_workflow.svg)
+![Vision Workflow](./workflows/vision_workflow.svg)
 
 ### Kullanılan Araçlar:
 *   **MediaPipe:** Vücut landmark'larını (33 adet eklem noktası) 3D koordinat olarak çıkaran motor.
@@ -28,7 +28,7 @@ Sistemimiz sporcunun her hareketini milimetrik olarak takip eden dijital bir gö
 
 ## 2. Teknik Süreç (Sequence Diagram)
 
-![Vision Sequence](./vision_sequence.svg)
+![Vision Sequence](./workflows/vision_sequence.svg)
 
 ---
 

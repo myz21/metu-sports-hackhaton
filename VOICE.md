@@ -23,7 +23,7 @@ Sistemimiz bir sporcunun antrenörü gibi çalışır. Süreç şu şekilde iler
 
 Sistem, müziği hem matematiksel (Librosa) hem de anlamsal (LLM) olarak analiz ederek en doğru zamanlamada en doğal geri bildirimi üretir.
 
-![Voice Workflow](./workflow.svg)
+![Voice Workflow](./workflows/workflow.svg)
 
 ### Katmanlar ve Araçlar:
 *   **Veri Katmanı (Supabase - Local):** Müzik dosyalarının saklandığı (Storage) ve koçluk planlarının/analiz verilerinin tutulduğu (Database) merkezdir.
@@ -38,7 +38,7 @@ Sistem, müziği hem matematiksel (Librosa) hem de anlamsal (LLM) olarak analiz 
 
 Aşağıdaki şema, müziğin yüklenmesinden sesli komutun kullanıcıya ulaşmasına kadar geçen teknik adımları göstermektedir:
 
-![Sequence Diagram](./sequence.svg)
+![Sequence Diagram](./workflows/sequence.svg)
 
 ---
 
