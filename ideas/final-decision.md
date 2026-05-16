@@ -58,4 +58,29 @@ Jürinin karşısına çıktığınızda muhtemelen "Bu bir fitness uygulaması 
 *   **Low Friction:** Kullanıcının sadece 3 soruyla (Boy, Kilo, Hedef) ikizini oluşturabildiğini vurgulayın.
 
 ---
-> **Sonuç:** `Sport AI Twin`, hackathonun kısıtlı süresinde hem teknik olarak "bitmiş" görünebilecek hem de ticari olarak "Verified" başarılara en yakın fikirdir.
+
+## 🎙️ 3 Dakikalık "Champion Pitch" Senaryosu
+
+Zaman çok kısıtlı olduğu için teknik detaylarda boğulmak yerine "Problem -> Çözüm -> Kanıt -> Demo" akışını izlemelisiniz.
+
+### ⏱️ 0:00 - 0:45 | Kanca & Problem (Acıyı Hissettir)
+> "Her yıl spor salonuna yazılan 100 kişiden 60'ı ilk 3 ay dolmadan gitmeyi bırakıyor. Bu sadece ODTÜ Baraka'nın değil, tüm dünyadaki spor tesislerinin en büyük maliyet kalemi: **Üye Kaybı (Churn).** İnsanlar neden bırakıyor? Çünkü gelişimlerini göremiyorlar ve motivasyonlarını kaybediyorlar."
+
+### ⏱️ 0:45 - 1:30 | Çözüm (Sport AI Twin)
+> "Biz bu sorunu çözmek için **Sport AI Twin**'i geliştirdik. Bu sadece bir sayaç değil; sporcunun fiziksel ve davranışsal verilerinden oluşan bir dijital ikiz. Siz spor yaptıkça ikiziniz güçleniyor. Sistem, salon yöneticisine hangi üyelerin 'riskli' olduğunu (bırakmak üzere olduğunu) söylüyor ve onlara AI destekli otomatik kampanyalar (örn: 'Geri Dönüş Haftası') çıkıyor."
+
+### ⏱️ 1:30 - 2:15 | Kanıt & İş Modeli (Neden Kazanırız?)
+> "Fikrimiz havada değil. Dünyada `Gymnastics Tools` ve `REP Gym Pass` gibi B2B spor teknolojileri yıllık milyonlarca dolar ciro yapıyor. Bizim modelimiz salon sahiplerine bir **Retention SaaS** olarak satılıyor. Üye sadakatini %20 artırmak, bir salonun kârını %50'den fazla etkileyebiliyor."
+
+### ⏱️ 2:15 - 2:50 | Demo & Wow Moment (Görsel Kanıt)
+> *(Ekranda Admin Paneli gösterirken)* "Bakın, Baraka yöneticisi şu an düşük devamlılık gösteren 12 üyeyi tek tıkla görüyor. *(AI Twin ekranını gösterirken)* Sporcu tarafında ise Harun, kol kası antrenmanını tamamladığında dijital ikizinin güçlendiğini anlık görüyor. İşte bu, üyeyi salona bağlayan psikolojik bağ."
+
+### ⏱️ 2:50 - 3:00 | Kapanış (Noktayı Koy)
+> "Biz dünyayı değiştirmek için değil, spor salonlarının en büyük ticari acısını dindirmek için buradayız. Sport AI Twin: Yarının spor salonlarını bugünden akıllandırıyoruz."
+
+---
+
+## 🚩 Sunum İpuçları (Final)
+*   **Hızlı Başlayın:** "Merhaba biz X ekibi" diyerek 10 saniye kaybetmeyin. Direkt problemle girin.
+*   **Görsel Konuşsun:** Slaytlara yazı doldurmayın. Bir yanda karmaşık bir admin paneli, diğer yanda şık bir avatar olsun.
+*   **Soru Gelirse:** "Teknik olarak nasıl yapıyorsunuz?" sorusuna "MediaPipe tabanlı rule-based motorumuz hazır, demo kodumuzda görebilirsiniz" diyerek teknik yetkinliğinizi kanıtlayın.
