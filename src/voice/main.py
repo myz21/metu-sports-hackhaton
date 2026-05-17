@@ -18,7 +18,7 @@ from .tts_engine import DEFAULT_TTS_MODEL, DEFAULT_TTS_VOICE, TTSEngine
 
 
 def load_planned_elements(plan_path: str | Path) -> list[dict[str, Any]]:
-    payload = json.loads(Path(plan_path).read_text(encoding="utf-8"))
+    payload = json.loads(Path(plan_path).read_text(encoding="utf-8-sig"))
     if isinstance(payload, dict) and "planned_elements" in payload:
         return list(payload["planned_elements"])
     if isinstance(payload, list):
@@ -29,7 +29,10 @@ def load_planned_elements(plan_path: str | Path) -> list[dict[str, Any]]:
 def export_json(payload: Any, output_path: str | Path) -> str:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8-sig",
+    )
     return str(path)
 
 
@@ -41,7 +44,7 @@ def export_cue_texts(cues: list[dict[str, Any]], output_path: str | Path) -> str
         )
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8-sig")
     return str(path)
 
 
