@@ -4,6 +4,11 @@ Bu dokuman, SkateSync AI icin guncel video inceleme mimarisini aciklar.
 
 Amacimiz hareketi otomatik olarak siniflandirmak degil. Planlanan hareket listesi zaten koreografi timeline'indan geliyor. Vision katmani, sporcunun kaydedilen performansini bu planlanan timeline ile karsilastirip MVP seviyesinde antrenman skoru ve geri bildirim uretmek icin kullaniliyor.
 
+Bu branch'te `voice` ve `vision` birlikte dusunulur:
+
+- `voice` hareket planini ve sesli cue'lari uretir
+- `vision` ayni `planned_elements` yapisini kullanarak videoyu degerlendirir
+
 ## Guncel yaklasim
 
 Varsayilan backend artik `OpenAI VLM + local RAG + deterministic scoring`.
@@ -13,15 +18,15 @@ Kullaniciya iki analiz secenegi sunulur:
 - `low`: daha ucuz ve daha hizli gunluk review modu
 - `high`: daha pahali ama daha zengin demo / coach review modu
 
-Ana kod [src/vision](</d:/metu-sports-hackhaton/src/vision>) altinda:
+Ana kod [src/vision](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision>) altinda:
 
-- [cli.py](</d:/metu-sports-hackhaton/src/vision/cli.py>): komut satiri giris noktasi
-- [vlm_review.py](</d:/metu-sports-hackhaton/src/vision/vlm_review.py>): OpenAI vision ile planned-vs-actual inceleme
-- [frame_extractor.py](</d:/metu-sports-hackhaton/src/vision/frame_extractor.py>): planlanan zaman araligindan ornek frame cikarir
-- [rag.py](</d:/metu-sports-hackhaton/src/vision/rag.py>): local skating corpus icinden baglam ceker
-- [llm_feedback.py](</d:/metu-sports-hackhaton/src/vision/llm_feedback.py>): opsiyonel aciklama katmani
+- [cli.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/cli.py>): komut satiri giris noktasi
+- [vlm_review.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/vlm_review.py>): OpenAI vision ile planned-vs-actual inceleme
+- [frame_extractor.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/frame_extractor.py>): planlanan zaman araligindan ornek frame cikarir
+- [rag.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/rag.py>): local skating corpus icinden baglam ceker
+- [llm_feedback.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/llm_feedback.py>): opsiyonel aciklama katmani
 
-Local skating corpus su dosyada tutulur: [figure_skating_knowledge.json](</d:/metu-sports-hackhaton/src/vision/knowledge/figure_skating_knowledge.json>).
+Local skating corpus su dosyada tutulur: [figure_skating_knowledge.json](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/knowledge/figure_skating_knowledge.json>).
 
 ## Sistem ne yapiyor
 
@@ -122,7 +127,7 @@ VLM artik su son etiketleri belirlemiyor:
 - `short / on_target / long`
 - `strong / moderate / weak` music alignment
 
-Bu etiketler artik [vlm_review.py](</d:/metu-sports-hackhaton/src/vision/vlm_review.py>) icinde offset'lerden turetiliyor.
+Bu etiketler artik [vlm_review.py](</d:/metu-sports-hackhaton/__worktree_ai_core/src/vision/vlm_review.py>) icinde offset'lerden turetiliyor.
 
 ## Token ve maliyet stratejisi
 
@@ -149,8 +154,6 @@ VLM backend artik iki net quality profili sunuyor:
   - daha fazla gorsel baglam kullanir
   - demo, coach review ve daha kritik seanslar icin uygun
 
-`low` profil onceki cost-aware mantigin devamidir. `high` profil ise daha zengin frame orneklemesi ve daha guclu model ayarlariyla calisir.
-
 ### 3. Element basina kontrollu frame butcesi
 
 `low` profil icinde adaptif frame butcesi kullaniliyor:
@@ -168,32 +171,17 @@ OpenAI Responses API image detail seviyelerini destekliyor.
 - `low` profil: `detail: "low"`
 - `high` profil: `detail: "high"`
 
-Bu onemli, cunku OpenAI vision fiyatlamasi image detail seviyesinden etkileniyor.
-
 ### 5. Daha kucuk frame payload'i
 
-JPEG encode etmeden once ornek frame'ler kalite profiline gore resize ve compress edilebiliyor:
-
-- `low` profil icinde daha kucuk max dimension
-- `low` profil icinde daha dusuk JPEG quality
-
-Bu payload boyutunu dusurur ve istegi hafifletir.
+JPEG encode etmeden once ornek frame'ler kalite profiline gore resize ve compress edilebiliyor.
 
 ### 6. Compact RAG context
 
-Local skating RAG baglami `low` profil icinde kisaltiliyor:
-
-- daha az dokuman cekiliyor
-- her dokumandan daha az cue aliniyor
-- istege bagli karakter limiti uygulanabiliyor
-
-Bu, elemente ozel skating baglamini korurken text token miktarini azaltir.
+Local skating RAG baglami `low` profil icinde kisaltiliyor.
 
 ### 7. Ikinci LLM pass sadece gerekirse
 
-Sporcuya yonelik aciklama passi hala opsiyonel.
-
-Eger `--include-llm-feedback` kullanilmazsa, sistem ek OpenAI aciklama cagrisi yapmaz; sadece deterministic review ve local feedback dondurur.
+`--include-llm-feedback` kullanilmazsa sistem ek OpenAI aciklama cagrisi yapmaz.
 
 ## Guncel CLI kullanimi
 
@@ -203,13 +191,7 @@ Temel VLM review:
 python -m src.vision "video.mp4" "plan.json" --quality low
 ```
 
-Gunluk ve daha ucuz review:
-
-```bash
-python -m src.vision "video.mp4" "plan.json" --quality low
-```
-
-Daha yuksek ayrinti ile calistirmak:
+Daha yuksek ayrinti:
 
 ```bash
 python -m src.vision "video.mp4" "plan.json" --quality high
@@ -234,12 +216,4 @@ python -m src.vision "video.mp4" "plan.json" --quality high --include-llm-feedba
 - Frame tabanli VLM review hala MVP seviyesinde bir heuristic; tam hareket rekonstruksiyonu degil.
 - Music alignment, resmi hakem mantigindan degil; planned timing ve gorunen peak anlarindan cikariliyor.
 - Birden fazla kisi olan sahneler, kotu framing veya ciddi motion blur confidence'i dusurebilir.
-- `high` profil bile resmi judging dogrulugu iddia etmez; sadece `low` profile gore daha zengin review verir.
-
-## Onerilen sonraki iyilestirmeler
-
-- OpenAI response icinden request-level usage loglamak
-- frontend icinde cost control ayarlari acmak
-- hizli bir first-pass ve sadece gerekirse pahali second-pass retry stratejisi eklemek
-- review run'larini ve planlari tarihsel karsilastirma icin birlikte saklamak
-- music analysis pipeline'indan beat marker bilgisini opsiyonel olarak eklemek
+- `high` profil bile resmi judging dogrulugu iddia etmez.

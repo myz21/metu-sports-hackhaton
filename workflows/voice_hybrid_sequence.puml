@@ -1,0 +1,36 @@
+@startuml
+title Hybrid Voice Coaching Sequence
+
+skinparam backgroundColor white
+skinparam shadowing false
+
+actor User
+participant "test_voice.py" as Test
+participant "AudioAnalyzer" as Analyzer
+participant "CoachingEngine" as Gemini
+participant "Gemini 2.5 Flash" as Model
+participant "TTSEngine" as TTS
+participant "OpenAI/Edge TTS" as Speech
+participant "Mixer" as Mixer
+participant "Firebase" as Firebase
+
+User -> Test : run pipeline
+Test -> Analyzer : analyze_beats(audio_path)
+Analyzer --> Test : tempo, beat_times, duration, energy_profile
+Test -> Gemini : generate_cues(audio_data, planned_program)
+Gemini -> Model : structured JSON request
+Model --> Gemini : {"cues":[{"time":...,"text":"..."}]}
+Gemini --> Test : sorted cue list
+Test -> TTS : generate_cue_audios(cues)
+loop parallel for each cue
+  TTS -> Speech : synthesize cue_i text
+  Speech --> TTS : cue_i.mp3
+end
+TTS --> Test : cue file metadata + lead-in duration
+Test -> Mixer : overlay each cue at cue.time - latency - lead_in
+Mixer --> Test : output_test.mp3
+Test -> Firebase : upload/save session (optional)
+Firebase --> Test : public URL or auth error
+Test --> User : mixed coaching audio + logs
+
+@enduml
