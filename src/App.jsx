@@ -3,15 +3,15 @@ import movementKnowledge from "../knowledge/figure_skating_knowledge.json";
 import pageBackground from "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg";
 import brandLogo from "../skatesync-logo-Photoroom.png";
 import landingFigure from "../skatesync-landing.png";
-import { 
-  dbRegister, 
-  dbLogin, 
-  dbLogout, 
-  subscribeToAuth, 
-  dbUpdateProfile, 
-  dbSaveMusicAnalysis, 
-  dbGetMusicAnalyses, 
-  dbSaveVideoAnalysis, 
+import {
+  dbRegister,
+  dbLogin,
+  dbLogout,
+  subscribeToAuth,
+  dbUpdateProfile,
+  dbSaveMusicAnalysis,
+  dbGetMusicAnalyses,
+  dbSaveVideoAnalysis,
   dbGetVideoAnalyses,
   isFirebaseConfigured
 } from "./firebase";
@@ -85,11 +85,10 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
       <div className="flex items-center gap-3">
         {activeUser ? (
           <>
-            <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-              theme === "dark"
+            <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border ${theme === "dark"
                 ? "border-slate-700 bg-slate-800/50 text-slate-300"
                 : "border-sky-100 bg-sky-50/50 text-slate-700"
-            }`}>
+              }`}>
               <div className="h-6.5 w-6.5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold">
                 {activeUser.displayName ? activeUser.displayName[0].toUpperCase() : "S"}
               </div>
@@ -98,11 +97,10 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
             <button
               type="button"
               onClick={onLogout}
-              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
-                theme === "dark"
+              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${theme === "dark"
                   ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
                   : "border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-              }`}
+                }`}
             >
               Çıkış
             </button>
@@ -112,22 +110,20 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
             <button
               type="button"
               onClick={() => onNavigate("login")}
-              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
-                theme === "dark"
+              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${theme === "dark"
                   ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
                   : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
-              }`}
+                }`}
             >
               Login
             </button>
             <button
               type="button"
               onClick={() => onNavigate("overview")}
-              className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${
-                theme === "dark"
+              className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${theme === "dark"
                   ? "bg-slate-100 text-slate-900 hover:bg-white"
                   : "bg-slate-800 text-white hover:bg-slate-700"
-              }`}
+                }`}
             >
               Get Started
             </button>
@@ -191,8 +187,8 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
           {isSignUp ? "Rostere Katıl" : "SkateSync AI Giriş"}
         </h1>
         <p className="max-w-sm text-base leading-7 text-slate-500">
-          {isSignUp 
-            ? "Kendi hareket dağarcığınızı kaydedin ve otonom koç feedback raporlarına erişin" 
+          {isSignUp
+            ? "Kendi hareket dağarcığınızı kaydedin ve otonom koç feedback raporlarına erişin"
             : "Müzik algılamalı koreografi planlayıcı ve yapay zeka destekli paten antrenörü"}
         </p>
       </div>
@@ -275,9 +271,8 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
           <button
             type="submit"
             disabled={loading}
-            className={`flex h-16 w-full items-center justify-center rounded-2xl bg-slate-800 text-[1.05rem] font-semibold text-white transition hover:bg-slate-700 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`flex h-16 w-full items-center justify-center rounded-2xl bg-slate-800 text-[1.05rem] font-semibold text-white transition hover:bg-slate-700 ${loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? "Lütfen bekleyin..." : (isSignUp ? "Kaydol & Giriş Yap" : "Giriş Yap")}
           </button>
@@ -301,8 +296,8 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
       <div className="pt-6 text-center">
         <p className="text-base text-slate-500">
           {isSignUp ? "Zaten bir hesabınız var mı? " : "Henüz bir hesabınız yok mu? "}
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setIsSignUp(!isSignUp)}
             className="font-semibold text-teal-600 transition hover:text-teal-500"
           >
@@ -387,7 +382,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
                 Precision in motion
               </div>
             </div>
-            
+
             <div className="absolute inset-0 z-10 flex items-center justify-start pt-8">
               <img
                 src={landingFigure}
@@ -395,7 +390,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
                 className="h-[94%] max-h-[460px] w-auto object-contain -translate-x-8 sm:-translate-x-16 drop-shadow-[0_24px_40px_rgba(14,116,144,0.22)]"
               />
             </div>
-            
+
             <div className="absolute bottom-6 right-[6%] z-30 flex w-[48%] max-w-[260px] flex-col justify-end">
               <div className="hidden w-full rounded-[26px] border border-white/75 bg-white/52 px-5 py-4 shadow-[0_20px_40px_rgba(14,116,144,0.08)] backdrop-blur-md sm:block mb-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -539,7 +534,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
 
 function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
-  
+
   // Profile States
   const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
   const [selectedMovements, setSelectedMovements] = useState(activeUser?.selectedMovements || ["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"]);
@@ -581,7 +576,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
       setSkateChoice(activeUser.skateChoice || "edea");
       const movements = activeUser.selectedMovements || ["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"];
       setSelectedMovements(movements);
-      
+
       // Update checkmarks to match
       setCheckedMovements((prev) => {
         const nextChecked = { ...prev };
@@ -650,7 +645,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setTimeout(async () => {
       setIsPlanGenerating(false);
       setIsPlanGenerated(true);
-      
+
       if (activeUser) {
         try {
           const newChoreo = {
@@ -683,7 +678,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setTimeout(async () => {
       setIsAnalyzing(false);
       setIsAnalysisFinished(true);
-      
+
       if (activeUser) {
         try {
           const newAnalysis = {
@@ -704,8 +699,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
 
   // Mock catalog data
   const movementCategories = [
-    { 
-      name: "Jumps", 
+    {
+      name: "Jumps",
       items: [
         { name: "Axel", desc: "Edge jump starting forward, extra half rotation in the air." },
         { name: "Salchow", desc: "Takeoff from back inside edge of one foot, land on back outside of the other." },
@@ -713,10 +708,10 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         { name: "Toe Loop", desc: "Toe-assisted jump taking off from back outside edge." },
         { name: "Flip", desc: "Toe-assisted jump from back inside edge with outer edge entry." },
         { name: "Lutz", desc: "Counter-rotated toe jump taking off from back outside edge." }
-      ] 
+      ]
     },
-    { 
-      name: "Spins", 
+    {
+      name: "Spins",
       items: [
         { name: "Sit Spin", desc: "Spin performed in a deep squat position with free leg extended." },
         { name: "Camel Spin", desc: "Spin performed with the body in an airplane (spiral) posture." },
@@ -724,20 +719,20 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         { name: "Scratch Spin", desc: "Fast upright spin crossing the free leg in front." },
         { name: "Layback Spin", desc: "Upright spin where head and shoulders lean backward." },
         { name: "Biellmann", desc: "Exquisite spin grabbing the blade and pulling it overhead." }
-      ] 
+      ]
     },
-    { 
-      name: "Step & Turn", 
+    {
+      name: "Step & Turn",
       items: [
         { name: "Three Turns", desc: "One-foot turn changing edge and direction, resembling a '3'." },
         { name: "Bracket", desc: "Difficult one-foot turn with the cusp pointing outward." },
         { name: "Rocker & Counter", desc: "Body rotation turn maintaining or reversing circular trajectory." },
         { name: "Mohawk", desc: "Two-foot turn changing foot but maintaining the edge style." },
         { name: "Twizzle", desc: "Multi-rotational traveling turn on one foot." }
-      ] 
+      ]
     },
-    { 
-      name: "Transitions & Choreography", 
+    {
+      name: "Transitions & Choreography",
       items: [
         { name: "Spiral", desc: "Sailing posture holding the free leg high above hip level." },
         { name: "Ina Bauer", desc: "Two-foot gliding transition with knees bent, tracking parallel lines." },
@@ -745,7 +740,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         { name: "Lunge", desc: "Deep forward flex glide dragging the back knee on the ice." },
         { name: "Cantilever", desc: "Low-altitude glide bending back parallel to the ice surface." },
         { name: "Final Pose", desc: "Choreographic ending posture locked to the final beat of music." }
-      ] 
+      ]
     }
   ];
 
@@ -799,7 +794,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
       )}
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-14 pt-4 sm:px-6 lg:pb-20">
-        
+
         {/* Navigation & Tab Bar */}
         <section className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white/70 backdrop-blur-md p-5 sm:p-6 shadow-lg">
           <div>
@@ -810,7 +805,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
               Otonom Koreografi Planlama ve Görüntü İşleme Analizi
             </p>
           </div>
-          
+
           <div className="flex bg-slate-100/80 rounded-2xl p-1.5 border border-slate-200/50 shadow-inner">
             {[
               { id: "profile", label: "Profil & Geçmiş" },
@@ -821,11 +816,10 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
-                  activeTab === tab.id 
-                    ? "bg-white text-sky-600 shadow-md border border-slate-200/30 scale-[1.02]" 
+                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${activeTab === tab.id
+                    ? "bg-white text-sky-600 shadow-md border border-slate-200/30 scale-[1.02]"
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -964,12 +958,12 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   <div className="space-y-3">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Önceki Coach Feedback Raporları</h4>
                     <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                      {(videoHistory.length > 0 
+                      {(videoHistory.length > 0
                         ? videoHistory.map(h => `${h.track} antrenman analizi tamamlandı. Hareket uyum skorun ${h.score} olarak ölçüldü!`)
                         : [
-                            "Double axel sıçrama ritmi harika, oturma dönüşünde kalçayı biraz daha aşağıda tutmaya odaklan.",
-                            "Adım dizilerinde stabilite ve dış kenarı tutuş süren belirgin şekilde iyileşmiş."
-                          ]
+                          "Double axel sıçrama ritmi harika, oturma dönüşünde kalçayı biraz daha aşağıda tutmaya odaklan.",
+                          "Adım dizilerinde stabilite ve dış kenarı tutuş süren belirgin şekilde iyileşmiş."
+                        ]
                       ).map((report, idx) => (
                         <div key={idx} className="p-3 rounded-xl border border-slate-100 bg-white/80 shadow-xs">
                           <p className="text-[11px] leading-5 text-slate-500 font-medium italic">"{report}"</p>
@@ -1064,7 +1058,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   {/* Energy Timeline Bar */}
                   <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-3">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">İnteraktif Enerji Dağılımı ve Hareket Önerileri</h4>
-                    
+
                     <div className="h-10 w-full rounded-xl overflow-hidden flex font-bold text-[10px] text-white">
                       <div className="w-[15%] bg-sky-400 flex items-center justify-center px-1 shadow-inner" title="Sakin Giriş">0-15s Sakin</div>
                       <div className="w-[23%] bg-sky-500 flex items-center justify-center px-1 shadow-inner" title="İlk Yükseliş">15-40s Yükseliş</div>
@@ -1116,11 +1110,11 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                             <span>Hedef Zorluk Puanı</span>
                             <span className="text-sky-600 font-bold">{targetScore} Puan</span>
                           </div>
-                          <input 
-                            type="range" 
-                            min="40" 
-                            max="100" 
-                            value={targetScore} 
+                          <input
+                            type="range"
+                            min="40"
+                            max="100"
+                            value={targetScore}
                             onChange={(e) => setTargetScore(parseInt(e.target.value))}
                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
                           />
@@ -1138,8 +1132,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-semibold text-slate-500">Planlama İçin Seçilen Hareketler</span>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => setActiveTab("catalog")}
                             className="text-[10px] font-bold text-sky-600 hover:underline"
                           >
@@ -1199,13 +1193,13 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                         {/* Skeleton looping athlete model animation */}
                         <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 flex flex-col items-center justify-center gap-4 relative overflow-hidden min-h-[220px]">
                           <div className="absolute inset-0 bg-radial-gradient from-sky-100/10 via-transparent to-transparent"></div>
-                          
+
                           {/* Skater posture graphic simulator */}
                           <div className="w-28 h-28 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 relative transition-transform duration-700">
                             {isPlaying ? (
                               <div className="absolute inset-0 rounded-full border border-sky-500/20 animate-ping"></div>
                             ) : null}
-                            
+
                             {/* Adaptive SVG for 5 skater movements */}
                             {currentCue.name === "Spiral" && (
                               <svg className="w-14 h-14 text-sky-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
@@ -1223,7 +1217,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                               <svg className="w-14 h-14 text-violet-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.475 3.475 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.475 3.475 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.475 3.475 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.475 3.475 0 013.138-3.138z" /></svg>
                             )}
                           </div>
-                          
+
                           <div className="text-center">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aktif Hareket</span>
                             <p className="text-sm font-extrabold text-slate-800 mt-0.5">{currentCue.name}</p>
@@ -1233,25 +1227,23 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                         {/* Ticker scrolling cues */}
                         <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 flex flex-col justify-center relative overflow-hidden min-h-[220px]">
                           <div className="absolute top-3 left-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Scrolling Lyrics Sync</div>
-                          
+
                           <div className="flex flex-col gap-5 relative z-10 transition-transform duration-500">
                             {plannedProgram.map((item, idx) => {
                               const isCueActive = idx === activeCueIdx;
                               const isCuePast = idx < activeCueIdx;
                               return (
-                                <div 
-                                  key={idx} 
-                                  className={`flex items-start gap-4 transition-all duration-300 ${
-                                    isCueActive 
-                                      ? "opacity-100 scale-102 font-semibold" 
-                                      : isCuePast 
-                                        ? "opacity-30 line-through" 
+                                <div
+                                  key={idx}
+                                  className={`flex items-start gap-4 transition-all duration-300 ${isCueActive
+                                      ? "opacity-100 scale-102 font-semibold"
+                                      : isCuePast
+                                        ? "opacity-30 line-through"
                                         : "opacity-40"
-                                  }`}
+                                    }`}
                                 >
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 border ${
-                                    isCueActive ? "bg-purple-100 border-purple-200 text-purple-600" : "bg-slate-100 border-slate-200 text-slate-500"
-                                  }`}>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 border ${isCueActive ? "bg-purple-100 border-purple-200 text-purple-600" : "bg-slate-100 border-slate-200 text-slate-500"
+                                    }`}>
                                     {item.time}s
                                   </span>
                                   <div>
@@ -1282,7 +1274,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
                             )}
                           </button>
-                          
+
                           {/* Pulsating Visual Wave */}
                           <div className="flex-1 mx-6 flex items-center gap-1.5 h-10 overflow-hidden relative">
                             {Array.from({ length: 42 }).map((_, waveIdx) => {
@@ -1292,9 +1284,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                               return (
                                 <span
                                   key={waveIdx}
-                                  className={`w-1 rounded-full transition-all duration-300 ${
-                                    isWavePast ? "bg-sky-500" : "bg-slate-200"
-                                  }`}
+                                  className={`w-1 rounded-full transition-all duration-300 ${isWavePast ? "bg-sky-500" : "bg-slate-200"
+                                    }`}
                                   style={{ height: `${randomWaveH}px` }}
                                 ></span>
                               );
@@ -1328,16 +1319,15 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                 {/* Planned items timeline sidebar */}
                 <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs overflow-y-auto max-h-[500px]">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Program Koreografi Rotası</h4>
-                  
+
                   {isPlanGenerated ? (
                     <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-[11px] before:w-px before:bg-slate-200 mt-2">
                       {plannedProgram.map((item, idx) => {
                         const isCueActive = idx === activeCueIdx;
                         return (
                           <div key={idx} className="relative pl-8 animate-rise" style={{ animationDelay: `${idx * 0.1}s` }}>
-                            <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white z-10 transition-all duration-300 shadow-sm ${
-                              isCueActive ? 'bg-sky-500 scale-110 ring-4 ring-sky-100' : 'bg-slate-300'
-                            }`}></div>
+                            <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white z-10 transition-all duration-300 shadow-sm ${isCueActive ? 'bg-sky-500 scale-110 ring-4 ring-sky-100' : 'bg-slate-300'
+                              }`}></div>
                             <span className="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-100 uppercase tracking-wider">{item.zone}</span>
                             <p className={`font-bold text-sm mt-1.5 transition-colors ${isCueActive ? 'text-sky-600' : 'text-slate-800'}`}>{item.name}</p>
                             <p className="text-[11px] text-slate-400 mt-0.5 font-medium">{item.time}s • {item.cue}</p>
@@ -1430,15 +1420,13 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                       key={mode.id}
                       type="button"
                       onClick={() => setReviewMode(mode.id)}
-                      className={`p-4 rounded-2xl border text-left flex flex-col gap-2 transition-all ${
-                        reviewMode === mode.id
+                      className={`p-4 rounded-2xl border text-left flex flex-col gap-2 transition-all ${reviewMode === mode.id
                           ? "bg-sky-50 border-sky-300 shadow-md scale-[1.01]"
                           : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
+                        }`}
                     >
-                      <span className={`text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-xl self-start ${
-                        reviewMode === mode.id ? "bg-sky-100 text-sky-600" : "bg-slate-100 text-slate-500"
-                      }`}>
+                      <span className={`text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-xl self-start ${reviewMode === mode.id ? "bg-sky-100 text-sky-600" : "bg-slate-100 text-slate-500"
+                        }`}>
                         {mode.id === "Fast" ? "HIZLI VE UCUZ" : "DETAYLI PRO"}
                       </span>
                       <p className="text-sm font-bold text-slate-800 mt-1">{mode.title}</p>
@@ -1454,11 +1442,11 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                     <span className="text-[10px] text-slate-400 font-medium">Bireysel teknik hatalar ve duruş ipuçlarını içeren koç metin raporu üretilir.</span>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={detailedCommentary} 
+                    <input
+                      type="checkbox"
+                      checked={detailedCommentary}
                       onChange={() => setDetailedCommentary(!detailedCommentary)}
-                      className="sr-only peer" 
+                      className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
                   </label>
@@ -1487,7 +1475,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
             {/* If analysis finished, show visual scores, planned vs actual grid and coach comment */}
             {isAnalysisFinished && (
               <div className="flex flex-col gap-6 animate-rise">
-                
+
                 {/* Scoring cards dashboard */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
@@ -1507,7 +1495,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                 {/* Planned vs Actual Grid Table */}
                 <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-2">Planlanan Zamanlama vs Gerçekleşen Uyum</h4>
-                  
+
                   <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xs">
                     <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
                       <thead className="bg-slate-50">
@@ -1613,33 +1601,31 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
               {movementCategories.map((cat) => (
                 <div key={cat.name} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col gap-3">
                   <h4 className="text-sm font-extrabold text-sky-600 uppercase tracking-widest border-b border-slate-50 pb-2">{cat.name}</h4>
-                  
+
                   <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
                     {cat.items.map((item) => {
                       const isSelected = selectedMovements.includes(item.name);
                       return (
-                        <div 
-                          key={item.name} 
+                        <div
+                          key={item.name}
                           onClick={() => {
-                            setSelectedMovements(prev => 
-                              prev.includes(item.name) 
-                                ? prev.filter(x => x !== item.name) 
+                            setSelectedMovements(prev =>
+                              prev.includes(item.name)
+                                ? prev.filter(x => x !== item.name)
                                 : [...prev, item.name]
                             );
                           }}
-                          className={`p-3 rounded-xl border cursor-pointer flex flex-col gap-1 transition-all duration-200 ${
-                            isSelected 
-                              ? "bg-teal-50/60 border-teal-200 hover:bg-teal-50" 
+                          className={`p-3 rounded-xl border cursor-pointer flex flex-col gap-1 transition-all duration-200 ${isSelected
+                              ? "bg-teal-50/60 border-teal-200 hover:bg-teal-50"
                               : "bg-slate-50 border-slate-100/50 hover:bg-slate-100/30"
-                          }`}
+                            }`}
                         >
                           <div className="flex justify-between items-center">
                             <span className={`text-xs font-bold ${isSelected ? "text-teal-800" : "text-slate-800"}`}>{item.name}</span>
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${
-                              isSelected 
-                                ? "text-teal-600 bg-teal-50 border-teal-100" 
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${isSelected
+                                ? "text-teal-600 bg-teal-50 border-teal-100"
                                 : "text-slate-400 bg-slate-50 border-slate-100"
-                            }`}>
+                              }`}>
                               {isSelected ? "✓ Seçildi" : "Katalogda"}
                             </span>
                           </div>
@@ -1657,12 +1643,14 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
       </main>
     </div>
   );
+}
+
 export default function App() {
   const [screen, setScreen] = useState("landing");
   const [activeUser, setActiveUser] = useState(null);
 
   useEffect(() => {
-    return authStateListener((user) => {
+    return subscribeToAuth((user) => {
       setActiveUser(user);
       if (user) {
         if (screen === "landing" || screen === "login") {
@@ -1678,7 +1666,7 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await authSignOut();
+      await dbLogout();
       setScreen("landing");
     } catch (err) {
       console.error("Logout error:", err);
@@ -1686,7 +1674,7 @@ export default function App() {
   };
 
   if (screen === "login") {
-    return <LoginScreen onNavigate={setScreen} />;
+    return <LoginScreen onNavigate={setScreen} activeUser={activeUser} setActiveUser={setActiveUser} />;
   }
 
   if (screen === "overview") {
@@ -1695,4 +1683,3 @@ export default function App() {
 
   return <LandingScreen onNavigate={setScreen} activeUser={activeUser} handleLogout={handleLogout} />;
 }
-

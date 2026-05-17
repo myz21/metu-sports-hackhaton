@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import os
 import json
 from pathlib import Path
 from typing import Any
+from dotenv import load_dotenv
+
+# Automatically load environment variables from parent project root or current working directory
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env")
+load_dotenv()
 
 from .llm_feedback import generate_openai_feedback
 from .vlm_review import compare_performance_to_plan_vlm
