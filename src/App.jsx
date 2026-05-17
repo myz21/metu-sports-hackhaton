@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import movementKnowledge from "../knowledge/figure_skating_knowledge.json";
+import demoTimeline from "../demo.json";
 import pageBackground from "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg";
 import brandLogo from "../skatesync-logo-Photoroom.png";
 import landingFigure from "../skatesync-landing.png";
@@ -18,6 +19,82 @@ import {
 
 
 const movementPreview = ["Axel", "Sit Spin", "Camel Spin", "Spiral", "Final Pose"];
+const demoCoachingMixSrc = "/media/demo/coaching_mix.mp3";
+const demoOffsetPattern = [0.12, -0.18, 0.24, -0.11, 0.08, 0.19, -0.14, 0.15, -0.09, 0.21];
+const demoStabilityPattern = [94, 91, 89, 92, 90, 87, 93, 88, 90, 86];
+const demoAdherencePattern = [95, 90, 88, 92, 89, 86, 91, 87, 90, 85];
+
+function formatSecondsLabel(value) {
+  return `${value.toFixed(1)}s`;
+}
+
+function getTimingStatus(offsetSeconds) {
+  if (Math.abs(offsetSeconds) <= 0.18) return "On Time";
+  return offsetSeconds > 0 ? "Late" : "Early";
+}
+
+function getTimingBadge(status) {
+  if (status === "On Time") return "bg-teal-50 text-teal-600 border-teal-100";
+  if (status === "Late") return "bg-amber-50 text-amber-600 border-amber-100";
+  return "bg-purple-50 text-purple-600 border-purple-100";
+}
+
+function getMovementFeedback(name, status) {
+  const feedbackMap = {
+    "Two Foot Glide": "Acilis suzulusu temiz. Diz yumusakligi korunursa ilk gecis daha sakin gorunur.",
+    "One Foot Glide": "Tek ayak dengesinde cizgi iyi. Omuzlari daha sessiz tutarsan akicilik artar.",
+    Spiral: "Spiral cizgisi guclu. Zirveye girerken serbest bacak uzamasi biraz daha net olabilir.",
+    "Camel Spin": "Camel spin girisi okunakli. Govde hatti daha uzun tutulursa merkez daha temiz gorunur.",
+    Lunge: "Lunge gecisi muzikal olarak guzel oturuyor. Alt seviyeye inerken tempo biraz daha sabit kalabilir.",
+    "Final Pose": "Bitis vurguya yakin. Son durusu yarim nefes daha uzun tutmak etkiyi buyutur.",
+  };
+
+  const suffix =
+    status === "Late"
+      ? " Bu bolum planin biraz gerisinde kaliyor."
+      : status === "Early"
+        ? " Bu bolum plana gore biraz erken aciliyor."
+        : " Bu bolum plana yakin akiyor.";
+
+  return `${feedbackMap[name] || `${name} bolumu genel olarak kontrollu gorunuyor.`}${suffix}`;
+}
+
+function buildDemoReviewRows(cues) {
+  return cues.map((cue, index) => {
+    const planned = Number(cue.time || 0);
+    const offset = demoOffsetPattern[index % demoOffsetPattern.length];
+    const actual = Math.max(0, planned + offset);
+    const status = getTimingStatus(offset);
+    const timingScore =
+      Math.abs(offset) <= 0.12
+        ? 96
+        : Math.abs(offset) <= 0.24
+          ? 91
+          : Math.abs(offset) <= 0.4
+            ? 86
+            : Math.abs(offset) <= 0.75
+              ? 79
+              : 72;
+    const stability = demoStabilityPattern[index % demoStabilityPattern.length];
+    const adherence = demoAdherencePattern[index % demoAdherencePattern.length];
+
+    return {
+      ...cue,
+      plannedSeconds: planned,
+      actualSeconds: Number(actual.toFixed(2)),
+      offsetSeconds: Number(offset.toFixed(2)),
+      plannedLabel: formatSecondsLabel(planned),
+      actualLabel: formatSecondsLabel(actual),
+      offsetLabel: `${offset >= 0 ? "+" : ""}${Math.round(offset * 1000)}ms`,
+      status,
+      badge: getTimingBadge(status),
+      timingScore,
+      stability,
+      adherence,
+      feedback: getMovementFeedback(cue.element_name, status),
+    };
+  });
+}
 
 function GoogleMark() {
   return (
@@ -633,6 +710,73 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
       dbGetVideoAnalyses(activeUser.uid).then(setVideoHistory).catch(console.error);
     }
   }, [activeUser]);
+  const demoCueTimeline = useMemo(() => {
+    const items = Array.isArray(demoTimeline?.planned_elements) ? demoTimeline.planned_elements : [];
+    return items.filter((item) => item && typeof item.time === "number" && item.element_name);
+  }, []);
+
+  const demoReviewRows = useMemo(() => buildDemoReviewRows(demoCueTimeline), [demoCueTimeline]);
+
+  const demoReviewSummary = useMemo(() => {
+    if (!demoReviewRows.length) {
+      return {
+        timing: 0,
+        stability: 0,
+        adherence: 0,
+        overall: 0,
+      };
+    }
+
+    const totals = demoReviewRows.reduce(
+      (acc, row) => {
+        acc.timing += row.timingScore;
+        acc.stability += row.stability;
+        acc.adherence += row.adherence;
+        return acc;
+      },
+      { timing: 0, stability: 0, adherence: 0 }
+    );
+
+    const count = demoReviewRows.length;
+    const timing = Math.round(totals.timing / count);
+    const stability = Math.round(totals.stability / count);
+    const adherence = Math.round(totals.adherence / count);
+    const overall = Math.round((timing * 0.38) + (stability * 0.31) + (adherence * 0.31));
+
+    return { timing, stability, adherence, overall };
+  }, [demoReviewRows]);
+
+  const demoScoreCards = useMemo(() => {
+    const modeBoost = reviewMode === "Detailed" ? 2 : -1;
+    return [
+      {
+        label: "Muzikal Ritim Uyumu",
+        score: `${Math.max(0, Math.min(100, demoReviewSummary.timing + modeBoost))}%`,
+        desc: "Timeline cue senkronu",
+        color: "text-sky-600 bg-sky-50 border-sky-100",
+      },
+      {
+        label: "Denge & Stabilite",
+        score: `${Math.max(0, Math.min(100, demoReviewSummary.stability + (reviewMode === "Detailed" ? 1 : 0)))}%`,
+        desc: "Kayis cizgisi kontrolu",
+        color: "text-violet-600 bg-violet-50 border-violet-100",
+      },
+      {
+        label: "Programa Sadakat",
+        score: `${Math.max(0, Math.min(100, demoReviewSummary.adherence + modeBoost))}%`,
+        desc: "Demo plan uyumu",
+        color: "text-cyan-700 bg-cyan-50 border-cyan-100",
+      },
+      {
+        label: "Genel Match Score",
+        score: `${Math.max(0, Math.min(100, demoReviewSummary.overall + modeBoost))}%`,
+        desc: reviewMode === "Detailed" ? "High quality estimate" : "Fast estimate",
+        color: "text-slate-800 bg-slate-50 border-slate-200",
+      },
+    ];
+  }, [demoReviewSummary, reviewMode]);
+
+  const firstDemoMovement = demoReviewRows[0] || null;
 
   // Playback timer for wave player & scrolling sync cues
   useEffect(() => {
@@ -1632,6 +1776,39 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
               )}
             </div>
 
+            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-2xl">
+                  <h4 className="text-sm font-bold text-slate-900">Demo Coaching Mix</h4>
+                  <p className="mt-1 text-xs leading-6 text-slate-500">
+                    Elinizdeki <span className="font-semibold text-slate-700">demo.json</span> cue verisine gore
+                    uretilmis sesli koc kaydi. Demo sirasinda bu ses dosyasi ile video analiz ekranini birlikte
+                    gosterebilirsiniz.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center text-[11px] font-semibold text-slate-500">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
+                    <p className="text-slate-900">{demoCueTimeline.length}</p>
+                    <p className="mt-1 uppercase tracking-wider">Cue</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
+                    <p className="text-slate-900">{demoReviewSummary.overall}%</p>
+                    <p className="mt-1 uppercase tracking-wider">Base Score</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3">
+                    <p className="text-slate-900">demo.json</p>
+                    <p className="mt-1 uppercase tracking-wider">Source</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-sky-100 bg-sky-50/40 p-4">
+                <audio controls preload="metadata" className="w-full">
+                  <source src={demoCoachingMixSrc} type="audio/mpeg" />
+                </audio>
+              </div>
+            </div>
+
             {/* If video is not uploaded, show a gorgeous upload zone */}
             {!isVideoUploaded && (
               <div className="border-2 border-dashed border-sky-200 bg-sky-50/20 rounded-[24px] p-10 flex flex-col items-center justify-center text-center gap-4 min-h-[260px] transition hover:bg-sky-50/30">
@@ -1723,10 +1900,83 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
             {/* If analysis finished, show visual scores, planned vs actual grid and coach comment */}
             {isAnalysisFinished && (
               <div className="flex flex-col gap-6 animate-rise">
-
                 {/* Scoring cards dashboard */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
+                  {demoScoreCards.map((scoreCard, idx) => (
+                    <div key={`demo-score-${idx}`} className={`rounded-2xl border p-5 flex flex-col items-center justify-center text-center shadow-xs ${scoreCard.color}`}>
+                      <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">{scoreCard.label}</span>
+                      <span className="text-3xl font-extrabold tracking-tight mt-2.5 mb-1">{scoreCard.score}</span>
+                      <span className="text-[10px] font-semibold opacity-50">{scoreCard.desc}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {firstDemoMovement && (
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="max-w-3xl">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-sky-500">Ilk hareket analizi</p>
+                        <h4 className="mt-2 text-lg font-bold text-slate-900">{firstDemoMovement.element_name}</h4>
+                        <p className="mt-2 text-sm leading-7 text-slate-600">{firstDemoMovement.feedback}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-center text-xs font-semibold text-slate-500">
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4">
+                          <p className="text-[10px] uppercase tracking-wider">Plan</p>
+                          <p className="mt-2 text-base font-bold text-slate-900">{firstDemoMovement.plannedLabel}</p>
+                        </div>
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4">
+                          <p className="text-[10px] uppercase tracking-wider">Gercek</p>
+                          <p className="mt-2 text-base font-bold text-slate-900">{firstDemoMovement.actualLabel}</p>
+                        </div>
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4">
+                          <p className="text-[10px] uppercase tracking-wider">Offset</p>
+                          <p className="mt-2 text-base font-bold text-slate-900">{firstDemoMovement.offsetLabel}</p>
+                        </div>
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4">
+                          <p className="text-[10px] uppercase tracking-wider">Durum</p>
+                          <p className="mt-2 text-base font-bold text-slate-900">{firstDemoMovement.status}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-2">Demo timeline vs yaklasik gerceklesen</h4>
+
+                  <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xs">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Hareket</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Plan</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Gercek</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Durum</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Offset</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {demoReviewRows.map((row, idx) => (
+                          <tr key={`demo-row-${idx}`} className="hover:bg-slate-50/50">
+                            <td className="px-4 py-3.5 font-bold text-slate-800">{row.element_name}</td>
+                            <td className="px-4 py-3.5 font-medium text-slate-500">{row.plannedLabel}</td>
+                            <td className="px-4 py-3.5 font-bold text-slate-600">{row.actualLabel}</td>
+                            <td className="px-4 py-3.5">
+                              <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase border ${row.badge}`}>
+                                {row.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-400 font-medium">{row.offsetLabel}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                {/* Legacy scoring cards dashboard */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {false && [
                     { label: "Müzikal Ritim Uyumu", score: "88%", desc: "Beat Vurgusu Senkronu", color: "text-sky-600 bg-sky-50 border-sky-100" },
                     { label: "Denge & Stabilite", score: "92%", desc: "Landmark Sapma Payı", color: "text-purple-600 bg-purple-50 border-purple-100" },
                     { label: "Programa Sadakat", score: "85%", desc: "Plan Karşılaştırma", color: "text-pink-600 bg-pink-50 border-pink-100" },
@@ -1740,8 +1990,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ))}
                 </div>
 
-                {/* Planned vs Actual Grid Table */}
-                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                {/* Legacy Planned vs Actual Grid Table */}
+                <div className="hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex-col gap-4">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-2">Planlanan Zamanlama vs Gerçekleşen Uyum</h4>
 
                   <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xs">

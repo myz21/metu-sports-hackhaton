@@ -1,0 +1,68 @@
+{
+  "planned_elements": [
+    {
+      "element_index": 1,
+      "element_name": "Two Foot Glide",
+      "element_type": "transition",
+      "cue_kind": "trigger",
+      "time": 0.500,
+      "text": "Giriş, Başlangıç süzülüşü"
+    },
+    {
+      "element_index": 2,
+      "element_name": "One Foot Glide",
+      "element_type": "transition",
+      "cue_kind": "trigger",
+      "time": 4.800,
+      "text": "One Foot Glide, denge kontrolü"
+    },
+    {
+      "element_index": 3,
+      "element_name": "Spiral",
+      "element_type": "field_move",
+      "cue_kind": "trigger",
+      "time": 12.800,
+      "text": "Spiral pozisyonuna geç"
+    },
+    {
+      "element_index": 4,
+      "element_name": "Camel Spin",
+      "element_type": "spin",
+      "cue_kind": "trigger",
+      "time": 19.200,
+      "text": "Camel Spin başlangıcı, gövdeni hizala "
+    },
+    {
+      "element_index": 6,
+      "element_name": "One Foot Glide",
+      "element_type": "transition",
+      "cue_kind": "trigger",
+      "time": 25.800,
+      "text": "Dönüş çıkışı, tek ayak denge"
+    },
+    {
+      "element_index": 7,
+      "element_name": "Lunge",
+      "element_type": "field_move",
+      "cue_kind": "trigger",
+      "time": 28.800,
+      "text": "Alçak lunge geçişi, "
+    },
+    {
+      "element_index": 8,
+      "element_name": "Spiral",
+      "element_type": "field_move",
+      "cue_kind": "trigger",
+      "time": 35.500,
+      "text": "Final spiral"
+    },
+    {
+      "element_index": 9,
+      "element_name": "One Foot Glide",
+      "element_type": "transition",
+      "cue_kind": "trigger",
+      "time": 39.000,
+      "text": "çıkış"
+    }
+  ]
+}
