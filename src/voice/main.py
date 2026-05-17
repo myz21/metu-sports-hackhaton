@@ -75,7 +75,7 @@ def mix_audio_session(
     cue_audio_files: list[dict],
     output_path: str,
     playback_latency_ms: int = 120,
-    tts_gain_db: int = 5,
+    tts_gain_db: int = 10,
 ):
     music_wav_path = _convert_to_wav(music_path, "/tmp/voice_mix_music.wav")
     background = AudioSegment.from_wav(music_wav_path)
