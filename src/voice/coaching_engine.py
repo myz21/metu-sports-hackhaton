@@ -1,212 +1,309 @@
+"""OpenAI-based short-form coaching cue generation for planned elements."""
+
+from __future__ import annotations
+
 import json
 import os
-from dataclasses import dataclass
 from typing import Any
 
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
-from pydantic import BaseModel, Field
-
-load_dotenv()
-
-DEFAULT_GEMINI_MODEL = "gemini-3.0-flash"
+from .knowledge import build_rag_context
 
 
-class CueModel(BaseModel):
-    time: float = Field(..., ge=0)
-    text: str = Field(..., min_length=1, max_length=80)
+DEFAULT_COACH_MODEL = os.getenv("SKATESYNC_COACH_MODEL", "gpt-4o-mini")
 
+PREP_LEADS = {
+    "jump": 2.0,
+    "spin": 1.5,
+    "turns": 1.1,
+    "sequence": 1.4,
+    "transition": 0.9,
+    "pose": 0.7,
+}
 
-class CueListModel(BaseModel):
-    cues: list[CueModel]
+TRIGGER_LEADS = {
+    "jump": 0.42,
+    "spin": 0.24,
+    "turns": 0.18,
+    "sequence": 0.24,
+    "transition": 0.15,
+    "pose": 0.1,
+}
 
-
-@dataclass
-class TimingPlan:
-    action: str
-    target_time: float
-    prep_time: float
-    trigger_time: float
-    prep_beat: float
-    trigger_beat: float
+CUE_TEXT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "element_index": {"type": "integer"},
+                    "prep_text": {"type": "string"},
+                    "trigger_text": {"type": "string"},
+                    "focus_text": {"type": "string"},
+                },
+                "required": [
+                    "element_index",
+                    "prep_text",
+                    "trigger_text",
+                    "focus_text",
+                ],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["items"],
+    "additionalProperties": False,
+}
 
 
 class CoachingEngine:
     def __init__(
         self,
         audio_data: dict[str, Any],
-        planned_program: list[dict[str, Any]] | None = None,
-        gemini_api_key: str | None = None,
-        model: str = DEFAULT_GEMINI_MODEL,
-        reaction_lead_seconds: float = 0.35,
-        prep_lead_seconds: float = 2.0,
+        planned_elements: list[dict[str, Any]],
+        *,
+        api_key: str | None = None,
+        model: str = DEFAULT_COACH_MODEL,
+        language: str = "Turkish",
+        knowledge_path: str | None = None,
+        client: Any | None = None,
     ):
         self.audio_data = audio_data
-        self.planned_program = planned_program or []
+        self.planned_elements = planned_elements
         self.model = model
-        self.reaction_lead_seconds = reaction_lead_seconds
-        self.prep_lead_seconds = prep_lead_seconds
-        self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
-        self.client = genai.Client(api_key=self.gemini_api_key)
+        self.language = language
+        self.knowledge_path = knowledge_path
+        self.client = client or _build_openai_client(api_key)
 
-    def _nearest_beat(self, target_time: float) -> float:
-        beat_times = self.audio_data.get("beat_times") or []
-        if not beat_times:
-            return round(target_time, 3)
-        return float(min(beat_times, key=lambda beat: abs(beat - target_time)))
-
-    def _build_timing_plan(self) -> list[TimingPlan]:
-        timing_plan: list[TimingPlan] = []
+    def build_timing_plan(self) -> list[dict[str, Any]]:
+        beat_times = [float(item) for item in self.audio_data.get("beat_times", [])]
         duration = float(self.audio_data.get("duration", 0))
-        for item in self.planned_program:
-            action = str(item["action"]).strip()
-            raw_target_time = max(0.0, min(float(item["time"]), duration))
-            
-            # 1. HİBRİT ADIMI ZORUNLU KIL: Hedef zamanı en yakın Librosa vuruşuna (beat) mıknatısla
-            target_time = self._nearest_beat(raw_target_time)
-            
-            prep_anchor = max(0.0, target_time - self.prep_lead_seconds)
-            trigger_anchor = max(0.0, target_time - self.reaction_lead_seconds)
-            prep_beat = self._nearest_beat(prep_anchor)
-            trigger_beat = self._nearest_beat(trigger_anchor)
-            timing_plan.append(
-                TimingPlan(
-                    action=action,
-                    target_time=round(target_time, 3),
-                    prep_time=round(prep_anchor, 3),
-                    trigger_time=round(trigger_anchor, 3),
-                    prep_beat=round(prep_beat, 3),
-                    trigger_beat=round(trigger_beat, 3),
-                )
+        timing_plan: list[dict[str, Any]] = []
+
+        for index, element in enumerate(self.planned_elements):
+            element_type = str(element["type"]).lower()
+            start_time = max(0.0, min(float(element["start_time"]), duration))
+            end_time = max(start_time, min(float(element["end_time"]), duration))
+            peak_time = max(start_time, min(float(element["music_peak_time"]), end_time))
+
+            prep_anchor = max(0.0, start_time - PREP_LEADS.get(element_type, 1.0))
+            trigger_anchor = max(0.0, start_time - TRIGGER_LEADS.get(element_type, 0.2))
+            focus_anchor = peak_time
+
+            prep_time = _snap_to_nearest_beat(prep_anchor, beat_times)
+            trigger_time = _snap_to_nearest_beat(trigger_anchor, beat_times)
+            focus_time = _snap_to_nearest_beat(focus_anchor, beat_times)
+
+            rag_context = build_rag_context(
+                movement_name=str(element["name"]),
+                movement_type=element_type,
+                top_k=2,
+                knowledge_path=self.knowledge_path,
             )
+
+            timing_plan.append(
+                {
+                    "element_index": index,
+                    "name": element["name"],
+                    "type": element_type,
+                    "start_time": round(start_time, 3),
+                    "end_time": round(end_time, 3),
+                    "music_peak_time": round(peak_time, 3),
+                    "prep_time": round(prep_time, 3),
+                    "trigger_time": round(trigger_time, 3),
+                    "focus_time": round(focus_time, 3),
+                    "duration_seconds": round(end_time - start_time, 3),
+                    "movement_context": rag_context["prompt_context"],
+                }
+            )
+
         return timing_plan
 
-    def _build_prompt(self, timing_plan: list[TimingPlan]) -> tuple[str, str]:
-        system_prompt = (
-            "Sen artistik buz pateni ve tekerlekli paten sporculari icin dunya capinda "
-            "bir koreografi ve sesli kocluk asistanisin. Gorevin, sana verilen muzik "
-            "ritim verilerine ve planlanan hareket zamanlarina bakarak, sporcuya "
-            "kulakliktan gercek zamanli fisildayacak bir kocluk senaryosu uretmektir. "
-            "Sporcunun odagini dagitmamak icin cumleler cok kisa, dogal ve muzigin "
-            "ruhuna uygun olmali. Hazirlik uyarilari en fazla 4 kelime olmali. "
-            "Tetikleyici komutlar tek kelime ya da en fazla 2 cok kisa kelime olmali. "
-            "Periyodik metronom tekrarlarindan kacin. Sana verilen zamanlar latency ve "
-            "biyomekanik reaksiyon icin onceden telafi edilmis zamanlardir; bunlari "
-            "degistirme. Ciktini kesinlikle yalnizca JSON olarak ver."
-        )
-
-        payload = {
-            "timing_rules": {
-                "prep_lead_seconds": self.prep_lead_seconds,
-                "reaction_lead_seconds": self.reaction_lead_seconds,
-                "timing_note": (
-                    "prep_beat ve trigger_beat degerleri kullanilacak kesin cue "
-                    "zamanlaridir; target_time sadece sporcu hareket hedefidir."
+    def generate_cues(self) -> list[dict[str, Any]]:
+        timing_plan = self.build_timing_plan()
+        input_items = [
+            {
+                "role": "system",
+                "content": (
+                    "Sen artistik buz pateni ve artistik roller skating icin deneyimli bir sesli kocsun. "
+                    "Gorevin, sana verilen hareket timeline'ina gore cok kisa ama gercekci kulaklik cue'lari uretmek. "
+                    "Dil dogal, teknik ve sporcuyu rahatsiz etmeyecek kadar kisa olmali. "
+                    "Prep cue'lar 2-4 kelime olmali. Trigger cue'lar 1-3 kelime olmali. "
+                    "Ayni ifadeyi surekli tekrar etme. Hareketin tipine ve verilen teknik baglama uygun yaz. "
+                    "Hakem gibi konusma; antrenor gibi yonlendir."
                 ),
             },
-            "audio_context": {
-                "tempo_bpm": round(float(self.audio_data.get("tempo", 0)), 2),
-                "duration_seconds": round(float(self.audio_data.get("duration", 0)), 2),
-                "energy_profile": self.audio_data.get("energy_profile", []),
-                "first_beats": [round(float(b), 3) for b in self.audio_data.get("beat_times", [])[:24]],
-            },
-            "planned_program": [
-                {
-                    "action": plan.action,
-                    "target_time": plan.target_time,
-                    "prep_time": plan.prep_time,
-                    "prep_beat": plan.prep_beat,
-                    "trigger_time": plan.trigger_time,
-                    "trigger_beat": plan.trigger_beat,
-                }
-                for plan in timing_plan
-            ],
-            "requirements": [
-                "Her hareket icin tam 1 hazirlik ve 1 tetikleyici cue uret.",
-                "Hazirlik cue zamani prep_beat olmali.",
-                "Tetikleyici cue zamani trigger_beat olmali.",
-                "Hazirlik cue metni dogal Turkce ve kisa olmali.",
-                "Tetikleyici cue metni cok kisa olmali ve sporcuyu anlik tetiklemeli.",
-                "Gerekirse en fazla 2 ek motivasyon cue'u ekleyebilirsin; bunlar ritmik tekrar gibi duyulmamali.",
-                "JSON formati: {\"cues\": [{\"time\": float, \"text\": string}, ...]}",
-            ],
-        }
-        return system_prompt, json.dumps(payload, ensure_ascii=False, indent=2)
-
-    def _normalize_response(self, response_text: str) -> list[dict[str, Any]]:
-        parsed = CueListModel.model_validate(json.loads(response_text))
-        cues = [
             {
-                "time": round(float(cue.time), 3),
-                "text": cue.text.strip(),
-            }
-            for cue in parsed.cues
-            if cue.text.strip()
+                "role": "user",
+                "content": json.dumps(
+                    {
+                        "language": self.language,
+                        "tempo_bpm": round(float(self.audio_data.get("tempo", 0)), 2),
+                        "planned_elements": timing_plan,
+                        "requirements": [
+                            "Her element icin tam 1 prep_text ve 1 trigger_text uret.",
+                            "focus_text yalnizca hareket 4 saniyeden uzunsa ve ek teknik hatirlatma gercekten gerekliyse dolu olsun; yoksa bos string kullan.",
+                            "Metinler teknik olarak hareketin karakterine uysun.",
+                            "Metinler sporcu kulakliktan duyacakmis gibi akici olsun.",
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
+            },
         ]
-        cues.sort(key=lambda cue: cue["time"])
+
+        payload = _responses_json(
+            client=self.client,
+            model=self.model,
+            input_items=input_items,
+            schema_name="coaching_cue_texts",
+            schema=CUE_TEXT_SCHEMA,
+        )
+        generated_items = {
+            int(item["element_index"]): item for item in payload.get("items", [])
+        }
+
+        cues: list[dict[str, Any]] = []
+        for plan in timing_plan:
+            generated = generated_items.get(plan["element_index"], {})
+            prep_text = _normalize_short_text(
+                generated.get("prep_text"),
+                fallback=_fallback_prep_text(plan["type"], plan["name"]),
+            )
+            trigger_text = _normalize_short_text(
+                generated.get("trigger_text"),
+                fallback=_fallback_trigger_text(plan["type"], plan["name"]),
+            )
+            focus_text = _normalize_short_text(generated.get("focus_text"), fallback="", max_words=5)
+
+            cues.append(
+                {
+                    "element_index": plan["element_index"],
+                    "element_name": plan["name"],
+                    "element_type": plan["type"],
+                    "cue_kind": "prep",
+                    "time": plan["prep_time"],
+                    "text": prep_text,
+                }
+            )
+            cues.append(
+                {
+                    "element_index": plan["element_index"],
+                    "element_name": plan["name"],
+                    "element_type": plan["type"],
+                    "cue_kind": "trigger",
+                    "time": plan["trigger_time"],
+                    "text": trigger_text,
+                }
+            )
+            if focus_text and plan["duration_seconds"] >= 4.0:
+                cues.append(
+                    {
+                        "element_index": plan["element_index"],
+                        "element_name": plan["name"],
+                        "element_type": plan["type"],
+                        "cue_kind": "focus",
+                        "time": plan["focus_time"],
+                        "text": focus_text,
+                    }
+                )
+
+        cues.sort(key=lambda item: (float(item["time"]), int(item["element_index"])))
         return cues
 
-    def generate_cues(self) -> list[dict[str, Any]]:
-        timing_plan = self._build_timing_plan()
-        system_prompt, user_prompt = self._build_prompt(timing_plan)
 
-        for attempt in range(3):
-            try:
-                response = self.client.models.generate_content(
-                    model=self.model,
-                    contents=user_prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.5,
-                        response_mime_type="application/json",
-                        response_schema={
-                            "type": "object",
-                            "properties": {
-                                "cues": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "time": {"type": "number"},
-                                            "text": {"type": "string"},
-                                        },
-                                        "required": ["time", "text"],
-                                    },
-                                }
-                            },
-                            "required": ["cues"],
-                        },
-                        system_instruction=system_prompt,
-                        max_output_tokens=4096,
-                    ),
-                )
-                
-                response_text = response.text.strip()
-                if response_text.startswith("```json"):
-                    response_text = response_text[7:]
-                if response_text.startswith("```"):
-                    response_text = response_text[3:]
-                if response_text.endswith("```"):
-                    response_text = response_text[:-3]
-                response_text = response_text.strip()
-                
-                return self._normalize_response(response_text)
-            except Exception as e:
-                print(f"CoachingEngine Attempt {attempt+1} failed: {e}")
-                if attempt == 2:
-                    raise e
-        return []
+def _snap_to_nearest_beat(
+    target_time: float,
+    beat_times: list[float],
+    *,
+    max_shift_seconds: float = 0.4,
+) -> float:
+    if not beat_times:
+        return round(target_time, 3)
+    nearest = min(beat_times, key=lambda beat: abs(beat - target_time))
+    if abs(nearest - target_time) <= max_shift_seconds:
+        return round(nearest, 3)
+    return round(target_time, 3)
 
 
-if __name__ == "__main__":
-    dummy_audio = {
-        "tempo": 120,
-        "beat_times": [0.5, 2, 4, 6, 8, 10, 12, 14],
-        "duration": 15,
-        "energy_profile": [0.2, 0.4, 0.7, 0.3],
-    }
-    dummy_program = [{"time": 10, "action": "Axel Jump"}]
+def _normalize_short_text(
+    value: Any,
+    *,
+    fallback: str,
+    max_words: int = 4,
+) -> str:
+    text = " ".join(str(value or "").strip().split())
+    if not text:
+        return fallback
+    words = text.split()
+    if len(words) > max_words:
+        text = " ".join(words[:max_words])
+    return text
 
-    engine = CoachingEngine(dummy_audio, dummy_program)
-    for cue in engine.generate_cues():
-        print(f"[{cue['time']:.2f}s] {cue['text']}")
+
+def _fallback_prep_text(element_type: str, element_name: str) -> str:
+    if element_type == "jump":
+        return "Kalkisa hazirlan"
+    if element_type == "spin":
+        return "Merkezi kur"
+    if element_type == "sequence":
+        return "Ritmi kur"
+    if element_type == "turns":
+        return "Kenari kur"
+    if element_type == "pose":
+        return "Finale hazirlan"
+    if "glide" in element_name.lower():
+        return "Dengeyi kur"
+    return "Hatti hazirla"
+
+
+def _fallback_trigger_text(element_type: str, element_name: str) -> str:
+    if element_type == "jump":
+        return "Atla"
+    if element_type == "spin":
+        return "Don"
+    if element_type == "sequence":
+        return "Isle"
+    if element_type == "turns":
+        return "Cevir"
+    if element_type == "pose":
+        return "Tut"
+    if "glide" in element_name.lower():
+        return "Kay"
+    return "Ac"
+
+
+def _build_openai_client(api_key: str | None):
+    from openai import OpenAI  # type: ignore
+
+    key = api_key or os.getenv("OPENAI_API_KEY")
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY is required for CoachingEngine.")
+    return OpenAI(api_key=key)
+
+
+def _responses_json(
+    *,
+    client: Any,
+    model: str,
+    input_items: list[dict[str, str]],
+    schema_name: str,
+    schema: dict[str, Any],
+) -> dict[str, Any]:
+    response = client.responses.create(
+        model=model,
+        input=input_items,
+        store=False,
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": schema_name,
+                "schema": schema,
+                "strict": True,
+            }
+        },
+    )
+    if not response.output_text:
+        raise RuntimeError("OpenAI returned an empty response while generating coaching cues.")
+    return json.loads(response.output_text)

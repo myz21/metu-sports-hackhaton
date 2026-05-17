@@ -1,58 +1,163 @@
-# 🎙️ Hibrit AI Sesli Koçluk Stratejisi
+# OpenAI Tabanli Sesli Kocluk Mimarisi
 
-Bu doküman, projenin sesli geri bildirim katmanının teknik mimarisini, hibrit analiz yöntemini ve kullanıcıya ulaştırılma sürecini detaylandırır.
+Bu dokuman, SkateSync AI icindeki sesli kocluk hattinin guncel halini aciklar.
 
----
+Bu surumde hedef:
 
-## 🎙️ Süreç Nasıl İşliyor? (Basitçe Anlatım)
+- tek saglayici olarak OpenAI kullanmak
+- hareket listesini `planned_elements` semasina oturtmak
+- hareket sozlugunu LLM'e baglam olarak vermek
+- gercek zamanli ama kisa ve gercekci kulaklik cue'lari uretmek
 
-Sistemimiz bir sporcunun antrenörü gibi çalışır. Süreç şu şekilde ilerler:
+## Sistem nasil calisir
 
-1.  **Müziği Hafızaya Alma:** Sporcu müziğini yüklediğinde, sistem bunu güvenli bir şekilde **Supabase** (lokal veri merkezi) içine kaydeder.
-2.  **Ritmi ve Ruhu Anlama:** 
-    *   **Librosa** (matematiksel araç) müziğin içindeki vuruşları, saniyenin binde biri hassasiyetinde ölçer ("Tık tık" ritmi nerede?).
-    *   **GPT-4o / Gemini** (zekâ katmanı) müziği "dinler" ve havasını anlar (Bu müzik hüzünlü mü, yoksa gaza getirici mi?).
-3.  **Kişisel Koçluk Planı:** Sistem, ritim noktalarıyla müziğin havasını birleştirir. Sadece "Zıpla" demek yerine, *"Müzik burada yükseliyor, tam bu ritimle beraber zıpla!"* gibi doğal ve motive edici cümleler hazırlar.
-4.  **Sesli Geri Bildirim:** Hazırlanan bu cümleler, **OpenAI TTS** ile gerçek bir insan sesi kalitesinde seslendirilir ve sporcuya tam vaktinde iletilir.
-5.  **Görsel Özet ve Metin Raporu:** Sesli komutların tamamı, antrenman sonunda bir **"Koçluk Özeti"** olarak ekranda listelenir. Böylece sporcu duyduğu tavsiyeleri daha sonra yazılı olarak da inceleyebilir.
+1. Sporcu muzigi yukler.
+2. Sistem muzigi analiz eder:
+   - tempo
+   - beat noktalar
+   - enerji profili
+3. Eger elde hazir bir plan varsa, `planned_elements` dogrudan kullanilir.
+4. Eger plan yoksa `ProgramPlanner`, OpenAI ile bir `planned_elements` listesi uretir.
+5. `CoachingEngine`, bu hareketlerin hangi saniyede basladigini okur.
+6. Kod tarafinda:
+   - prep cue zamani
+   - trigger cue zamani
+   - gerekirse focus cue zamani
+   hesaplanir.
+7. OpenAI, her hareket icin kisa ama dogal cue metni uretir.
+8. Istenirse OpenAI TTS ile her cue seslendirilir.
+9. Istenirse cue sesleri muzik ustune mikslenir.
 
----
+## Neden bu yapi kullanildi
 
----
+- Hareket zamanlari ve cue anlari deterministik olmali.
+- LLM sadece metni yazmali, saniyeyi keyfi degistirmemeli.
+- Ayni hareket sozlugu hem planlama hem kocluk hem de ileride video review tarafinda kullanilabilmeli.
 
-## 1. İş Akışı (Workflow)
+Bu nedenle sistem iki katmanli kuruldu:
 
-Sistem, müziği hem matematiksel (Librosa) hem de anlamsal (LLM) olarak analiz ederek en doğru zamanlamada en doğal geri bildirimi üretir.
+- kod:
+  - beat analizi
+  - timing hesaplama
+  - cue zamanlarinin sabitlenmesi
+- OpenAI:
+  - planned elements uretme
+  - cue metinlerini dogal ve teknik sekilde yazma
+  - TTS ile ses klibi uretme
 
-![Voice Workflow](./workflows/workflow.svg)
+## Klasor yapisi
 
-### Katmanlar ve Araçlar:
-*   **Veri Katmanı (Supabase - Local):** Müzik dosyalarının saklandığı (Storage) ve koçluk planlarının/analiz verilerinin tutulduğu (Database) merkezdir.
-*   **Analiz Katmanı (Librosa):** Supabase'den çekilen müziğin BPM ve ritim noktalarını matematiksel olarak analiz eder.
-*   **Zekâ Katmanı (GPT-4o / Gemini):** Teknik verileri, müziğin atmosferiyle birleştirerek kişiselleştirilmiş koçluk metni üretir.
-*   **Sentez Katmanı (OpenAI TTS):** Metni doğal bir insan sesine dönüştürür.
-*   **Görsel Katman (Coaching Dashboard):** Üretilen koçluk metinlerini ve analiz sonuçlarını sporcuya yazılı bir rapor olarak sunar.
-*   **İletim Katmanı (Web Audio API):** Sesi tarayıcıda gecikmesiz olarak çalar.
+Ana dosyalar [src/voice](</d:/metu-sports-hackhaton/src/voice>) altinda:
 
----
+- [audio_analyzer.py](</d:/metu-sports-hackhaton/src/voice/audio_analyzer.py>)
+- [program_planner.py](</d:/metu-sports-hackhaton/src/voice/program_planner.py>)
+- [coaching_engine.py](</d:/metu-sports-hackhaton/src/voice/coaching_engine.py>)
+- [tts_engine.py](</d:/metu-sports-hackhaton/src/voice/tts_engine.py>)
+- [main.py](</d:/metu-sports-hackhaton/src/voice/main.py>)
+- [cli.py](</d:/metu-sports-hackhaton/src/voice/cli.py>)
 
-## 2. Teknik Süreç (Sequence Diagram)
+Hareket bilgisi:
 
-Aşağıdaki şema, müziğin yüklenmesinden sesli komutun kullanıcıya ulaşmasına kadar geçen teknik adımları göstermektedir:
+- [figure_skating_knowledge.json](</d:/metu-sports-hackhaton/src/voice/knowledge/figure_skating_knowledge.json>)
+- [skating-movement-catalog.md](</d:/metu-sports-hackhaton/src/voice/knowledge/skating-movement-catalog.md>)
 
-![Sequence Diagram](./workflows/sequence.svg)
+## Girdi semasi
 
----
+Sistemin temel ortak semasi:
 
-## 3. Neden Hibrit Yaklaşım?
+```json
+{
+  "planned_elements": [
+    {
+      "name": "Sit Spin",
+      "type": "spin",
+      "start_time": 31.0,
+      "end_time": 36.5,
+      "music_peak_time": 34.0
+    }
+  ]
+}
+```
 
-1.  **Hassas Zamanlama:** Sadece LLM kullanıldığında müziğin ritmiyle sesli komut arasında senkronizasyon sorunu oluşabilir. Librosa, bu senkronizasyonu matematiksel olarak garanti eder.
-2.  **Zengin İçerik:** Sadece Librosa kullanıldığında sesli geri bildirimler "Robotik" kalır. LLM, bu geri bildirimlere duygu ve motivasyon katar.
-3.  **Düşük Hata Payı:** Veri füzyonu sayesinde, sesli asistan sporcuya yanlış zamanda veya yanlış tonda komut vermez.
+## OpenAI tarafinda neler kullaniliyor
 
----
+- metin/planning/cue generation:
+  `Responses API`
+- structured JSON:
+  `text.format -> json_schema`
+- TTS:
+  `audio.speech.create(...)`
 
-## 4. Uygulama Notları
+Varsayilan model tercihleri:
 
-*   **Model Seçimi:** Metin üretimi için `gpt-4o`, ses sentezi için `tts-1-hd` (yüksek kalite) modeli tercih edilecektir.
-*   **Gecikme Yönetimi:** Ses dosyaları önceden (pre-fetch) oluşturulup tarayıcı önbelleğinde saklanarak vuruş (beat) anında anlık oynatılması sağlanacaktır.
+- planner: `gpt-4o-mini`
+- coach text: `gpt-4o-mini`
+- TTS: `gpt-4o-mini-tts`
+
+Istersen bunlari CLI ile override edebilirsin.
+
+## Test etme
+
+### 1. Paketleri kur
+
+```bash
+pip install -r src/voice/requirements.txt
+```
+
+### 2. OpenAI key tanimla
+
+PowerShell:
+
+```powershell
+$env:OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+```
+
+### 3. Hazir planla ucuz test
+
+Bu testte TTS yok, sadece planner/cue JSON uretilir:
+
+```powershell
+python -m src.voice "C:\path\to\your-music-file.mp3" --plan "src/voice/examples/planned_elements.sample.json" --output-dir "src/voice/output/demo"
+```
+
+### 4. TTS ile test
+
+Bu testte cue sesleri de uretilir:
+
+```powershell
+python -m src.voice "C:\path\to\your-music-file.mp3" --plan "src/voice/examples/planned_elements.sample.json" --include-tts --output-dir "src/voice/output/demo_tts"
+```
+
+### 5. TTS + miks test
+
+Bu testte cue sesleri muzik ustune de oturtulur:
+
+```powershell
+python -m src.voice "C:\path\to\your-music-file.mp3" --plan "src/voice/examples/planned_elements.sample.json" --include-tts --mix-audio --output-dir "src/voice/output/demo_mix"
+```
+
+### 6. Plansiz test
+
+Bu testte sistem once planned elements uretir, sonra cue yazar:
+
+```powershell
+python -m src.voice "C:\path\to\your-music-file.mp3" --output-dir "src/voice/output/generated_plan"
+```
+
+## Test sonucunda ne beklemelisin
+
+Cikti klasorunde sunlar olusur:
+
+- `audio_analysis.json`
+- `planned_elements.json`
+- `coaching_cues.json`
+- `coaching_cues.txt`
+- opsiyonelse `cue_audio_files.json`
+- opsiyonelse `coaching_mix.mp3`
+
+## Bilinen sinirlar
+
+- Bu sistem gercek zamanli streaming degil; offline ya da near-offline cue uretir.
+- Cue metinleri OpenAI tarafindan yazilir ama cue zamanlari kod tarafinda belirlenir.
+- TTS ve mix acik oldugunda maliyet ve sure artar.
+- Planner ciktisi hala MVP seviyesinde koreografi taslagidir; hakem seviyesi resmi plan degildir.

@@ -1,59 +1,82 @@
+"""OpenAI text-to-speech support for cue synthesis."""
+
+from __future__ import annotations
+
 import asyncio
 import os
 import subprocess
+import tempfile
+from pathlib import Path
 from typing import Any
 
-import edge_tts
-import imageio_ffmpeg
-from dotenv import load_dotenv
-from openai import OpenAI
-from pydub import AudioSegment
 
-load_dotenv()
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-AudioSegment.converter = imageio_ffmpeg.get_ffmpeg_exe()
+DEFAULT_TTS_MODEL = os.getenv("SKATESYNC_TTS_MODEL", "gpt-4o-mini-tts")
+DEFAULT_TTS_VOICE = os.getenv("SKATESYNC_TTS_VOICE", "alloy")
 
 
 class TTSEngine:
-    def __init__(self, voice="nova", engine_type="openai", output_dir="/tmp/cue_audios"):
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        model: str = DEFAULT_TTS_MODEL,
+        voice: str = DEFAULT_TTS_VOICE,
+        output_dir: str | Path | None = None,
+        client: Any | None = None,
+    ):
+        self.model = model
         self.voice = voice
-        self.engine_type = engine_type
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir) if output_dir else Path(tempfile.gettempdir()) / "skatesync_voice_cues"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.client = client or _build_openai_client(api_key)
 
-    async def generate_audio(self, text: str, output_path: str):
-        if self.engine_type == "openai":
-            return await asyncio.to_thread(self._generate_openai, text, output_path)
-        return await self._generate_edge(text, output_path)
+    async def generate_cue_audios(self, cues: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        tasks = []
+        clip_meta: list[dict[str, Any]] = []
+        for index, cue in enumerate(cues):
+            output_path = self.output_dir / f"cue_{index:03d}.mp3"
+            tasks.append(self._generate_audio_async(cue["text"], output_path))
+            clip_meta.append(
+                {
+                    "index": index,
+                    "time": float(cue["time"]),
+                    "text": cue["text"],
+                    "path": str(output_path),
+                    "cue_kind": cue.get("cue_kind", "cue"),
+                    "element_name": cue.get("element_name", ""),
+                }
+            )
 
-    def _generate_openai(self, text: str, output_path: str):
-        response = client.audio.speech.create(
-            model="tts-1",
+        await asyncio.gather(*tasks)
+
+        for item in clip_meta:
+            wav_path = self._convert_to_wav(item["path"])
+            clip = _import_audio_segment().from_wav(wav_path)
+            item["duration_ms"] = len(clip)
+            item["lead_in_ms"] = self._detect_leading_silence_ms(clip)
+
+        return clip_meta
+
+    async def _generate_audio_async(self, text: str, output_path: Path) -> str:
+        return await asyncio.to_thread(self._generate_audio, text, output_path)
+
+    def _generate_audio(self, text: str, output_path: Path) -> str:
+        response = self.client.audio.speech.create(
+            model=self.model,
             voice=self.voice,
             input=text,
         )
-        response.stream_to_file(output_path)
-        return output_path
+        response.stream_to_file(str(output_path))
+        return str(output_path)
 
-    async def _generate_edge(self, text: str, output_path: str):
-        voice = self.voice if "Neural" in self.voice else "tr-TR-AhmetNeural"
-        communicate = edge_tts.Communicate(text, voice)
-        await communicate.save(output_path)
-        return output_path
-
-    def _detect_leading_silence_ms(self, audio_segment: AudioSegment, threshold_db: float = -40.0) -> int:
-        trim_ms = 0
-        step_ms = 5
-        while trim_ms < len(audio_segment):
-            if audio_segment[trim_ms:trim_ms + step_ms].dBFS > threshold_db:
-                break
-            trim_ms += step_ms
-        return trim_ms
-
-    def _convert_to_wav(self, input_path: str, output_path: str) -> str:
+    def _convert_to_wav(self, input_path: str) -> str:
+        ffmpeg_path = _import_imageio_ffmpeg().get_ffmpeg_exe()
+        handle = tempfile.NamedTemporaryFile(delete=False, suffix="_cue.wav")
+        handle.close()
+        output_path = handle.name
         subprocess.run(
             [
-                imageio_ffmpeg.get_ffmpeg_exe(),
+                ffmpeg_path,
                 "-y",
                 "-i",
                 input_path,
@@ -68,29 +91,33 @@ class TTSEngine:
         )
         return output_path
 
-    async def generate_cue_audios(self, cues: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        os.makedirs(self.output_dir, exist_ok=True)
-        tasks = []
-        clip_meta: list[dict[str, Any]] = []
+    def _detect_leading_silence_ms(self, audio_segment: Any, threshold_db: float = -40.0) -> int:
+        trim_ms = 0
+        step_ms = 5
+        while trim_ms < len(audio_segment):
+            if audio_segment[trim_ms : trim_ms + step_ms].dBFS > threshold_db:
+                break
+            trim_ms += step_ms
+        return trim_ms
 
-        for index, cue in enumerate(cues):
-            output_path = os.path.join(self.output_dir, f"cue_{index:03d}.mp3")
-            tasks.append(self.generate_audio(cue["text"], output_path))
-            clip_meta.append(
-                {
-                    "index": index,
-                    "time": float(cue["time"]),
-                    "text": cue["text"],
-                    "path": output_path,
-                }
-            )
 
-        await asyncio.gather(*tasks)
+def _build_openai_client(api_key: str | None):
+    from openai import OpenAI  # type: ignore
 
-        for item in clip_meta:
-            wav_path = self._convert_to_wav(item["path"], item["path"].replace(".mp3", ".wav"))
-            clip = AudioSegment.from_wav(wav_path)
-            item["duration_ms"] = len(clip)
-            item["lead_in_ms"] = self._detect_leading_silence_ms(clip)
+    key = api_key or os.getenv("OPENAI_API_KEY")
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY is required for TTSEngine.")
+    return OpenAI(api_key=key)
 
-        return clip_meta
+
+def _import_imageio_ffmpeg():
+    import imageio_ffmpeg  # type: ignore
+
+    return imageio_ffmpeg
+
+
+def _import_audio_segment():
+    from pydub import AudioSegment  # type: ignore
+
+    AudioSegment.converter = _import_imageio_ffmpeg().get_ffmpeg_exe()
+    return AudioSegment
