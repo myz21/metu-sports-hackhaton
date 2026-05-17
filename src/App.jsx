@@ -3,6 +3,19 @@ import movementKnowledge from "../knowledge/figure_skating_knowledge.json";
 import pageBackground from "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg";
 import brandLogo from "../skatesync-logo-Photoroom.png";
 import landingFigure from "../skatesync-landing.png";
+import { 
+  dbRegister, 
+  dbLogin, 
+  dbLogout, 
+  subscribeToAuth, 
+  dbUpdateProfile, 
+  dbSaveMusicAnalysis, 
+  dbGetMusicAnalyses, 
+  dbSaveVideoAnalysis, 
+  dbGetVideoAnalyses,
+  isFirebaseConfigured
+} from "./firebase";
+
 
 const movementPreview = ["Axel", "Sit Spin", "Camel Spin", "Spiral", "Final Pose"];
 
@@ -65,77 +78,189 @@ function LogoMark({ theme = "light" }) {
   );
 }
 
-function TopBar({ onNavigate, theme = "light" }) {
+function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
       <LogoMark theme={theme} />
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => onNavigate("login")}
-          className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
-            theme === "dark"
-              ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
-              : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
-          }`}
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          onClick={() => onNavigate("overview")}
-          className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${
-            theme === "dark"
-              ? "bg-slate-100 text-slate-900 hover:bg-white"
-              : "bg-slate-800 text-white hover:bg-slate-700"
-          }`}
-        >
-          Get Started
-        </button>
+        {activeUser ? (
+          <>
+            <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+              theme === "dark"
+                ? "border-slate-700 bg-slate-800/50 text-slate-300"
+                : "border-sky-100 bg-sky-50/50 text-slate-700"
+            }`}>
+              <div className="h-6.5 w-6.5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold">
+                {activeUser.displayName ? activeUser.displayName[0].toUpperCase() : "S"}
+              </div>
+              <span className="text-xs font-semibold">{activeUser.displayName || "Sporcu"}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onLogout}
+              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
+                theme === "dark"
+                  ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+              }`}
+            >
+              Çıkış
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => onNavigate("login")}
+              className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
+                theme === "dark"
+                  ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("overview")}
+              className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${
+                theme === "dark"
+                  ? "bg-slate-100 text-slate-900 hover:bg-white"
+                  : "bg-slate-800 text-white hover:bg-slate-700"
+              }`}
+            >
+              Get Started
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
 }
 
-function LoginPanel({ onSuccess }) {
+
+function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [skateChoice, setSkateChoice] = useState("edea");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        if (!displayName.trim()) {
+          throw new Error("Lütfen bir sporcu adı girin.");
+        }
+        const user = await dbRegister(email, password, displayName, skateChoice);
+        setActiveUser(user);
+      } else {
+        const user = await dbLogin(email, password);
+        setActiveUser(user);
+      }
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      let errMsg = "İşlem sırasında hata oluştu.";
+      if (err.message === "auth/email-already-in-use" || err.code === "auth/email-already-in-use") {
+        errMsg = "Bu e-posta adresi zaten kullanımda.";
+      } else if (err.message === "auth/wrong-password-or-user-not-found" || err.code === "auth/wrong-password") {
+        errMsg = "E-posta veya şifre hatalı.";
+      } else if (err.code === "auth/invalid-email") {
+        errMsg = "Geçersiz e-posta adresi.";
+      } else if (err.code === "auth/weak-password") {
+        errMsg = "Şifre en az 6 karakter olmalıdır.";
+      } else {
+        errMsg = err.message;
+      }
+      setError(errMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-md space-y-8">
       <div className="space-y-3 text-center lg:text-left">
         <h1 className="font-display text-[2rem] font-semibold tracking-tight text-slate-900">
-          SkateSync AI
+          {isSignUp ? "Rostere Katıl" : "SkateSync AI Giriş"}
         </h1>
         <p className="max-w-sm text-base leading-7 text-slate-500">
-          Music-aware choreography planner for figure skating and artistic roller skating
+          {isSignUp 
+            ? "Kendi hareket dağarcığınızı kaydedin ve otonom koç feedback raporlarına erişin" 
+            : "Müzik algılamalı koreografi planlayıcı ve yapay zeka destekli paten antrenörü"}
         </p>
       </div>
 
-      <form
-        className="space-y-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          onSuccess();
-        }}
-      >
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-xs font-semibold text-red-600 animate-rise">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-4">
+          {isSignUp && (
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-slate-500">Sporcu Adı Soyadı</span>
+              <input
+                type="text"
+                required
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Örn: Derin Yıldız"
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 text-base text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              />
+            </label>
+          )}
+
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-500">Email Address</span>
+            <span className="text-sm font-medium text-slate-500">E-Posta Adresi</span>
             <input
               type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="name@skatesync.ai"
               className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 text-base text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
             />
           </label>
 
+          {isSignUp && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-500 block">Buz Pateni Seçimi</label>
+              <select
+                value={skateChoice}
+                onChange={(e) => setSkateChoice(e.target.value)}
+                className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              >
+                <option value="edea">Edeal Ice Fly + Gold Seal</option>
+                <option value="jackson">Jackson Premiere + MK Pro</option>
+                <option value="riedell">Riedell Royal + Eclipse Titanium</option>
+              </select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <label className="text-sm font-medium text-slate-500">Password</label>
-              <button type="button" className="text-sm font-medium text-teal-600 transition hover:text-teal-500">
-                Forgot password?
-              </button>
+              <label className="text-sm font-medium text-slate-500">Şifre</label>
+              {!isSignUp && (
+                <button type="button" className="text-sm font-medium text-teal-600 transition hover:text-teal-500">
+                  Şifremi Unuttum?
+                </button>
+              )}
             </div>
             <div className="relative">
               <input
                 type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 pr-14 text-base text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
               />
@@ -149,14 +274,17 @@ function LoginPanel({ onSuccess }) {
         <div className="space-y-4 pt-2">
           <button
             type="submit"
-            className="flex h-16 w-full items-center justify-center rounded-2xl bg-slate-800 text-[1.05rem] font-semibold text-white transition hover:bg-slate-700"
+            disabled={loading}
+            className={`flex h-16 w-full items-center justify-center rounded-2xl bg-slate-800 text-[1.05rem] font-semibold text-white transition hover:bg-slate-700 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Sign In
+            {loading ? "Lütfen bekleyin..." : (isSignUp ? "Kaydol & Giriş Yap" : "Giriş Yap")}
           </button>
 
           <div className="flex items-center gap-4">
             <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-sm font-medium text-slate-400">OR</span>
+            <span className="text-sm font-medium text-slate-400">VEYA</span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
@@ -165,16 +293,20 @@ function LoginPanel({ onSuccess }) {
             className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50"
           >
             <GoogleMark />
-            Continue with Google
+            Google ile devam et
           </button>
         </div>
       </form>
 
-      <div className="pt-8 text-center">
+      <div className="pt-6 text-center">
         <p className="text-base text-slate-500">
-          Don&apos;t have an account?{" "}
-          <button type="button" className="font-semibold text-teal-600 transition hover:text-teal-500">
-            Join the roster
+          {isSignUp ? "Zaten bir hesabınız var mı? " : "Henüz bir hesabınız yok mu? "}
+          <button 
+            type="button" 
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="font-semibold text-teal-600 transition hover:text-teal-500"
+          >
+            {isSignUp ? "Giriş Yap" : "Rostere Katıl"}
           </button>
         </p>
       </div>
@@ -182,7 +314,7 @@ function LoginPanel({ onSuccess }) {
   );
 }
 
-function LoginScreen({ onNavigate }) {
+function LoginScreen({ onNavigate, activeUser, setActiveUser }) {
   return (
     <div
       className="min-h-screen bg-[#fbfbfb] bg-cover bg-center px-4 py-4 sm:px-6 sm:py-6"
@@ -213,7 +345,7 @@ function LoginScreen({ onNavigate }) {
           >
             Back
           </button>
-          <LoginPanel onSuccess={() => onNavigate("overview")} />
+          <LoginPanel onSuccess={() => onNavigate("overview")} activeUser={activeUser} setActiveUser={setActiveUser} />
           <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-full bg-teal-50" />
         </div>
       </div>
@@ -225,7 +357,8 @@ function LoginScreen({ onNavigate }) {
   );
 }
 
-function LandingScreen({ onNavigate }) {
+
+function LandingScreen({ onNavigate, activeUser, handleLogout }) {
   return (
     <div
       className="min-h-screen bg-cover bg-center"
@@ -233,7 +366,8 @@ function LandingScreen({ onNavigate }) {
         backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(246,250,252,0.95) 100%), url("${pageBackground}")`,
       }}
     >
-      <TopBar onNavigate={onNavigate} />
+      <TopBar onNavigate={onNavigate} activeUser={activeUser} onLogout={handleLogout} />
+
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-14 pt-4 sm:px-6 lg:gap-14 lg:pb-20 lg:pt-8">
         <section className="grid items-center gap-8 rounded-[32px] border border-slate-100 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] lg:grid-cols-[1.05fr_0.95fr] lg:p-8">
@@ -403,15 +537,19 @@ function LandingScreen({ onNavigate }) {
   );
 }
 
-function OverviewScreen({ onNavigate }) {
+function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
   
   // Profile States
-  const [athleteLevel, setAthleteLevel] = useState("Junior");
-  const [selectedMovements, setSelectedMovements] = useState(["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"]);
-  const [skateChoice, setSkateChoice] = useState("edea");
+  const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
+  const [selectedMovements, setSelectedMovements] = useState(activeUser?.selectedMovements || ["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"]);
+  const [skateChoice, setSkateChoice] = useState(activeUser?.skateChoice || "edea");
   const [showProfileToast, setShowProfileToast] = useState(false);
-  
+
+  // History States
+  const [musicHistory, setMusicHistory] = useState([]);
+  const [videoHistory, setVideoHistory] = useState([]);
+
   // Music States
   const [isMusicUploading, setIsMusicUploading] = useState(false);
   const [isMusicUploaded, setIsMusicUploaded] = useState(false);
@@ -436,6 +574,29 @@ function OverviewScreen({ onNavigate }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalysisFinished, setIsAnalysisFinished] = useState(false);
 
+  // Sync active user details on change
+  useEffect(() => {
+    if (activeUser) {
+      setAthleteName(activeUser.displayName || "Derin Yıldız");
+      setSkateChoice(activeUser.skateChoice || "edea");
+      const movements = activeUser.selectedMovements || ["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"];
+      setSelectedMovements(movements);
+      
+      // Update checkmarks to match
+      setCheckedMovements((prev) => {
+        const nextChecked = { ...prev };
+        Object.keys(nextChecked).forEach((k) => {
+          nextChecked[k] = movements.includes(k);
+        });
+        return nextChecked;
+      });
+
+      // Load histories
+      dbGetMusicAnalyses(activeUser.uid).then(setMusicHistory).catch(console.error);
+      dbGetVideoAnalyses(activeUser.uid).then(setVideoHistory).catch(console.error);
+    }
+  }, [activeUser]);
+
   // Playback timer for wave player & scrolling sync cues
   useEffect(() => {
     let interval;
@@ -454,9 +615,23 @@ function OverviewScreen({ onNavigate }) {
   }, [isPlaying]);
 
   // Handle Profile Save
-  const handleSaveProfile = () => {
-    setShowProfileToast(true);
-    setTimeout(() => setShowProfileToast(false), 3000);
+  const handleSaveProfile = async () => {
+    if (activeUser) {
+      try {
+        await dbUpdateProfile(activeUser.uid, {
+          displayName: athleteName,
+          skateChoice: skateChoice,
+          selectedMovements: selectedMovements
+        });
+        setShowProfileToast(true);
+        setTimeout(() => setShowProfileToast(false), 3000);
+      } catch (err) {
+        console.error("Profile save error:", err);
+      }
+    } else {
+      setShowProfileToast(true);
+      setTimeout(() => setShowProfileToast(false), 3000);
+    }
   };
 
   // Handle Music Upload Simulation
@@ -470,11 +645,26 @@ function OverviewScreen({ onNavigate }) {
   };
 
   // Handle Plan Generation Simulation
-  const handleGeneratePlanSimulate = () => {
+  const handleGeneratePlanSimulate = async () => {
     setIsPlanGenerating(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsPlanGenerating(false);
       setIsPlanGenerated(true);
+      
+      if (activeUser) {
+        try {
+          const newChoreo = {
+            title: uploadedMusicName ? uploadedMusicName.replace(".mp3", "") : "swan_lake_climax_edit",
+            bpm: "128 BPM",
+            elCount: `${selectedMovements.length} hareket`,
+            movements: selectedMovements
+          };
+          const saved = await dbSaveMusicAnalysis(activeUser.uid, newChoreo);
+          setMusicHistory((prev) => [saved, ...prev]);
+        } catch (err) {
+          console.error("Error persisting generated program:", err);
+        }
+      }
     }, 1500);
   };
 
@@ -488,13 +678,29 @@ function OverviewScreen({ onNavigate }) {
   };
 
   // Handle Video Analysis Simulation
-  const handleStartAnalysisSimulate = () => {
+  const handleStartAnalysisSimulate = async () => {
     setIsAnalyzing(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsAnalyzing(false);
       setIsAnalysisFinished(true);
+      
+      if (activeUser) {
+        try {
+          const newAnalysis = {
+            date: new Date().toLocaleDateString("tr-TR"),
+            track: uploadedMusicName ? uploadedMusicName.replace(".mp3", "") : "Swan Lake Climax",
+            score: "94%",
+            grade: "A"
+          };
+          const saved = await dbSaveVideoAnalysis(activeUser.uid, newAnalysis);
+          setVideoHistory((prev) => [saved, ...prev]);
+        } catch (err) {
+          console.error("Error persisting video analysis:", err);
+        }
+      }
     }, 2000);
   };
+
 
   // Mock catalog data
   const movementCategories = [
@@ -579,7 +785,8 @@ function OverviewScreen({ onNavigate }) {
         backgroundImage: `linear-gradient(180deg, rgba(248,250,252,0.92) 0%, rgba(255,255,255,0.96) 100%), url("${pageBackground}")`,
       }}
     >
-      <TopBar onNavigate={onNavigate} theme="light" />
+      <TopBar onNavigate={onNavigate} theme="light" activeUser={activeUser} onLogout={handleLogout} />
+
 
       {/* Profile Saved Toast notification */}
       {showProfileToast && (
@@ -641,9 +848,11 @@ function OverviewScreen({ onNavigate }) {
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sporcu Adı</label>
                   <input
                     type="text"
-                    defaultValue="Derin Yıldız"
+                    value={athleteName}
+                    onChange={(e) => setAthleteName(e.target.value)}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-white/80 px-4 text-sm text-slate-700 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition"
                   />
+
                 </div>
 
                 <div className="space-y-2">
@@ -713,11 +922,11 @@ function OverviewScreen({ onNavigate }) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {[
+                        {(videoHistory.length > 0 ? videoHistory : [
                           { date: "10.05.2026", track: "Swan Lake Climax", score: "92%", grade: "A" },
                           { date: "05.05.2026", track: "Riverdance Upbeat", score: "86%", grade: "B+" },
                           { date: "28.04.2026", track: "Moonlight Sonata Act 1", score: "78%", grade: "B-" }
-                        ].map((row, idx) => (
+                        ]).map((row, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/50">
                             <td className="px-4 py-3 font-medium text-slate-600">{row.date}</td>
                             <td className="px-4 py-3 font-semibold text-slate-800">{row.track}</td>
@@ -735,10 +944,10 @@ function OverviewScreen({ onNavigate }) {
                   <div className="space-y-3">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Önceki Müzikli Koreografiler</h4>
                     <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                      {[
+                      {(musicHistory.length > 0 ? musicHistory : [
                         { title: "Swan Lake Cinematic", bpm: "120 BPM", elCount: "12 hareket" },
                         { title: "Riverdance Mix", bpm: "132 BPM", elCount: "15 hareket" }
-                      ].map((item, idx) => (
+                      ]).map((item, idx) => (
                         <div key={idx} className="p-3 rounded-xl border border-slate-100 bg-white/80 flex justify-between items-center shadow-xs">
                           <div>
                             <p className="text-xs font-bold text-slate-800">{item.title}</p>
@@ -755,10 +964,13 @@ function OverviewScreen({ onNavigate }) {
                   <div className="space-y-3">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Önceki Coach Feedback Raporları</h4>
                     <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                      {[
-                        "Double axel sıçrama ritmi harika, oturma dönüşünde kalçayı biraz daha aşağıda tutmaya odaklan.",
-                        "Adım dizilerinde stabilite ve dış kenarı tutuş süren belirgin şekilde iyileşmiş."
-                      ].map((report, idx) => (
+                      {(videoHistory.length > 0 
+                        ? videoHistory.map(h => `${h.track} antrenman analizi tamamlandı. Hareket uyum skorun ${h.score} olarak ölçüldü!`)
+                        : [
+                            "Double axel sıçrama ritmi harika, oturma dönüşünde kalçayı biraz daha aşağıda tutmaya odaklan.",
+                            "Adım dizilerinde stabilite ve dış kenarı tutuş süren belirgin şekilde iyileşmiş."
+                          ]
+                      ).map((report, idx) => (
                         <div key={idx} className="p-3 rounded-xl border border-slate-100 bg-white/80 shadow-xs">
                           <p className="text-[11px] leading-5 text-slate-500 font-medium italic">"{report}"</p>
                           <p className="text-[9px] text-sky-500 font-bold uppercase tracking-wider mt-1 text-right">— Elena (AI Coach)</p>
@@ -767,6 +979,7 @@ function OverviewScreen({ onNavigate }) {
                     </div>
                   </div>
                 </div>
+
 
               </div>
             </div>
@@ -1444,16 +1657,44 @@ function OverviewScreen({ onNavigate }) {
       </main>
     </div>
   );
-}export default function App() {
+}
+
+export default function App() {
   const [screen, setScreen] = useState("landing");
+  const [activeUser, setActiveUser] = useState(null);
+
+  useEffect(() => {
+    return subscribeToAuth((user) => {
+      setActiveUser(user);
+      if (user) {
+        if (screen === "landing" || screen === "login") {
+          setScreen("overview");
+        }
+      } else {
+        if (screen === "overview") {
+          setScreen("landing");
+        }
+      }
+    });
+  }, [screen]);
+
+  const handleLogout = async () => {
+    try {
+      await dbLogout();
+      setScreen("landing");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   if (screen === "login") {
-    return <LoginScreen onNavigate={setScreen} />;
+    return <LoginScreen onNavigate={setScreen} activeUser={activeUser} setActiveUser={setActiveUser} />;
   }
 
   if (screen === "overview") {
-    return <OverviewScreen onNavigate={setScreen} />;
+    return <OverviewScreen onNavigate={setScreen} activeUser={activeUser} handleLogout={handleLogout} />;
   }
 
-  return <LandingScreen onNavigate={setScreen} />;
+  return <LandingScreen onNavigate={setScreen} activeUser={activeUser} handleLogout={handleLogout} />;
 }
+
