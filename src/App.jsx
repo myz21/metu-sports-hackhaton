@@ -637,7 +637,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
 }
 
 function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("video");
   const musicInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const [uploadedVideoName, setUploadedVideoName] = useState("");
@@ -653,7 +653,6 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setOpenaiApiKey(key);
     localStorage.setItem("skatesync_openai_api_key", key);
   };
-
   // Profile States
   const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
   const [selectedMovements, setSelectedMovements] = useState(activeUser?.selectedMovements || ["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"]);
@@ -682,8 +681,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
 
   // Video States
   const [isVideoUploading, setIsVideoUploading] = useState(false);
-  const [isVideoUploaded, setIsVideoUploaded] = useState(false);
-  const [reviewMode, setReviewMode] = useState("Fast");
+  const [isVideoUploaded, setIsVideoUploaded] = useState(true);
+  const [reviewMode, setReviewMode] = useState("Detailed");
   const [detailedCommentary, setDetailedCommentary] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalysisFinished, setIsAnalysisFinished] = useState(false);
@@ -1771,7 +1770,10 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
               ) : (
                 <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 px-4 py-2.5 rounded-2xl">
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{uploadedVideoName || "practice_session_video.mp4"}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{uploadedVideoName || "demo_practice_session.mp4"}</span>
+                    <span className="text-[10px] font-medium text-teal-700/80">Demo videosu hazir, tekrar yukleme gerekmez.</span>
+                  </div>
                 </div>
               )}
             </div>
