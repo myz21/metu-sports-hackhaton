@@ -1,0 +1,718 @@
+[
+  {
+    "id": "sit_spin",
+    "title": "Sit Spin",
+    "category": "spin",
+    "aliases": ["sit spin", "basic sit spin", "low sit spin"],
+    "summary": "A sit spin lowers the skating leg into a compact seated position while rotating around a relatively steady center.",
+    "timing_cues": [
+      "The entry should settle before the main rotational moment begins.",
+      "The visual peak usually happens when the spin center is established and the body line looks stable."
+    ],
+    "stability_cues": [
+      "Center drift reduces the clarity of the spin.",
+      "A steady upper body and consistent rotational axis are more important than raw speed."
+    ],
+    "duration_cues": [
+      "If the spin exits too early, the movement can feel under-finished.",
+      "If the spin runs too long, it can break the planned musical transition."
+    ],
+    "coaching_cues": [
+      "Prepare the entry edge early.",
+      "Keep the center controlled through the deepest part of the position."
+    ]
+  },
+  {
+    "id": "camel_spin",
+    "title": "Camel Spin",
+    "category": "spin",
+    "aliases": ["camel spin", "forward camel", "basic camel spin"],
+    "summary": "A camel spin presents a longer body line with the free leg extended while rotating on a controlled axis.",
+    "timing_cues": [
+      "The line should be visible early enough for the audience to read the shape.",
+      "The best musical moment often coincides with the fullest extension."
+    ],
+    "stability_cues": [
+      "Hip level and center control are key to keeping the spin from traveling.",
+      "A broken upper-body line often makes the spin look unstable."
+    ],
+    "duration_cues": [
+      "The line needs enough time to register visually.",
+      "Exiting too late can reduce musical precision."
+    ],
+    "coaching_cues": [
+      "Reach the full line before chasing rotation speed.",
+      "Control the hip line to reduce travel."
+    ]
+  },
+  {
+    "id": "upright_spin",
+    "title": "Upright Spin",
+    "category": "spin",
+    "aliases": ["upright spin", "basic upright spin", "standing spin"],
+    "summary": "An upright spin keeps the body more vertical and often relies on a clean center and leg line.",
+    "timing_cues": [
+      "The acceleration into the spin should not rush past the musical accent.",
+      "The most readable moment is when the body is centered and visually tall."
+    ],
+    "stability_cues": [
+      "Vertical balance and shoulder control influence whether the spin reads cleanly.",
+      "Traveling or wobbling weakens the effect."
+    ],
+    "duration_cues": [
+      "A short upright spin may feel abrupt.",
+      "An overlong upright spin may feel repetitive if the music has already moved on."
+    ],
+    "coaching_cues": [
+      "Build the center before increasing speed.",
+      "Keep the shoulders calm through the main rotation."
+    ]
+  },
+  {
+    "id": "two_foot_spin",
+    "title": "Two Foot Spin",
+    "category": "spin",
+    "aliases": ["two foot spin", "two-foot spin", "basic two foot spin"],
+    "summary": "A two foot spin is a foundational training spin that uses both feet to help establish rotation, balance, and a readable center.",
+    "timing_cues": [
+      "The spin should establish its center quickly instead of spending too long searching for balance.",
+      "The clearest visual moment comes when the rotation becomes calm and centered."
+    ],
+    "stability_cues": [
+      "This element should still look centered even though it is more basic than a one-foot spin.",
+      "Excessive travel usually signals that the center was never fully found."
+    ],
+    "duration_cues": [
+      "If it ends too quickly, the training value and visual read both drop.",
+      "If it lingers after the phrase moves on, the section can feel stalled."
+    ],
+    "coaching_cues": [
+      "Find the center before trying to turn faster.",
+      "Keep the shoulders quiet while the rotation settles."
+    ]
+  },
+  {
+    "id": "one_foot_spin",
+    "title": "One Foot Spin",
+    "category": "spin",
+    "aliases": ["one foot spin", "one-foot spin", "basic one foot spin"],
+    "summary": "A one foot spin asks for a clearer axis and more single-leg control than a two foot spin while still functioning as a basic spin family.",
+    "timing_cues": [
+      "The entry should rise into the center without delaying the phrase.",
+      "The strongest moment is when the skater settles onto one foot and the rotation looks committed."
+    ],
+    "stability_cues": [
+      "Single-leg balance and axis control matter more than speed here.",
+      "Traveling or repeated corrections make the spin look under-controlled."
+    ],
+    "duration_cues": [
+      "The spin needs enough time to show that the center is truly established.",
+      "Leaving too early can make the element read like an incomplete setup."
+    ],
+    "coaching_cues": [
+      "Commit cleanly onto the skating foot.",
+      "Protect the axis before accelerating the spin."
+    ]
+  },
+  {
+    "id": "scratch_spin",
+    "title": "Scratch Spin",
+    "category": "spin",
+    "aliases": ["scratch spin", "fast upright spin"],
+    "summary": "A scratch spin is a fast upright variation that depends on a centered axis, a visually narrow line, and controlled acceleration.",
+    "timing_cues": [
+      "The acceleration should crest with the intended musical lift instead of peaking too early.",
+      "The strongest visual moment often comes when the spin tightens and speed increases without losing center."
+    ],
+    "stability_cues": [
+      "Fast rotation only reads well if the center stays compact and stable.",
+      "Shoulder swing or travel weakens the clean effect of the scratch position."
+    ],
+    "duration_cues": [
+      "The fast section needs enough time to register as a highlight.",
+      "Resolving too soon can make the build feel unfinished."
+    ],
+    "coaching_cues": [
+      "Build speed after the center is secure.",
+      "Keep the line narrow without letting the shoulders twist."
+    ]
+  },
+  {
+    "id": "layback_spin",
+    "title": "Layback Spin",
+    "category": "spin",
+    "aliases": ["layback spin"],
+    "summary": "A layback spin relies on a clear back line, centered rotation, and enough duration for the stretched shape to read musically.",
+    "timing_cues": [
+      "The full layback line should appear before or at the phrase peak, not after it.",
+      "The visual payoff is strongest when the back line opens clearly and stays readable through the accent."
+    ],
+    "stability_cues": [
+      "The axis should remain centered even as the body opens backward.",
+      "A collapsing hip line or wandering center makes the spin lose authority."
+    ],
+    "duration_cues": [
+      "The position needs enough hold time for the shape to register.",
+      "Exiting too early can make the dramatic line feel cut short."
+    ],
+    "coaching_cues": [
+      "Open into the back line before the musical crest.",
+      "Keep the center steady while the upper body extends."
+    ]
+  },
+  {
+    "id": "biellmann_spin",
+    "title": "Biellmann Spin",
+    "category": "spin",
+    "aliases": ["biellmann spin", "biellmann"],
+    "summary": "A Biellmann spin combines flexibility and rotation, asking for a high overhead line that still remains centered and musically placed.",
+    "timing_cues": [
+      "The lift into the Biellmann line should land with a clear musical rise.",
+      "If the overhead shape arrives late, the main highlight can lose impact."
+    ],
+    "stability_cues": [
+      "Pulling the leg higher should not cost the spin center.",
+      "If the axis travels while the position opens, the element looks less secure."
+    ],
+    "duration_cues": [
+      "The overhead line needs enough time to be read as the climax of the spin.",
+      "A rushed exit can make the flexibility moment feel incomplete."
+    ],
+    "coaching_cues": [
+      "Reach the overhead line before chasing extra speed.",
+      "Protect the axis while opening the flexibility position."
+    ]
+  },
+  {
+    "id": "combination_spin",
+    "title": "Combination Spin",
+    "category": "spin",
+    "aliases": ["combination spin", "spin combination"],
+    "summary": "A combination spin changes positions within one rotational element and needs clear transitions between shapes.",
+    "timing_cues": [
+      "Each position change should still respect the musical phrase.",
+      "The strongest moment often comes when the cleanest position is fully established."
+    ],
+    "stability_cues": [
+      "Position changes can introduce center drift if transitions are rushed.",
+      "The center should stay readable even through variation changes."
+    ],
+    "duration_cues": [
+      "Each position should be readable enough to matter.",
+      "Too much time in one phase can flatten the combination."
+    ],
+    "coaching_cues": [
+      "Keep the transitions intentional between positions.",
+      "Do not sacrifice center control while changing shape."
+    ]
+  },
+  {
+    "id": "flying_spin",
+    "title": "Flying Spin",
+    "category": "spin",
+    "aliases": ["flying spin", "flying sit spin", "flying camel"],
+    "summary": "A flying spin adds an airborne entry before the rotational phase and needs a clean moment of takeoff into center.",
+    "timing_cues": [
+      "The airborne entry should not arrive after the intended accent.",
+      "The visual payoff is strongest when the landing into spin is immediate and centered."
+    ],
+    "stability_cues": [
+      "The jump entry often introduces instability if the center is not found quickly.",
+      "Landing into a wandering rotation weakens the element."
+    ],
+    "duration_cues": [
+      "The rotational phase still needs enough time to read after the entry.",
+      "If the spin resolves too quickly, the airborne setup dominates the element."
+    ],
+    "coaching_cues": [
+      "Establish the center immediately after the airborne entry.",
+      "Avoid letting the jump entry delay the main rotational moment."
+    ]
+  },
+  {
+    "id": "toe_loop",
+    "title": "Toe Loop",
+    "category": "jump",
+    "aliases": ["toe loop", "single toe loop", "double toe loop", "triple toe loop"],
+    "summary": "A toe loop uses toe-assisted takeoff timing and benefits from a clean rhythmic entry and controlled landing line.",
+    "timing_cues": [
+      "The takeoff should line up with a clear beat or accent.",
+      "Late takeoff can make the jump feel disconnected from the phrase."
+    ],
+    "stability_cues": [
+      "The landing edge and upper-body control influence whether the jump looks settled.",
+      "A rushed exit after landing usually reads unstable."
+    ],
+    "duration_cues": [
+      "The landing flow should have enough continuation to connect into the next phrase."
+    ],
+    "coaching_cues": [
+      "Set the pick rhythm early.",
+      "Protect the landing flow after touchdown."
+    ]
+  },
+  {
+    "id": "salchow",
+    "title": "Salchow",
+    "category": "jump",
+    "aliases": ["salchow", "single salchow", "double salchow", "triple salchow"],
+    "summary": "A salchow uses a distinct edge-based setup and usually reads best when the takeoff is committed and the landing flows out cleanly.",
+    "timing_cues": [
+      "The takeoff should grow out of the setup edge instead of arriving late to the phrase.",
+      "The landing moment often carries the strongest visual accent."
+    ],
+    "stability_cues": [
+      "Landing control matters more visually than forcing speed.",
+      "Breaking the body line after landing weakens the jump."
+    ],
+    "duration_cues": [
+      "The exit needs enough flow to reconnect with the choreography."
+    ],
+    "coaching_cues": [
+      "Commit to the takeoff edge earlier.",
+      "Let the landing edge continue rather than stopping the flow."
+    ]
+  },
+  {
+    "id": "loop_jump",
+    "title": "Loop Jump",
+    "category": "jump",
+    "aliases": ["loop jump", "loop", "rittberger", "single loop", "double loop", "triple loop"],
+    "summary": "A loop jump tends to reward compact timing and a stable landing line.",
+    "timing_cues": [
+      "The takeoff should feel decisive and rhythmically clean.",
+      "A delayed jump entry can soften the intended accent."
+    ],
+    "stability_cues": [
+      "Upper-body steadiness on landing affects the visual cleanliness of the jump.",
+      "A wandering landing line makes the jump look less secure."
+    ],
+    "duration_cues": [
+      "The landing must connect into the next move without looking stalled."
+    ],
+    "coaching_cues": [
+      "Keep the entry compact and decisive.",
+      "Protect the landing line before moving on."
+    ]
+  },
+  {
+    "id": "flip_jump",
+    "title": "Flip Jump",
+    "category": "jump",
+    "aliases": ["flip jump", "single flip", "double flip", "triple flip"],
+    "summary": "A flip jump depends on a precise picked entry and a controlled landing phase.",
+    "timing_cues": [
+      "The takeoff should not arrive after the main beat.",
+      "The jump usually reads strongest when the launch and landing both support the phrase."
+    ],
+    "stability_cues": [
+      "The landing line should stay organized immediately after impact.",
+      "A shaky pickup into the jump can show up as instability later."
+    ],
+    "duration_cues": [
+      "The landing continuation still needs enough room before the next element."
+    ],
+    "coaching_cues": [
+      "Do not rush the pick before the accent.",
+      "Let the landing complete before forcing the next movement."
+    ]
+  },
+  {
+    "id": "lutz_jump",
+    "title": "Lutz Jump",
+    "category": "jump",
+    "aliases": ["lutz jump", "single lutz", "double lutz", "triple lutz"],
+    "summary": "A lutz jump often relies on strong approach control, committed takeoff timing, and a clear landing edge.",
+    "timing_cues": [
+      "The setup needs enough time before the main launch.",
+      "If the takeoff comes late, the jump can miss the intended musical impact."
+    ],
+    "stability_cues": [
+      "Approach composure and landing control both affect the cleanliness of the element.",
+      "A rushed landing exit weakens the effect."
+    ],
+    "duration_cues": [
+      "The jump should leave enough continuation for the next phrase."
+    ],
+    "coaching_cues": [
+      "Start the setup earlier if the takeoff keeps arriving late.",
+      "Hold the landing edge with more control."
+    ]
+  },
+  {
+    "id": "axel",
+    "title": "Axel",
+    "category": "jump",
+    "aliases": ["axel", "single axel", "double axel"],
+    "summary": "An axel often needs a committed forward entry, clear takeoff timing, and a confident landing flow.",
+    "timing_cues": [
+      "The takeoff should match a clear rise or major accent.",
+      "Late launch tends to reduce the musical payoff."
+    ],
+    "stability_cues": [
+      "Landing control and continuity are visually important for the axel.",
+      "A heavy landing or broken line weakens the phrasing."
+    ],
+    "duration_cues": [
+      "The post-landing glide should have enough time to settle into the next movement."
+    ],
+    "coaching_cues": [
+      "Prepare the entry earlier so the takeoff lands on the phrase.",
+      "Do not cut the landing exit short."
+    ]
+  },
+  {
+    "id": "jump_combination",
+    "title": "Jump Combination",
+    "category": "jump",
+    "aliases": ["jump combination", "combo jump", "combination jump"],
+    "summary": "A jump combination links multiple jumps and needs both timing discipline and continued landing flow between parts.",
+    "timing_cues": [
+      "The first jump should not consume the entire musical accent.",
+      "The connection between jumps needs to stay rhythmically alive."
+    ],
+    "stability_cues": [
+      "Breaks in flow between jumps usually read as instability.",
+      "The landing of the first jump should support the takeoff of the second."
+    ],
+    "duration_cues": [
+      "The connection needs enough time to read clearly without dragging."
+    ],
+    "coaching_cues": [
+      "Protect the landing flow of the first jump.",
+      "Keep the connection rhythmically active between parts."
+    ]
+  },
+  {
+    "id": "step_sequence",
+    "title": "Step Sequence",
+    "category": "sequence",
+    "aliases": ["step sequence", "steps", "footwork sequence"],
+    "summary": "A step sequence is driven by rhythmic footwork, turns, and changes of direction that should stay alive with the music.",
+    "timing_cues": [
+      "The section should stay rhythmically engaged instead of drifting away from the beat.",
+      "Important turns or accents should land near strong pulses."
+    ],
+    "stability_cues": [
+      "The sequence does not need stillness, but it does need control through direction changes.",
+      "Chaotic upper-body movement can make the footwork look unclear."
+    ],
+    "duration_cues": [
+      "If the sequence ends early, it can feel incomplete.",
+      "If it runs long, the next highlight can lose impact."
+    ],
+    "coaching_cues": [
+      "Keep the rhythm visible through the feet and body line.",
+      "Use the strongest turns near clear musical pulses."
+    ]
+  },
+  {
+    "id": "choreographic_sequence",
+    "title": "Choreographic Sequence",
+    "category": "sequence",
+    "aliases": ["choreographic sequence", "choreo sequence"],
+    "summary": "A choreographic sequence often emphasizes expression, edge quality, and phrase design more than strict technical stillness.",
+    "timing_cues": [
+      "The phrase should expand with the music instead of arriving after it.",
+      "The emotional peak should align with a visible gesture or highlight."
+    ],
+    "stability_cues": [
+      "Expressive movement still benefits from controlled body lines.",
+      "Loose control can reduce the intended visual effect."
+    ],
+    "duration_cues": [
+      "The phrase should breathe but still resolve within the musical section."
+    ],
+    "coaching_cues": [
+      "Match the largest gesture to the main musical lift.",
+      "Do not let expressive timing become late timing."
+    ]
+  },
+  {
+    "id": "edge_transition",
+    "title": "Edge Transition",
+    "category": "transition",
+    "aliases": ["edge transition", "transition", "entry transition", "connecting edge"],
+    "summary": "An edge transition connects larger elements and should preserve flow, direction, and musical continuity.",
+    "timing_cues": [
+      "Transitions should support the phrase instead of delaying the next element.",
+      "A late transition can push the main element off the music."
+    ],
+    "stability_cues": [
+      "Even simple connecting edges should look controlled and intentional.",
+      "A broken line can make the program look unfinished."
+    ],
+    "duration_cues": [
+      "The transition should be long enough to breathe but not so long that it drains momentum."
+    ],
+    "coaching_cues": [
+      "Keep the line alive through the transition.",
+      "Use it to prepare the next element rather than to recover late."
+    ]
+  },
+  {
+    "id": "spiral",
+    "title": "Spiral",
+    "category": "transition",
+    "aliases": ["spiral", "arabesque spiral", "edge spiral"],
+    "summary": "A spiral relies on edge quality, extension, and enough duration for the line to be seen.",
+    "timing_cues": [
+      "The line should reach full expression in time for the intended musical accent.",
+      "If the shape arrives late, the emotional peak is weakened."
+    ],
+    "stability_cues": [
+      "Hip level and edge control determine whether the line reads cleanly.",
+      "Wobble or short holds make the spiral less convincing."
+    ],
+    "duration_cues": [
+      "The line needs enough time to register visually."
+    ],
+    "coaching_cues": [
+      "Reach the line earlier.",
+      "Hold the extension long enough for it to be seen."
+    ]
+  },
+  {
+    "id": "ina_bauer",
+    "title": "Ina Bauer",
+    "category": "transition",
+    "aliases": ["ina bauer"],
+    "summary": "An Ina Bauer is often used as a musical and visual highlight built on edge control and openness of line.",
+    "timing_cues": [
+      "The fullest shape should land with a strong rise in the phrase.",
+      "If entered too late, the dramatic effect drops quickly."
+    ],
+    "stability_cues": [
+      "The edge and body line need to stay broad and controlled.",
+      "If the line collapses, the movement loses impact."
+    ],
+    "duration_cues": [
+      "The position should breathe long enough to register before exiting."
+    ],
+    "coaching_cues": [
+      "Open the line before the peak rather than after it.",
+      "Keep the edge broad and confident through the hold."
+    ]
+  },
+  {
+    "id": "spread_eagle",
+    "title": "Spread Eagle",
+    "category": "transition",
+    "aliases": ["spread eagle"],
+    "summary": "A spread eagle is a wide edge-based transitional or highlight movement that depends on line and edge continuity.",
+    "timing_cues": [
+      "The most open shape should align with the phrase highlight.",
+      "A late opening weakens the intended emphasis."
+    ],
+    "stability_cues": [
+      "Edge security matters more than forcing a bigger shape.",
+      "Unclear edge control reduces visual confidence."
+    ],
+    "duration_cues": [
+      "Too brief and it reads like a pass-through rather than a highlight."
+    ],
+    "coaching_cues": [
+      "Let the shape open before the musical crest.",
+      "Prioritize clean edge continuation."
+    ]
+  },
+  {
+    "id": "lunge",
+    "title": "Lunge",
+    "category": "transition",
+    "aliases": ["lunge", "deep lunge"],
+    "summary": "A lunge is a dramatic low transitional move that depends on line clarity, glide control, and a convincing held shape.",
+    "timing_cues": [
+      "The drop into the lunge should arrive with the intended phrase emphasis.",
+      "If the lowest shape happens after the accent, the movement can lose impact."
+    ],
+    "stability_cues": [
+      "The front knee, back leg line, and upper-body carriage should stay organized through the glide.",
+      "Wobble in the edge or a collapsing torso weakens the visual authority."
+    ],
+    "duration_cues": [
+      "The line needs enough travel time to read as intentional.",
+      "Too brief and it can feel like a transition blur instead of a highlight."
+    ],
+    "coaching_cues": [
+      "Drop into the lowest line before the phrase peak.",
+      "Keep the back leg extended and the torso calm through the glide."
+    ]
+  },
+  {
+    "id": "cantilever",
+    "title": "Cantilever",
+    "category": "transition",
+    "aliases": ["cantilever"],
+    "summary": "A cantilever is a highly dramatic field move that asks for deep knee bend, strong back control, and confident glide timing.",
+    "timing_cues": [
+      "The deepest line should match the intended musical shock or release point.",
+      "A late drop can make the move feel disconnected from the phrase."
+    ],
+    "stability_cues": [
+      "Because the body line is extreme, edge security and torso control are crucial.",
+      "Any visible loss of control quickly reduces the effect of the movement."
+    ],
+    "duration_cues": [
+      "The move needs enough hold time to register, but not so much that the phrase loses momentum."
+    ],
+    "coaching_cues": [
+      "Enter the deepest line with confidence rather than gradually collapsing into it.",
+      "Protect the glide and body tension while holding the shape."
+    ]
+  },
+  {
+    "id": "three_turns",
+    "title": "Three Turns",
+    "category": "turns",
+    "aliases": ["three turn", "three turns"],
+    "summary": "Three turns are foundational directional changes that should stay rhythmically clear and controlled.",
+    "timing_cues": [
+      "The turns should speak with the beat if used inside a rhythmic phrase.",
+      "Late or blurred turns weaken the footwork texture."
+    ],
+    "stability_cues": [
+      "The body should stay organized through the change of direction.",
+      "Extra upper-body noise can make the turn look messy."
+    ],
+    "duration_cues": [
+      "The turn rhythm should remain consistent across the phrase."
+    ],
+    "coaching_cues": [
+      "Let the turn happen on the beat, not after it.",
+      "Keep the torso quieter through the directional change."
+    ]
+  },
+  {
+    "id": "bracket",
+    "title": "Bracket",
+    "category": "turns",
+    "aliases": ["bracket", "bracket turn", "brackets"],
+    "summary": "A bracket is a more demanding one-foot turn that asks for edge clarity and calm upper-body organization through the directional change.",
+    "timing_cues": [
+      "The turn should arrive crisply with the phrase instead of dragging after it.",
+      "If the bracket is late or blurred, the step passage loses sharpness."
+    ],
+    "stability_cues": [
+      "The body should stay controlled while the edge and rotation oppose each other.",
+      "Visible recovery after the turn makes it read less confidently."
+    ],
+    "duration_cues": [
+      "The rhythm around the turn should stay even so the step does not feel labored."
+    ],
+    "coaching_cues": [
+      "Commit to the edge before the turn happens.",
+      "Keep the upper body organized so the turn reads clearly."
+    ]
+  },
+  {
+    "id": "rocker_counter",
+    "title": "Rocker and Counter",
+    "category": "turns",
+    "aliases": ["rocker", "counter", "rocker turn", "counter turn", "rocker and counter", "rocker & counter"],
+    "summary": "Rockers and counters are advanced one-foot turns that rely on edge command, clean directional timing, and visible control through the change.",
+    "timing_cues": [
+      "The directional change should land close to the intended pulse or phrase inflection.",
+      "If the turn happens late, the footwork can feel reactive instead of authored."
+    ],
+    "stability_cues": [
+      "These turns need a stable core and clean edge management more than visible speed.",
+      "A step that looks recovered rather than placed reduces confidence."
+    ],
+    "duration_cues": [
+      "The turn sequence should keep the phrase alive without stretching the rhythm."
+    ],
+    "coaching_cues": [
+      "Prepare the edge earlier so the change of direction arrives on time.",
+      "Stay stacked through the turn instead of correcting after it."
+    ]
+  },
+  {
+    "id": "mohawk",
+    "title": "Mohawk",
+    "category": "turns",
+    "aliases": ["mohawk", "open mohawk", "closed mohawk"],
+    "summary": "A mohawk is a step-turn connection that often drives flow into larger elements or footwork phrases.",
+    "timing_cues": [
+      "The entry and exit of the mohawk should preserve phrase direction.",
+      "A delayed mohawk can make the next element arrive late."
+    ],
+    "stability_cues": [
+      "Clean transfer and edge control make the mohawk look intentional.",
+      "A sloppy transfer can break the movement line."
+    ],
+    "duration_cues": [
+      "It should connect efficiently without becoming hesitant."
+    ],
+    "coaching_cues": [
+      "Use the mohawk to carry flow, not pause it.",
+      "Keep the weight transfer clear and quick."
+    ]
+  },
+  {
+    "id": "choctaw",
+    "title": "Choctaw",
+    "category": "turns",
+    "aliases": ["choctaw"],
+    "summary": "A choctaw changes foot and edge in a more demanding way and should stay rhythmically clear inside step passages.",
+    "timing_cues": [
+      "The directional shift should arrive clearly with the phrase.",
+      "A late choctaw can blur the rhythm of the sequence."
+    ],
+    "stability_cues": [
+      "Body organization through the edge change is crucial.",
+      "If the step looks recovered instead of planned, the phrase loses confidence."
+    ],
+    "duration_cues": [
+      "The change should be quick enough to preserve rhythm."
+    ],
+    "coaching_cues": [
+      "Keep the change of edge decisive.",
+      "Do not let the directional shift lag behind the rhythm."
+    ]
+  },
+  {
+    "id": "twizzles",
+    "title": "Twizzles",
+    "category": "turns",
+    "aliases": ["twizzle", "twizzles"],
+    "summary": "Twizzles are traveling rotational steps that need rhythmic sharpness and upper-body control.",
+    "timing_cues": [
+      "The first twizzle should arrive with a clear pulse.",
+      "Delayed initiation weakens the rhythmic effect."
+    ],
+    "stability_cues": [
+      "Axis control and consistent body line keep twizzles readable.",
+      "Travel without control makes the sequence look rushed."
+    ],
+    "duration_cues": [
+      "The turns should complete cleanly before the next phrase shift."
+    ],
+    "coaching_cues": [
+      "Start the first rotation on the pulse.",
+      "Keep the body stacked while traveling."
+    ]
+  },
+  {
+    "id": "final_pose",
+    "title": "Final Pose",
+    "category": "pose",
+    "aliases": ["final pose", "ending pose", "closing pose"],
+    "summary": "A final pose should resolve with the end of the phrase and hold long enough for the finish to register.",
+    "timing_cues": [
+      "The pose should land at or just before the musical ending, not after it.",
+      "Reaching the pose late can weaken the final effect."
+    ],
+    "stability_cues": [
+      "Stillness and line clarity matter more than movement intensity here.",
+      "A restless ending makes the finish feel incomplete."
+    ],
+    "duration_cues": [
+      "The ending shape should be held long enough to read as intentional."
+    ],
+    "coaching_cues": [
+      "Arrive into the pose before the sound fully resolves.",
+      "Hold the final stillness rather than releasing early."
+    ]
+  }
+]

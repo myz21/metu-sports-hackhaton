@@ -1,0 +1,32 @@
+{
+  "planned_elements": [
+    {
+      "name": "Edge Transition",
+      "type": "transition",
+      "start_time": 8.0,
+      "end_time": 15.0,
+      "music_peak_time": 11.0
+    },
+    {
+      "name": "Single Salchow",
+      "type": "jump",
+      "start_time": 34.0,
+      "end_time": 39.0,
+      "music_peak_time": 35.0
+    },
+    {
+      "name": "Sit Spin",
+      "type": "spin",
+      "start_time": 55.0,
+      "end_time": 61.0,
+      "music_peak_time": 55.0
+    },
+    {
+      "name": "Final Pose",
+      "type": "pose",
+      "start_time": 117.0,
+      "end_time": 120.0,
+      "music_peak_time": 118.5
+    }
+  ]
+}
