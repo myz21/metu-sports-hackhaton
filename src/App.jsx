@@ -27,6 +27,27 @@ const movementPreviewMap = {
   "One Foot Glide": "/media/movements/one-foot-glide.mp4",
   "Two Foot Glide": "/media/movements/two-foot-glide.mp4",
 };
+const jumpPreviewFallbackNames = new Set(["Axel", "Salchow", "Loop", "Toe Loop", "Flip", "Lutz"]);
+const spinPreviewFallbackNames = new Set([
+  "Sit Spin",
+  "Camel Spin",
+  "Upright Spin",
+  "Scratch Spin",
+  "Layback Spin",
+  "Biellmann",
+  "Biellmann Spin",
+  "Final Pose",
+]);
+const glidePreviewFallbackNames = new Set([
+  "Spiral",
+  "One Foot Glide",
+  "Two Foot Glide",
+  "Ina Bauer",
+  "Spread Eagle",
+  "Lunge",
+  "Cantilever",
+  "Twizzle",
+]);
 const demoOffsetPattern = [0.12, -0.18, 0.24, -0.11, 0.08, 0.19, -0.14, 0.15, -0.09, 0.21];
 const demoStabilityPattern = [94, 91, 89, 92, 90, 87, 93, 88, 90, 86];
 const demoAdherencePattern = [95, 90, 88, 92, 89, 86, 91, 87, 90, 85];
@@ -44,6 +65,14 @@ function getTimingBadge(status) {
   if (status === "On Time") return "bg-teal-50 text-teal-600 border-teal-100";
   if (status === "Late") return "bg-amber-50 text-amber-600 border-amber-100";
   return "bg-purple-50 text-purple-600 border-purple-100";
+}
+
+function getMovementPreviewSrc(name) {
+  if (movementPreviewMap[name]) return movementPreviewMap[name];
+  if (jumpPreviewFallbackNames.has(name)) return movementPreviewMap.Axel;
+  if (spinPreviewFallbackNames.has(name)) return movementPreviewMap["Camel Spin"];
+  if (glidePreviewFallbackNames.has(name)) return movementPreviewMap.Spiral;
+  return "";
 }
 
 function getMovementFeedback(name, status) {
@@ -1538,14 +1567,14 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                           <div className="absolute inset-0 bg-radial-gradient from-sky-100/10 via-transparent to-transparent"></div>
 
                           {/* Active movement preview */}
-                          {movementPreviewMap[currentCue.name] ? (
+                          {getMovementPreviewSrc(currentCue.name) ? (
                             <div className="relative w-full max-w-[250px] overflow-hidden rounded-[24px] border border-sky-100 bg-white/75 shadow-[0_18px_40px_rgba(56,189,248,0.12)]">
                               {isPlaying ? (
                                 <div className="pointer-events-none absolute inset-0 z-10 rounded-[24px] ring-2 ring-sky-300/40 ring-offset-2 ring-offset-white/60" />
                               ) : null}
                               <video
                                 key={currentCue.name}
-                                src={movementPreviewMap[currentCue.name]}
+                                src={getMovementPreviewSrc(currentCue.name)}
                                 autoPlay
                                 loop
                                 muted
