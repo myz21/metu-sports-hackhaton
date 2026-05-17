@@ -132,6 +132,25 @@ function buildDemoReviewRows(cues) {
   });
 }
 
+function buildDemoMusicProgram(cues) {
+  const zones = [
+    "Acilis Akisi",
+    "Yukselis",
+    "Gecis Hatti",
+    "Merkez Vurgusu",
+    "Climax",
+    "Cikis",
+    "Final Hatti",
+  ];
+
+  return cues.map((cue, index) => ({
+    time: Number(cue.time || 0),
+    name: cue.element_name,
+    zone: zones[index % zones.length],
+    cue: cue.text,
+  }));
+}
+
 function GoogleMark() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 flex-none">
@@ -1062,13 +1081,9 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   ];
 
   // Energy-aware planned program
-  const plannedProgram = realChoreoPlan ? realChoreoPlan.routine : [
-    { time: 5, name: "Spiral", zone: "Sakin Giriş", cue: "Dış kenarını koru, süzül." },
-    { time: 22, name: "Salchow", zone: "İlk Yükseliş", cue: "Ritime odaklan... Sıçra!" },
-    { time: 54, name: "Twizzle", zone: "Ritmik Bölüm", cue: "Dönüş hızını koru... Ritimle ak." },
-    { time: 82, name: "Camel Spin", zone: "Climax (Peak)", cue: "Climax! Vücudunu gergin tut, merkezi koru." },
-    { time: 105, name: "Final Pose", zone: "Final Vurgusu", cue: "Harika bitiriş! Duruşunu sabitle ve gülümse." }
-  ];
+  const plannedProgram = realChoreoPlan
+    ? realChoreoPlan.routine
+    : buildDemoMusicProgram(demoCueTimeline);
 
   // Active cue index based on current playback time
   const getActiveCueIndex = () => {
@@ -1610,7 +1625,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                         <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 flex flex-col justify-center relative overflow-hidden min-h-[220px]">
                           <div className="absolute top-3 left-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Scrolling Lyrics Sync</div>
 
-                          <div className="flex flex-col gap-5 relative z-10 transition-transform duration-500">
+                          <div className="flex flex-col gap-5 pt-8 relative z-10 transition-transform duration-500">
                             {plannedProgram.map((item, idx) => {
                               const isCueActive = idx === activeCueIdx;
                               const isCuePast = idx < activeCueIdx;
