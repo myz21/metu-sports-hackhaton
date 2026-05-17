@@ -408,6 +408,7 @@ function OverviewScreen({ onNavigate }) {
   
   // Profile States
   const [athleteLevel, setAthleteLevel] = useState("Junior");
+  const [selectedMovements, setSelectedMovements] = useState(["Axel", "Salchow", "Camel Spin", "Spiral", "Twizzle", "Final Pose"]);
   const [skateChoice, setSkateChoice] = useState("edea");
   const [showProfileToast, setShowProfileToast] = useState(false);
   
@@ -646,23 +647,25 @@ function OverviewScreen({ onNavigate }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">Sporcu Seviyesi</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["Novice", "Junior", "Senior"].map((lvl) => (
-                      <button
-                        key={lvl}
-                        type="button"
-                        onClick={() => setAthleteLevel(lvl)}
-                        className={`h-11 rounded-xl text-xs font-bold border transition ${
-                          athleteLevel === lvl 
-                            ? "bg-sky-50 border-sky-300 text-sky-600 shadow-sm" 
-                            : "bg-white/80 border-slate-200 text-slate-600 hover:border-slate-300"
-                        }`}
-                      >
-                        {lvl}
-                      </button>
-                    ))}
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">Seçilen Hareketler ({selectedMovements.length})</label>
+                  <div className="flex flex-wrap gap-1.5 p-3 rounded-xl border border-slate-100 bg-slate-50/50 max-h-[140px] overflow-y-auto">
+                    {selectedMovements.length === 0 ? (
+                      <span className="text-xs text-slate-400 font-medium">Henüz hareket seçilmedi.</span>
+                    ) : (
+                      selectedMovements.map((mv) => (
+                        <span key={mv} className="text-[10px] font-bold text-sky-600 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                          ✓ {mv}
+                        </span>
+                      ))
+                    )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("catalog")}
+                    className="w-full h-10 rounded-xl text-xs font-bold text-sky-600 bg-sky-50/50 hover:bg-sky-50 border border-sky-100/50 hover:border-sky-200 transition flex items-center justify-center gap-1.5 mt-2"
+                  >
+                    📖 Kataloğu Ziyaret Et & Hareketlerini Seç
+                  </button>
                 </div>
 
                 <div className="space-y-2">
@@ -911,29 +914,38 @@ function OverviewScreen({ onNavigate }) {
                         </div>
 
                         <div className="space-y-2">
-                          <span className="text-xs font-semibold text-slate-500 block">Düzey / Seviye</span>
-                          <span className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg inline-block w-full">{athleteLevel} Seviye Kuralları</span>
+                          <span className="text-xs font-semibold text-slate-500 block">Program Seviyesi</span>
+                          <span className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg inline-block w-full">
+                            {selectedMovements.length <= 3 ? "Başlangıç (Novice)" : selectedMovements.length <= 6 ? "Orta (Junior)" : "İleri (Senior)"} Seviyesi ({selectedMovements.length} Hareket Aktif)
+                          </span>
                         </div>
                       </div>
 
-                      {/* Doable movements selection */}
+                      {/* Doable movements selection from movement dictionary */}
                       <div className="space-y-2">
-                        <span className="text-xs font-semibold text-slate-500 block">Koreografide Kullanılabilecek Hareketler</span>
-                        <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto pr-1">
-                          {Object.keys(checkedMovements).map((mName) => (
-                            <button
-                              key={mName}
-                              type="button"
-                              onClick={() => setCheckedMovements(prev => ({ ...prev, [mName]: !prev[mName] }))}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
-                                checkedMovements[mName]
-                                  ? "bg-purple-50 border-purple-200 text-purple-600"
-                                  : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
-                              }`}
-                            >
-                              {mName}
-                            </button>
-                          ))}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-semibold text-slate-500">Planlama İçin Seçilen Hareketler</span>
+                          <button 
+                            type="button" 
+                            onClick={() => setActiveTab("catalog")}
+                            className="text-[10px] font-bold text-sky-600 hover:underline"
+                          >
+                            Kataloğu Düzenle ↗
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 p-3 rounded-xl border border-slate-100 bg-slate-50/50 max-h-[100px] overflow-y-auto pr-1">
+                          {selectedMovements.length === 0 ? (
+                            <span className="text-xs text-slate-400 font-medium w-full text-center py-2">Henüz katalogdan hareket seçmediniz. Kataloğa gidip hareketleri seçin!</span>
+                          ) : (
+                            selectedMovements.map((mName) => (
+                              <span
+                                key={mName}
+                                className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-purple-50 border border-purple-100 text-purple-600"
+                              >
+                                {mName}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </div>
 
@@ -1355,6 +1367,17 @@ function OverviewScreen({ onNavigate }) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Çıktı Bilgi Notu */}
+                    <div className="rounded-2xl border border-amber-100 bg-amber-50/50 p-4 shadow-sm flex gap-3 text-xs text-amber-700 leading-relaxed font-semibold">
+                      <div className="text-base">ℹ️</div>
+                      <div>
+                        <h5 className="font-bold text-amber-900 uppercase tracking-wider mb-1">Önemli Çıktı Bilgi Notu</h5>
+                        <p className="font-medium text-[11px] leading-relaxed">
+                          Bu video analizi çıktısı ve zamanlama değerleri, SkateSync AI motorunun Librosa tabanlı tempo eşleme algoritmaları ve MediaPipe 3D iskelet landmark tespiti kullanılarak otomatik olarak hesaplanmıştır. Önerilen zamanlama düzeltmeleri (offset) ve kararlılık puanları eğitim/antrenman geliştirme amaçlı tavsiyelerdir ve resmi ISU (International Skating Union) hakem kararlarının yerine geçmez. Performansınızı zenginleştirmek için birer destekçi rehber olarak değerlendirilmelidir.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -1379,17 +1402,38 @@ function OverviewScreen({ onNavigate }) {
                   <h4 className="text-sm font-extrabold text-sky-600 uppercase tracking-widest border-b border-slate-50 pb-2">{cat.name}</h4>
                   
                   <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
-                    {cat.items.map((item) => (
-                      <div key={item.name} className="p-3 rounded-xl bg-slate-50 border border-slate-100/50 flex flex-col gap-1 transition hover:bg-slate-100/30">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-800">{item.name}</span>
-                          <span className="text-[9px] font-bold text-teal-600 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
-                            AI Bilinen
-                          </span>
+                    {cat.items.map((item) => {
+                      const isSelected = selectedMovements.includes(item.name);
+                      return (
+                        <div 
+                          key={item.name} 
+                          onClick={() => {
+                            setSelectedMovements(prev => 
+                              prev.includes(item.name) 
+                                ? prev.filter(x => x !== item.name) 
+                                : [...prev, item.name]
+                            );
+                          }}
+                          className={`p-3 rounded-xl border cursor-pointer flex flex-col gap-1 transition-all duration-200 ${
+                            isSelected 
+                              ? "bg-teal-50/60 border-teal-200 hover:bg-teal-50" 
+                              : "bg-slate-50 border-slate-100/50 hover:bg-slate-100/30"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className={`text-xs font-bold ${isSelected ? "text-teal-800" : "text-slate-800"}`}>{item.name}</span>
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${
+                              isSelected 
+                                ? "text-teal-600 bg-teal-50 border-teal-100" 
+                                : "text-slate-400 bg-slate-50 border-slate-100"
+                            }`}>
+                              {isSelected ? "✓ Seçildi" : "Katalogda"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 leading-5 mt-1 font-medium">{item.desc}</p>
                         </div>
-                        <p className="text-[11px] text-slate-500 leading-5 mt-1 font-medium">{item.desc}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
