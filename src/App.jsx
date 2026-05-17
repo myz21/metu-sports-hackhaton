@@ -86,8 +86,8 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
         {activeUser ? (
           <>
             <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border ${theme === "dark"
-                ? "border-slate-700 bg-slate-800/50 text-slate-300"
-                : "border-sky-100 bg-sky-50/50 text-slate-700"
+              ? "border-slate-700 bg-slate-800/50 text-slate-300"
+              : "border-sky-100 bg-sky-50/50 text-slate-700"
               }`}>
               <div className="h-6.5 w-6.5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold">
                 {activeUser.displayName ? activeUser.displayName[0].toUpperCase() : "S"}
@@ -98,8 +98,8 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
               type="button"
               onClick={onLogout}
               className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${theme === "dark"
-                  ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
+                : "border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                 }`}
             >
               Çıkış
@@ -111,8 +111,8 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
               type="button"
               onClick={() => onNavigate("login")}
               className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${theme === "dark"
-                  ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
+                ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
+                : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
                 }`}
             >
               Login
@@ -121,8 +121,8 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
               type="button"
               onClick={() => onNavigate("overview")}
               className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${theme === "dark"
-                  ? "bg-slate-100 text-slate-900 hover:bg-white"
-                  : "bg-slate-800 text-white hover:bg-slate-700"
+                ? "bg-slate-100 text-slate-900 hover:bg-white"
+                : "bg-slate-800 text-white hover:bg-slate-700"
                 }`}
             >
               Get Started
@@ -561,12 +561,10 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
 
 function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
-<<<<<<< HEAD
-=======
   const musicInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const [uploadedVideoName, setUploadedVideoName] = useState("");
-  
+
   const [openaiApiKey, setOpenaiApiKey] = useState(() => {
     return localStorage.getItem("skatesync_openai_api_key") || import.meta.env.VITE_OPENAI_API_KEY || "";
   });
@@ -578,7 +576,6 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setOpenaiApiKey(key);
     localStorage.setItem("skatesync_openai_api_key", key);
   };
->>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
 
   // Profile States
   const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
@@ -730,16 +727,12 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setTimeout(async () => {
       setIsPlanGenerating(false);
       setIsPlanGenerated(true);
-<<<<<<< HEAD
-
-=======
       if (realPlan) {
         setRealChoreoPlan(realPlan);
       } else {
         setRealChoreoPlan(null);
       }
-      
->>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
+
       if (activeUser) {
         try {
           const newChoreo = {
@@ -779,7 +772,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     let feedback = "";
     let score = "94%";
     let grade = "A";
-    
+
     if (openaiApiKey) {
       try {
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -818,16 +811,12 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     setTimeout(async () => {
       setIsAnalyzing(false);
       setIsAnalysisFinished(true);
-<<<<<<< HEAD
-
-=======
       if (feedback) {
         setRealCoachFeedback(feedback);
       } else {
         setRealCoachFeedback("");
       }
-      
->>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
+
       if (activeUser) {
         try {
           const newAnalysis = {
@@ -966,8 +955,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${activeTab === tab.id
-                    ? "bg-white text-sky-600 shadow-md border border-slate-200/30 scale-[1.02]"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
+                  ? "bg-white text-sky-600 shadow-md border border-slate-200/30 scale-[1.02]"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
                   }`}
               >
                 {tab.label}
@@ -1160,7 +1149,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   {showKeyInput ? "Gizle" : "Düzenle"}
                 </button>
               </div>
-              
+
               {(showKeyInput || !openaiApiKey) && (
                 <div className="space-y-2 pt-2 border-t border-slate-200/50 animate-rise">
                   <p className="text-xs text-slate-500 leading-5">
@@ -1440,10 +1429,10 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                                 <div
                                   key={idx}
                                   className={`flex items-start gap-4 transition-all duration-300 ${isCueActive
-                                      ? "opacity-100 scale-102 font-semibold"
-                                      : isCuePast
-                                        ? "opacity-30 line-through"
-                                        : "opacity-40"
+                                    ? "opacity-100 scale-102 font-semibold"
+                                    : isCuePast
+                                      ? "opacity-30 line-through"
+                                      : "opacity-40"
                                     }`}
                                 >
                                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 border ${isCueActive ? "bg-purple-100 border-purple-200 text-purple-600" : "bg-slate-100 border-slate-200 text-slate-500"
@@ -1582,7 +1571,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   {showKeyInput ? "Gizle" : "Düzenle"}
                 </button>
               </div>
-              
+
               {(showKeyInput || !openaiApiKey) && (
                 <div className="space-y-2 pt-2 border-t border-slate-200/50 animate-rise">
                   <p className="text-xs text-slate-500 leading-5">
@@ -1680,8 +1669,8 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                       type="button"
                       onClick={() => setReviewMode(mode.id)}
                       className={`p-4 rounded-2xl border text-left flex flex-col gap-2 transition-all ${reviewMode === mode.id
-                          ? "bg-sky-50 border-sky-300 shadow-md scale-[1.01]"
-                          : "bg-white border-slate-200 hover:border-slate-300"
+                        ? "bg-sky-50 border-sky-300 shadow-md scale-[1.01]"
+                        : "bg-white border-slate-200 hover:border-slate-300"
                         }`}
                     >
                       <span className={`text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-xl self-start ${reviewMode === mode.id ? "bg-sky-100 text-sky-600" : "bg-slate-100 text-slate-500"
@@ -1881,15 +1870,15 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                             );
                           }}
                           className={`p-3 rounded-xl border cursor-pointer flex flex-col gap-1 transition-all duration-200 ${isSelected
-                              ? "bg-teal-50/60 border-teal-200 hover:bg-teal-50"
-                              : "bg-slate-50 border-slate-100/50 hover:bg-slate-100/30"
+                            ? "bg-teal-50/60 border-teal-200 hover:bg-teal-50"
+                            : "bg-slate-50 border-slate-100/50 hover:bg-slate-100/30"
                             }`}
                         >
                           <div className="flex justify-between items-center">
                             <span className={`text-xs font-bold ${isSelected ? "text-teal-800" : "text-slate-800"}`}>{item.name}</span>
                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${isSelected
-                                ? "text-teal-600 bg-teal-50 border-teal-100"
-                                : "text-slate-400 bg-slate-50 border-slate-100"
+                              ? "text-teal-600 bg-teal-50 border-teal-100"
+                              : "text-slate-400 bg-slate-50 border-slate-100"
                               }`}>
                               {isSelected ? "✓ Seçildi" : "Katalogda"}
                             </span>
