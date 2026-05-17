@@ -54,6 +54,22 @@ def _convert_to_wav(input_path: str, output_path: str) -> str:
     return output_path
 
 
+def export_cue_texts(cues: list[dict], output_path: str) -> str:
+    lines = []
+    for cue in cues:
+        lines.append(f"[{cue['time']:.3f}s] {cue['text']}")
+    with open(output_path, "w", encoding="utf-8") as file:
+        file.write("\n".join(lines) + "\n")
+    return output_path
+
+
+def export_cue_json(cues: list[dict], output_path: str) -> str:
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(cues, file, ensure_ascii=False, indent=2)
+        file.write("\n")
+    return output_path
+
+
 def mix_audio_session(
     music_path: str,
     cue_audio_files: list[dict],
@@ -86,6 +102,8 @@ def mix_audio_session(
 
 async def process_voice_coaching(audio_path, session_id, planned_program=None, output_path=None):
     output_path = output_path or os.path.join(VOICE_DIR, f"output_{session_id}.mp3")
+    text_output_path = os.path.splitext(output_path)[0] + ".txt"
+    json_output_path = os.path.splitext(output_path)[0] + ".json"
     print(f"--- Starting Voice Coaching Pipeline for {session_id} ---")
 
     analyzer = AudioAnalyzer(audio_path)
@@ -99,6 +117,10 @@ async def process_voice_coaching(audio_path, session_id, planned_program=None, o
     cues = engine.generate_cues()
     print("Gemini cue JSON:")
     print(json.dumps(cues, ensure_ascii=False, indent=2))
+    export_cue_texts(cues, text_output_path)
+    export_cue_json(cues, json_output_path)
+    print(f"Text script saved: {text_output_path}")
+    print(f"JSON cues saved: {json_output_path}")
 
     tts = _select_tts_engine()
     cue_audio_files = await tts.generate_cue_audios(cues)
@@ -118,6 +140,8 @@ async def process_voice_coaching(audio_path, session_id, planned_program=None, o
         "cues": cues,
         "cue_audio_files": cue_audio_files,
         "output_path": output_path,
+        "text_output_path": text_output_path,
+        "json_output_path": json_output_path,
     }
 
 

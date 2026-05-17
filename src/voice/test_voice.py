@@ -69,6 +69,8 @@ async def main():
     print(f"   ✅ Duration match: {'YES' if abs(output_duration - audio_data['duration']) < 1.5 else 'NO'}")
     print(f"   ✅ File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
     print(f"   ✅ Output path: {OUTPUT_PATH}")
+    print(f"   ✅ Text path: {result['text_output_path']}")
+    print(f"   ✅ JSON path: {result['json_output_path']}")
 
     print("\n" + "=" * 60)
     print("🎯 Pipeline completed successfully!")
