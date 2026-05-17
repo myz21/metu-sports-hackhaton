@@ -232,6 +232,51 @@ export const librarySections = [
   },
 ];
 
+export const movementReferenceClips = [
+  {
+    name: "Axel",
+    category: "Jump",
+    src: "/media/movements/axel.mp4",
+    note: "Featured jump reference for forward takeoff timing and landing flow.",
+  },
+  {
+    name: "Camel Spin",
+    category: "Spin",
+    src: "/media/movements/camel-spin.mp4",
+    note: "Line, axis, and centered rotation reference for longer spin shapes.",
+  },
+  {
+    name: "One Foot Glide",
+    category: "Transition",
+    src: "/media/movements/one-foot-glide.mp4",
+    note: "Basic edge control and balance reference for clean single-foot travel.",
+  },
+  {
+    name: "Spiral",
+    category: "Transition",
+    src: "/media/movements/spiral.mp4",
+    note: "Extension and line reference for longer phrase-driven glide moments.",
+  },
+  {
+    name: "Two Foot Glide",
+    category: "Foundation",
+    src: "/media/movements/two-foot-glide.mp4",
+    note: "Starter balance reference used to support early movement understanding.",
+  },
+];
+
+export const movementKnowledgeNote = {
+  eyebrow: "Knowledge Support",
+  title: "Visual references for the movement vocabulary",
+  detail:
+    "These clips live in the library as athlete-facing references, while the AI movement knowledge remains a separate structured glossary. Together they help keep movement naming and review language aligned.",
+  bullets: [
+    "Library holds the actual videos athletes can watch.",
+    "Knowledge holds the movement definitions the product refers to.",
+    "This MVP includes 5 featured clips as a starter reference set.",
+  ],
+};
+
 export const profile = {
   athleteName: "Mira Aydin",
   athleteLevel: "Junior Elite",
