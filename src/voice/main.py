@@ -17,6 +17,24 @@ from .program_planner import ProgramPlanner, DEFAULT_PLANNER_MODEL
 from .tts_engine import DEFAULT_TTS_MODEL, DEFAULT_TTS_VOICE, TTSEngine
 
 
+def project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def resolve_output_root(
+    output_dir: str | Path | None,
+    *,
+    session_id: str,
+) -> Path:
+    if output_dir:
+        candidate = Path(output_dir)
+        if candidate.is_absolute():
+            return candidate
+        return project_root() / candidate
+
+    return project_root() / "data" / "runtime" / "voice" / session_id
+
+
 def load_planned_elements(plan_path: str | Path) -> list[dict[str, Any]]:
     payload = json.loads(Path(plan_path).read_text(encoding="utf-8-sig"))
     if isinstance(payload, dict) and "planned_elements" in payload:
@@ -94,7 +112,7 @@ async def process_voice_session(
     knowledge_path: str | None = None,
 ) -> dict[str, Any]:
     session_id = session_id or datetime.utcnow().strftime("voice_%Y%m%d_%H%M%S")
-    output_root = Path(output_dir) if output_dir else Path("src/voice/output") / session_id
+    output_root = resolve_output_root(output_dir, session_id=session_id)
     output_root.mkdir(parents=True, exist_ok=True)
 
     analyzer = AudioAnalyzer(audio_path)
