@@ -209,6 +209,28 @@ Opsiyonel LLM aciklamasi:
 python -m src.vision "video.mp4" "plan.json" --quality high --include-llm-feedback --language Turkish
 ```
 
+## Frontend icin okunacak ana alanlar
+
+Vision review JSON icinde frontend'in ilk asamada odaklanmasi gereken alanlar:
+
+- `overall.overall_match_score`
+- `overall.average_start_score`
+- `overall.average_duration_score`
+- `overall.average_stability_score`
+- `overall.average_music_alignment_score`
+- `elements[]`
+  - `name`
+  - `scores.execution_match_score`
+  - `timing_comparison`
+  - `local_feedback`
+
+Frontend'in bu branch'te teknik detay olarak kullanmamasI gereken alanlar:
+
+- test dosyalari
+- `examples/`
+- workflow diagram varyasyonlari
+- knowledge corpus'un tum ham JSON detaylari
+
 ## Bilinen sinirlar
 
 - Sistem, planned timeline kalitesine bagimlidir.
