@@ -543,7 +543,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
               {[
                 ["Music planning", "AI reads the shape of the track."],
                 ["Clear vocabulary", "Athletes see familiar movement names."],
-                ["Simple review", "Fast feedback after each session."],
+                ["Video analysis", "Frame-aware feedback on each session video."],
               ].map(([title, text]) => (
                 <div key={title} className="rounded-[22px] border border-slate-100 bg-slate-50 px-4 py-4">
                   <p className="text-sm font-semibold text-slate-900">{title}</p>
@@ -566,7 +566,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
             },
             {
               title: "Review the skate",
-              text: "Compare the session video against the planned timing.",
+              text: "Video analysis compares the session against planned timing.",
             },
           ].map((item) => (
             <div key={item.title} className="rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.05)]">
@@ -595,7 +595,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
                 name: "Standard",
                 price: "$20",
                 desc: "Perfect for daily routines.",
-                features: ["Unlimited fast reviews", "Low latency scoring", "Basic voice coaching"],
+                features: ["Unlimited fast reviews", "Video analysis reports", "Basic voice coaching"],
                 btnText: "Get Standard",
                 btnStyle: "bg-slate-800 text-white hover:bg-slate-700",
                 highlight: true
@@ -604,7 +604,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
                 name: "Pro Coach",
                 price: "$50",
                 desc: "Detailed, high-quality analysis.",
-                features: ["Detailed coach-style reviews", "High quality (more frames)", "Scrolling lyrics sync"],
+                features: ["Detailed coach-style reviews", "High quality (more frames)", "Advanced video analysis"],
                 btnText: "Get Pro",
                 btnStyle: "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
               }
