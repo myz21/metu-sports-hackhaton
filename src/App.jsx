@@ -6,6 +6,8 @@ const pageBackground = new URL(
   "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg",
   import.meta.url,
 ).href;
+const brandLogo = new URL("../skatesync-logo-Photoroom.png", import.meta.url).href;
+const landingFigure = new URL("../skatesync-landing.png", import.meta.url).href;
 
 function GoogleMark() {
   return (
@@ -46,13 +48,21 @@ function PasswordIcon() {
 
 function LogoMark() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_#dff4fb_0%,_#f8fbfd_48%,_#d9eef8_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
-        <div className="h-6 w-6 rounded-full border border-sky-200 bg-[radial-gradient(circle_at_30%_30%,_#ffffff_0%,_#d2eef8_70%,_#a7d6eb_100%)]" />
+    <div className="flex items-center gap-4">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center sm:h-[5.5rem] sm:w-[5.5rem]">
+        <img
+          src={brandLogo}
+          alt="SkateSync AI logo"
+          className="h-full w-full object-contain object-center scale-[2.8] drop-shadow-sm"
+        />
       </div>
-      <div>
-        <p className="font-display text-xl font-semibold text-slate-900">SkateSync AI</p>
-        <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Precision in Motion</p>
+      <div className="min-w-0">
+        <p className="font-display text-[1.55rem] font-semibold leading-none text-slate-900 sm:text-[1.8rem]">
+          SkateSync AI
+        </p>
+        <p className="mt-2 text-[0.68rem] uppercase tracking-[0.42em] text-slate-400 sm:text-xs">
+          Precision in Motion
+        </p>
       </div>
     </div>
   );
@@ -222,18 +232,43 @@ function LandingScreen({ onNavigate }) {
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-14 pt-4 sm:px-6 lg:gap-14 lg:pb-20 lg:pt-8">
         <section className="grid items-center gap-8 rounded-[32px] border border-slate-100 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] lg:grid-cols-[1.05fr_0.95fr] lg:p-8">
-          <div className="relative min-h-[320px] overflow-hidden rounded-[28px] bg-[#f8fbfc] sm:min-h-[380px]">
+          <div className="relative min-h-[320px] overflow-hidden rounded-[28px] border border-sky-100/80 bg-[linear-gradient(145deg,_#eef8fc_0%,_#f8fcfe_48%,_#e7f4fb_100%)] sm:min-h-[380px]">
+            <div className="absolute left-[-10%] top-[-15%] h-44 w-44 rounded-full bg-sky-200/45 blur-3xl" />
+            <div className="absolute bottom-[-20%] right-[-5%] h-52 w-52 rounded-full bg-cyan-200/40 blur-3xl" />
             <img
               src="/login-background.png"
               alt="SkateSync AI abstract motion background"
-              className="absolute inset-0 h-full w-full object-cover opacity-95"
+              className="absolute inset-0 h-full w-full object-cover opacity-35 mix-blend-screen"
             />
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent" />
-            <div className="absolute bottom-8 left-8">
-              <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Precision in motion</p>
-              <p className="mt-3 font-display text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Figure &amp; Flow
-              </p>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,_rgba(255,255,255,0.96)_0%,_rgba(255,255,255,0.68)_38%,_rgba(240,249,255,0.18)_100%)]" />
+            <div className="absolute inset-y-0 right-0 w-[58%] bg-gradient-to-l from-sky-100/35 to-transparent" />
+
+            <div className="absolute inset-x-6 top-6 z-30 flex items-start justify-between">
+              <div className="rounded-full border border-white/80 bg-white/65 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.34em] text-sky-700/80 shadow-[0_10px_24px_rgba(56,189,248,0.1)] backdrop-blur">
+                Precision in motion
+              </div>
+            </div>
+            
+            <div className="absolute inset-0 z-10 flex items-center justify-start pt-8">
+              <img
+                src={landingFigure}
+                alt="Figure skater in motion"
+                className="h-[94%] max-h-[460px] w-auto object-contain -translate-x-8 sm:-translate-x-16 drop-shadow-[0_24px_40px_rgba(14,116,144,0.22)]"
+              />
+            </div>
+            
+            <div className="absolute bottom-6 right-[6%] z-30 flex w-[48%] max-w-[260px] flex-col justify-end">
+              <div className="hidden w-full rounded-[26px] border border-white/75 bg-white/52 px-5 py-4 shadow-[0_20px_40px_rgba(14,116,144,0.08)] backdrop-blur-md sm:block mb-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Figure study
+                </p>
+                <p className="mt-2 text-sm leading-7 text-slate-600">
+                  Elegant balance, clean lines, and a lighter visual rhythm.
+                </p>
+              </div>
+              <h2 className="font-display text-[2.75rem] font-bold leading-[1.05] tracking-tight text-slate-900 drop-shadow-sm sm:text-[3rem]">
+                Figure &<br />Flow
+              </h2>
             </div>
           </div>
 
