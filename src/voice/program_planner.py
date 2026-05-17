@@ -114,19 +114,19 @@ PROGRAM_SCHEMA = {
 }
 
 DEFAULT_DURATIONS = {
-    "jump": 2.0,
-    "spin": 4.5,
-    "turns": 4.0,
-    "sequence": 10.0,
-    "transition": 8.0,
+    "jump": 3.0,
+    "spin": 5.5,
+    "turns": 5.0,
+    "sequence": 7.5,
+    "transition": 6.0,
 }
 
 SEGMENT_WEIGHTS = {
-    "jump": 0.7,
+    "jump": 0.8,
     "spin": 1.0,
     "turns": 0.95,
-    "sequence": 1.45,
-    "transition": 1.3,
+    "sequence": 1.15,
+    "transition": 0.95,
 }
 
 
@@ -185,11 +185,11 @@ class ProgramPlanner:
                             "notes": [
                                 "Use only movement names listed in allowed_movements_by_type.",
                                 "Cover the full music duration from opening to closing.",
-                                "Think in larger choreography blocks, not in constant move spam.",
+                                "Target medium-fast density, roughly one planned element every 6 to 8 seconds in a 2-minute program.",
                                 "Do not stack jumps and spins back to back without a softer flow, turns, or sequence block between them.",
-                                "Longer expressive moments should usually be transitions, turns, or sequences.",
+                                "Use transitions, turns, and sequences to connect major elements cleanly.",
                                 "Jump windows should stay comparatively short.",
-                                "The program should feel skateable with breathing room, not overloaded.",
+                                "The program should still feel skateable and connected, not random.",
                             ],
                         },
                     },
@@ -325,7 +325,7 @@ def _shape_program_to_blueprint(
     for element in prepared:
         pools.setdefault(str(element["type"]), []).append(str(element["name"]))
 
-    inter_element_gap = 0.45
+    inter_element_gap = 0.25
     total_gap = inter_element_gap * max(0, len(blueprint) - 1)
     usable_duration = max(duration - total_gap, float(len(blueprint)))
     total_weight = sum(SEGMENT_WEIGHTS[element_type] for element_type in blueprint)
@@ -437,18 +437,23 @@ def _trim_element_count(
 def _build_fallback_program(duration: float, element_count: int) -> list[dict[str, Any]]:
     pattern = [
         ("transition", "Spiral"),
-        ("sequence", "Step Sequence"),
+        ("turns", "Three-Turn"),
         ("jump", "Salchow"),
         ("transition", "Spread Eagle"),
         ("spin", "Camel Spin"),
         ("turns", "Twizzle"),
-        ("transition", "Ina Bauer"),
+        ("sequence", "Step Sequence"),
         ("jump", "Loop"),
+        ("transition", "Lunge"),
+        ("spin", "Sit Spin"),
+        ("turns", "Bracket"),
+        ("jump", "Flip"),
+        ("transition", "Ina Bauer"),
         ("spin", "Layback Spin"),
     ]
 
     safe_count = max(1, element_count)
-    slot_length = max(duration / safe_count, 6.0)
+    slot_length = max(duration / safe_count, 4.5)
     plan: list[dict[str, Any]] = []
 
     for index in range(safe_count):
@@ -474,45 +479,30 @@ def _build_macro_blueprint(
     ideal_elements: int,
     prepared: list[dict[str, Any]],
 ) -> list[str]:
-    jump_count = sum(1 for item in prepared if str(item["type"]) == "jump")
-    spin_count = sum(1 for item in prepared if str(item["type"]) == "spin")
-    prefer_second_major = "jump" if jump_count >= spin_count else "spin"
+    if ideal_elements <= 6:
+        return ["transition", "turns", "jump", "transition", "spin", "transition"]
 
-    if ideal_elements <= 5:
-        return ["transition", "sequence", "jump", "spin", "transition"]
-    if ideal_elements == 6:
-        return ["transition", "sequence", "jump", "transition", "spin", "transition"]
-    if ideal_elements == 7:
-        return [
-            "transition",
-            "sequence",
-            "jump",
-            "transition",
-            "spin",
-            "turns",
-            "transition",
-        ]
-    if prefer_second_major == "jump":
-        return [
-            "transition",
-            "sequence",
-            "jump",
-            "transition",
-            "spin",
-            "turns",
-            "jump",
-            "transition",
-        ]
-    return [
-        "transition",
-        "sequence",
+    cycle = [
+        "turns",
         "jump",
         "transition",
         "spin",
+        "transition",
+        "sequence",
+        "transition",
+        "jump",
         "turns",
         "spin",
         "transition",
     ]
+    blueprint = ["transition"]
+    cycle_index = 0
+    while len(blueprint) < max(ideal_elements - 1, 1):
+        blueprint.append(cycle[cycle_index % len(cycle)])
+        cycle_index += 1
+    blueprint = blueprint[: max(ideal_elements - 1, 1)]
+    blueprint.append("transition")
+    return blueprint
 
 
 def _next_name_for_type(
@@ -536,11 +526,11 @@ def _next_name_for_type(
 
 
 def _target_density(duration: float) -> dict[str, int]:
-    if duration < 110:
-        return {"min_elements": 5, "max_elements": 7, "ideal_elements": 6}
-    if duration < 160:
-        return {"min_elements": 6, "max_elements": 8, "ideal_elements": 7}
-    return {"min_elements": 7, "max_elements": 9, "ideal_elements": 8}
+    if duration < 90:
+        return {"min_elements": 9, "max_elements": 12, "ideal_elements": 10}
+    if duration < 145:
+        return {"min_elements": 12, "max_elements": 16, "ideal_elements": 14}
+    return {"min_elements": 14, "max_elements": 18, "ideal_elements": 16}
 
 
 def _build_openai_client(api_key: str | None):

@@ -84,7 +84,7 @@ class ProgramPlannerNormalizationTests(unittest.TestCase):
         }
         self.assertTrue(all(item["name"] in allowed_names for item in normalized))
         self.assertEqual(normalized[0]["name"], "Spiral")
-        self.assertEqual(normalized[1]["name"], "Step Sequence")
+        self.assertEqual(normalized[1]["name"], "Mohawk & Choctaw")
         self.assertEqual(normalized[2]["name"], "Loop")
 
     def test_normalize_planned_elements_avoids_back_to_back_jump_spin_stack(self):

@@ -1,23 +1,6 @@
 import unittest
 
-from src.voice.coaching_engine import CoachingEngine, _select_priority_elements
-
-
-class DummyResponses:
-    def create(self, **kwargs):
-        class Response:
-            output_text = (
-                '{"items": ['
-                '{"element_index": 0, "prep_text": "Merkezi kur", "trigger_text": "Don", "focus_text": "Hatti tut"},'
-                '{"element_index": 1, "prep_text": "Kalkisa hazirlan", "trigger_text": "Atla", "focus_text": ""}'
-                "]}"
-            )
-
-        return Response()
-
-
-class DummyClient:
-    responses = DummyResponses()
+from src.voice.coaching_engine import CoachingEngine
 
 
 class CoachingEngineTests(unittest.TestCase):
@@ -37,13 +20,13 @@ class CoachingEngineTests(unittest.TestCase):
                     "music_peak_time": 4.1,
                 }
             ],
-            client=DummyClient(),
+            client={},
         )
         timing_plan = engine.build_timing_plan()
         self.assertEqual(timing_plan[0]["prep_time"], 0.5)
         self.assertEqual(timing_plan[0]["trigger_time"], 2.0)
 
-    def test_generate_cues_creates_focus_for_long_spin(self):
+    def test_generate_cues_uses_movement_callouts_and_spin_count(self):
         engine = CoachingEngine(
             audio_data={
                 "tempo": 120,
@@ -55,7 +38,7 @@ class CoachingEngineTests(unittest.TestCase):
                     "name": "Sit Spin",
                     "type": "spin",
                     "start_time": 2.2,
-                    "end_time": 6.8,
+                    "end_time": 8.4,
                     "music_peak_time": 4.1,
                 },
                 {
@@ -66,92 +49,49 @@ class CoachingEngineTests(unittest.TestCase):
                     "music_peak_time": 8.6,
                 },
             ],
-            client=DummyClient(),
+            client={},
         )
         cues = engine.generate_cues()
-        self.assertLessEqual(len(cues), 2)
-        self.assertTrue(all(cue["cue_kind"] in {"prep", "trigger", "focus"} for cue in cues))
+        self.assertEqual(len(cues), 3)
+        self.assertEqual(cues[0]["text"], "Sit Spin")
+        self.assertEqual(cues[1]["cue_kind"], "count")
+        self.assertIn("spin", cues[1]["text"].lower())
+        self.assertEqual(cues[2]["text"], "Axel")
 
-    def test_select_priority_elements_limits_spoken_density(self):
-        timing_plan = [
-            {
-                "element_index": 0,
-                "name": "Spiral",
-                "type": "transition",
-                "start_time": 0.0,
-                "end_time": 14.0,
-                "music_peak_time": 8.0,
-                "prep_time": 0.0,
-                "trigger_time": 0.0,
-                "focus_time": 8.0,
-                "duration_seconds": 14.0,
+    def test_generate_cues_skips_only_when_elements_are_too_close(self):
+        engine = CoachingEngine(
+            audio_data={
+                "tempo": 120,
+                "duration": 25,
+                "beat_times": [1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 20.0],
             },
-            {
-                "element_index": 1,
-                "name": "Step Sequence",
-                "type": "sequence",
-                "start_time": 14.5,
-                "end_time": 28.0,
-                "music_peak_time": 22.0,
-                "prep_time": 13.0,
-                "trigger_time": 14.0,
-                "focus_time": 22.0,
-                "duration_seconds": 13.5,
-            },
-            {
-                "element_index": 2,
-                "name": "Axel",
-                "type": "jump",
-                "start_time": 30.0,
-                "end_time": 33.0,
-                "music_peak_time": 31.5,
-                "prep_time": 28.0,
-                "trigger_time": 29.6,
-                "focus_time": 31.5,
-                "duration_seconds": 3.0,
-            },
-            {
-                "element_index": 3,
-                "name": "Spread Eagle",
-                "type": "transition",
-                "start_time": 38.0,
-                "end_time": 51.0,
-                "music_peak_time": 45.0,
-                "prep_time": 37.0,
-                "trigger_time": 37.8,
-                "focus_time": 45.0,
-                "duration_seconds": 13.0,
-            },
-            {
-                "element_index": 4,
-                "name": "Camel Spin",
-                "type": "spin",
-                "start_time": 58.0,
-                "end_time": 66.0,
-                "music_peak_time": 62.0,
-                "prep_time": 56.5,
-                "trigger_time": 57.7,
-                "focus_time": 62.0,
-                "duration_seconds": 8.0,
-            },
-            {
-                "element_index": 5,
-                "name": "Ina Bauer",
-                "type": "transition",
-                "start_time": 95.0,
-                "end_time": 116.0,
-                "music_peak_time": 108.0,
-                "prep_time": 94.0,
-                "trigger_time": 94.8,
-                "focus_time": 108.0,
-                "duration_seconds": 21.0,
-            },
-        ]
-
-        selected = _select_priority_elements(timing_plan, 117.0)
-        self.assertLessEqual(len(selected), 5)
-        self.assertEqual(selected[0]["element_index"], 0)
-        self.assertEqual(selected[-1]["element_index"], 5)
+            planned_elements=[
+                {
+                    "name": "Spiral",
+                    "type": "transition",
+                    "start_time": 4.0,
+                    "end_time": 7.0,
+                    "music_peak_time": 5.5,
+                },
+                {
+                    "name": "Three-Turn",
+                    "type": "turns",
+                    "start_time": 8.0,
+                    "end_time": 11.0,
+                    "music_peak_time": 9.0,
+                },
+                {
+                    "name": "Loop",
+                    "type": "jump",
+                    "start_time": 16.0,
+                    "end_time": 18.0,
+                    "music_peak_time": 17.0,
+                },
+            ],
+            client={},
+        )
+        cues = engine.generate_cues()
+        self.assertEqual([cue["text"] for cue in cues], ["Spiral", "Three-Turn", "Loop"])
 
 
 if __name__ == "__main__":
