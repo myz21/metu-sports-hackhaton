@@ -6,16 +6,9 @@
 
 @layer base {
   :root {
-    color: #e0e3e5;
-    background: #0f172a;
-    --page: #0f172a;
-    --surface: rgba(16, 20, 21, 0.66);
-    --surface-strong: rgba(14, 21, 37, 0.84);
-    --surface-soft: rgba(255, 255, 255, 0.06);
-    --border: rgba(255, 255, 255, 0.14);
-    --text-dim: rgba(224, 227, 229, 0.68);
-    --glacier: #2fd9f4;
-    --aurora: #ddb7ff;
+    color: #0f172a;
+    background: #fbfcfd;
+    --page: #fbfcfd;
   }
 
   * {
@@ -30,11 +23,8 @@
     margin: 0;
     min-width: 320px;
     min-height: 100dvh;
-    background:
-      radial-gradient(circle at top left, rgba(47, 217, 244, 0.2), transparent 28%),
-      radial-gradient(circle at 85% 18%, rgba(221, 183, 255, 0.18), transparent 22%),
-      linear-gradient(180deg, #09111f 0%, #0f172a 42%, #111827 100%);
-    color: #e0e3e5;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+    color: #0f172a;
     font-family: "Geist", sans-serif;
   }
 
@@ -49,16 +39,6 @@
 }
 
 @layer utilities {
-  @keyframes shimmer {
-    0% {
-      background-position: 0% 50%;
-    }
-
-    100% {
-      background-position: 100% 50%;
-    }
-  }
-
   @keyframes rise {
     from {
       opacity: 0;
@@ -82,58 +62,6 @@
     }
   }
 
-  @keyframes pulse-line {
-    0%,
-    100% {
-      opacity: 0.45;
-      transform: scaleX(0.96);
-    }
-
-    50% {
-      opacity: 1;
-      transform: scaleX(1);
-    }
-  }
-
-  .text-dim {
-    color: var(--text-dim);
-  }
-
-  .glass-panel {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.11) 0%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
-    border: 1px solid var(--border);
-    box-shadow:
-      inset 1px 1px 0 rgba(255, 255, 255, 0.12),
-      0 24px 60px rgba(2, 6, 23, 0.26);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-  }
-
-  .glass-highlight {
-    position: relative;
-  }
-
-  .glass-highlight::before {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: inherit;
-    pointer-events: none;
-    border-top: 1px solid rgba(162, 238, 255, 0.2);
-    border-left: 1px solid rgba(221, 183, 255, 0.15);
-  }
-
-  .gradient-text {
-    background: linear-gradient(120deg, #ffffff 0%, #ddb7ff 42%, #a2eeff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
   .animate-rise {
     animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -144,15 +72,5 @@
 
   .animate-drift-delayed {
     animation: drift 13s ease-in-out -4s infinite;
-  }
-
-  .animate-shimmer {
-    background-size: 180% 180%;
-    animation: shimmer 7s linear infinite alternate;
-  }
-
-  .animate-pulse-line {
-    animation: pulse-line 2.8s ease-in-out infinite;
-    transform-origin: center;
   }
 }
