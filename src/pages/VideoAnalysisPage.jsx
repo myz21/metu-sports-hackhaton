@@ -1,7 +1,15 @@
+import { useState } from "react";
+
 import { GlassPanel, ProgressList, SectionHeader, Tag } from "../components/ui";
-import { analysisFrames, uploadSections } from "../data/mockData";
+import {
+  analysisFrames,
+  analysisQualityOptions,
+  uploadSections,
+} from "../data/mockData";
 
 export default function VideoAnalysisPage({ onNavigate }) {
+  const [selectedQuality, setSelectedQuality] = useState("low");
+
   return (
     <div className="space-y-4 rounded-[28px] p-2">
       <div className="grid gap-4 xl:grid-cols-[0.84fr_1.16fr]">
@@ -31,6 +39,50 @@ export default function VideoAnalysisPage({ onNavigate }) {
             </p>
           </div>
 
+          <div className="mt-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-700/55">
+              Analysis quality
+            </p>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              {analysisQualityOptions.map((option) => {
+                const active = selectedQuality === option.id;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setSelectedQuality(option.id)}
+                    className={`rounded-[22px] border p-4 text-left transition duration-200 ${
+                      active
+                        ? "border-sky-300 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92)_0%,_rgba(219,243,255,0.88)_100%)] shadow-[0_16px_36px_rgba(76,152,209,0.14)]"
+                        : "border-white/75 bg-white/55 hover:border-ice-300 hover:bg-white/68"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700/55">
+                          {option.eyebrow}
+                        </p>
+                        <p className="mt-2 text-lg font-semibold text-navy">
+                          {option.label}
+                        </p>
+                      </div>
+                      <Tag tone={active ? "soft" : "default"}>
+                        {active ? "Selected" : "Available"}
+                      </Tag>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-500">
+                      {option.detail}
+                    </p>
+                    <p className="mt-3 text-sm font-medium text-slate-400">
+                      {option.meta}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="mt-6 space-y-3">
             {uploadSections.map((item) => (
               <div
@@ -55,7 +107,7 @@ export default function VideoAnalysisPage({ onNavigate }) {
           <SectionHeader
             eyebrow="Analysis Preview"
             title="Pose and timing checks"
-            description="Mock review of how the uploaded runthrough compares against the planned routine."
+            description="Mock review of how the uploaded runthrough compares against the planned routine, with a user-selectable cost vs depth mode."
           />
 
           <div className="mt-6 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">

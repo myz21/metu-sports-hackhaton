@@ -1,245 +1,164 @@
-# Vision Stratejisi
+# SkateSync AI Vision Strategy
 
-Bu dokuman, SkateSync AI icin guncel video inceleme mimarisini aciklar.
+Bu doküman, SkateSync AI için güncel video inceleme mimarisini açıklar.
 
-Amacimiz hareketi otomatik olarak siniflandirmak degil. Planlanan hareket listesi zaten koreografi timeline'indan geliyor. Vision katmani, sporcunun kaydedilen performansini bu planlanan timeline ile karsilastirip MVP seviyesinde antrenman skoru ve geri bildirim uretmek icin kullaniliyor.
+## Güncel Hedef
 
-## Guncel yaklasim
+Amacımız hareketi otomatik olarak sınıflandırmak değil. Planlanan hareket listesi zaten koreografi timeline'ından geliyor. Vision katmanı, sporcunun kaydedilen performansını bu planlanan timeline ile karşılaştırıp MVP seviyesinde antrenman skoru ve geri bildirim üretmek için kullanılıyor.
 
-Varsayilan backend artik `OpenAI VLM + local RAG + deterministic scoring`.
+Bu branch'te `voice` ve `vision` birlikte düşünülür:
+- `voice` hareket planını ve sesli cue'ları üretir.
+- `vision` aynı `planned_elements` yapısını kullanarak videoyu değerlendirir.
 
-Kullaniciya iki analiz secenegi sunulur:
+---
 
-- `low`: daha ucuz ve daha hizli gunluk review modu
-- `high`: daha pahali ama daha zengin demo / coach review modu
+## Güncel Yaklaşım
 
-Ana kod [src/vision](</d:/metu-sports-hackhaton/src/vision>) altinda:
+Varsayılan backend artık `OpenAI VLM + local RAG + deterministic scoring`.
 
-- [cli.py](</d:/metu-sports-hackhaton/src/vision/cli.py>): komut satiri giris noktasi
-- [vlm_review.py](</d:/metu-sports-hackhaton/src/vision/vlm_review.py>): OpenAI vision ile planned-vs-actual inceleme
-- [frame_extractor.py](</d:/metu-sports-hackhaton/src/vision/frame_extractor.py>): planlanan zaman araligindan ornek frame cikarir
-- [rag.py](</d:/metu-sports-hackhaton/src/vision/rag.py>): local skating corpus icinden baglam ceker
-- [llm_feedback.py](</d:/metu-sports-hackhaton/src/vision/llm_feedback.py>): opsiyonel aciklama katmani
+Kullanıcıya iki analiz seçeneği sunulur:
+- `low`: Daha ucuz ve daha hızlı günlük review modu.
+- `high`: Daha pahalı ama daha zengin demo / coach review modu.
 
-Local skating corpus su dosyada tutulur: [figure_skating_knowledge.json](</d:/metu-sports-hackhaton/src/vision/knowledge/figure_skating_knowledge.json>).
+Ana kod `src/vision` altında konumlanmıştır:
+- `src/vision/cli.py`: Komut satırı giriş noktası.
+- `src/vision/vlm_review.py`: OpenAI Vision ile planned-vs-actual inceleme.
+- `src/vision/frame_extractor.py`: Planlanan zaman aralığından örnek frame çıkarır.
+- `src/vision/rag.py`: Local skating corpus içinden bağlam çeker.
+- `src/vision/llm_feedback.py`: Opsiyonel açıklama katmanı.
 
-## Sistem ne yapiyor
+Local skating corpus şu dosyada tutulur: `src/vision/knowledge/figure_skating_knowledge.json`.
 
-Girdi:
+---
 
+## Sistem Ne Yapıyor
+
+**Girdi:**
 - `video_path`
 - `planned_elements`
 
-Her planned element su alanlari icerir:
-
+Her planned element şu alanları içerir:
 - `name`
 - `type`
 - `start_time`
 - `end_time`
 - `music_peak_time`
 
-Her planned element icin sistem:
+Her planned element için sistem:
+1. Sadece planlanan zaman aralığını, küçük bir padding ile okur.
+2. Tüm videoyu göndermek yerine birkaç temsilci frame seçer.
+3. Local knowledge base'den kısa skating bağlamı çeker.
+4. Örnek frame'leri ve planlanan zaman bilgisini OpenAI Vision modeline yollar.
+5. Modelden sadece algısal tahminler ister:
+   - Görünen başlangıç zamanı
+   - Görünen bitiş zamanı
+   - Görünen peak zamanı
+   - Stabilite değerlendirmesi
+   - Confidence (güven seviyesi)
+   - Kısa coaching cue
+6. Son etiketleri ve skorları kod tarafında hesaplar.
 
-1. Sadece planlanan zaman araligini, kucuk bir padding ile okur.
-2. Tum videoyu gondermek yerine birkac temsilci frame secer.
-3. Local knowledge base'den kisa skating baglami ceker.
-4. Ornek frame'leri ve planlanan zaman bilgisini OpenAI vision modeline yollar.
-5. Modelden sadece algisal tahminler ister:
-   - gorunen baslangic zamani
-   - gorunen bitis zamani
-   - gorunen peak zamani
-   - stabilite degerlendirmesi
-   - confidence
-   - kisa coaching cue
-6. Son etiketleri ve skorlari kod tarafinda hesaplar.
+**Çıktı:**
+- Element bazlı `execution_match_score`
+- Deterministic timing comparison
+- Deterministic `timing_assessment`
+- Deterministic `duration_assessment`
+- Deterministic `music_alignment_assessment`
+- Sporcuya gösterilecek opsiyonel LLM açıklaması
 
-Cikti su bilgileri icerir:
+---
 
-- element bazli `execution_match_score`
-- deterministic timing comparison
-- deterministic `timing_assessment`
-- deterministic `duration_assessment`
-- deterministic `music_alignment_assessment`
-- sporcuya gosterilecek opsiyonel LLM aciklamasi
+## Sistem Ne Yapmıyor
 
-## Sistem ne yapmiyor
+- Skating hareketlerini sıfırdan sınıflandırmıyor.
+- Resmi hakem kuralları kullanmıyor.
+- Koçu veya resmi puanlamayı değiştirmeyi hedeflemiyor.
+- Videoyu JSON'a çevirmeyi gerektirmiyor.
 
-- Skating hareketlerini sifirdan siniflandirmiyor.
-- Resmi hakem kurallari kullanmiyor.
-- Kocu veya resmi puanlamayi degistirmeyi hedeflemiyor.
-- Videoyu JSON'a cevirmeyi gerektirmiyor.
+---
 
-Planned JSON, videonun donusturulmus hali degil; sadece referans plan.
+## Skorlama Stratejisi
 
-## Inceleme akisi
+VLM algı için kullanılıyor, final skor için değil. Model, görüntü üzerinde ne olduğunu tahmin eder; kod ise skoru hesaplar.
 
-Urun akisinda:
-
-1. Muzik yuklenir.
-2. SkateSync AI bir koreografi timeline'i uretir veya kaydeder.
-3. Sporcu antrenman videosunu ceker.
-4. Sporcu planlanan timeline'i secer.
-5. Vision, kaydedilen performansi bu planla karsilastirir.
-6. Sistem sunlari dondurur:
-   - genel uyum skoru
-   - element bazli skorlar
-   - timing offset'leri
-   - coaching yonlendirmesi
-
-Bu sistem, planned-vs-actual training review sistemi olarak tasarlandi.
-
-## Skorlama stratejisi
-
-VLM algi icin kullaniliyor, final skor icin degil.
-
-Model, goruntu uzerinde ne oldugunu tahmin eder. Kod ise skoru hesaplar.
-
-Guncel skor bilesenleri:
-
+Güncel skor bileşenleri:
 - `start_score`
 - `duration_score`
 - `stability_score`
 - `music_alignment_score`
 - `confidence_score`
 
-Agirliklar element tipine gore degisir. Ornegin spin'lerde stabilite, bazi diger element tiplerine gore daha yuksek agirlik alir.
+Ağırlıklar element tipine göre değişir. Örneğin spin'lerde stabilite, bazı diğer element tiplerine göre daha yüksek ağırlık alır.
 
-Bu ayirim onemli:
+---
 
-- VLM: "frame'lerde ne gorunuyor gibi"
-- Rule engine: "skor nasil hesaplanacak"
-- Opsiyonel LLM pass: "sporcuya bu sonuc nasil anlatilacak"
+## Neden Deterministic Etiketler Eklendi
 
-## Neden deterministic etiketler eklendi
+Önceki VLM çıktıları bazen sayısal offset ile çelişen timing yorumları üretebiliyordu. Örneğin pozitif bir start offset, sporcunun geç başladığını gösterir; fakat serbest doğal dil yorumu yine de "early" diyebiliyordu.
 
-Onceki VLM ciktilari bazen sayisal offset ile celisen timing yorumlari uretebiliyordu. Ornegin pozitif bir start offset, sporcunun gec basladigini gosterir; fakat serbest dogal dil yorumu yine de "early" diyebiliyordu.
-
-Bu artik kod tarafinda duzeltildi.
-
-VLM artik su son etiketleri belirlemiyor:
-
+Bu artık kod tarafında düzeltildi. VLM artık şu son etiketleri belirlemiyor (bu etiketler artık `vlm_review.py` içinde offset'lerden türetiliyor):
 - `early / on_time / late`
 - `short / on_target / long`
 - `strong / moderate / weak` music alignment
 
-Bu etiketler artik [vlm_review.py](</d:/metu-sports-hackhaton/src/vision/vlm_review.py>) icinde offset'lerden turetiliyor.
+---
 
-## Token ve maliyet stratejisi
+## Token ve Maliyet Stratejisi
 
-Cok elementli uzun videolar, her elemente fazla frame veya fazla baglam gonderilirse pahali olabilir.
+Çok elementli uzun videolar, her elemente fazla frame veya fazla bağlam gönderilirse pahalı olabilir. Token kullanımını somut olarak birkaç yolla düşürdük:
 
-Token kullanimini somut olarak birkac yolla dusurduk.
+1. **Pencere Bazlı İnceleme:** 2 dakikalık videonun tamamı modele gönderilmiyor. Sadece planlanan element pencereleri inceleniyor.
+2. **Kullanıcı Kalite Seçimi:** VLM backend artık iki net kalite profili sunuyor: `low` (daha hızlı/ucuz) ve `high` (daha fazla görsel bağlam ve detay).
+3. **Frame Bütçesi:** `low` profilde adaptif frame bütçesi (2-4 frame) kullanılırken, `high` profilde zengin frame örneklemesi yapılır.
+4. **Detail Parametresi:** OpenAI vision detay seviyesi `low` için `"low"`, `high` için `"high"` olarak ayarlanır.
+5. **Frame Payload Boyutu:** Örnek frame'ler kalite profiline göre resize ve compress edilir.
+6. **Kompakt RAG:** RAG bağlamı `low` profil içinde kısaltılır.
+7. **Opsiyonel İkinci LLM Geçişi:** `--include-llm-feedback` kullanılmadıkça ek bir LLM açıklaması çağrısı yapılmaz.
 
-### 1. Tum video yerine pencere bazli inceleme
+---
 
-2 dakikalik videonun tamami modele gonderilmiyor.
+## Güncel CLI Kullanımı
 
-Sadece planlanan element pencereleri inceleniyor. En buyuk maliyet dusurme etkisi burada.
-
-### 2. Quality profilleri artik kullanici secimiyle calisiyor
-
-VLM backend artik iki net quality profili sunuyor:
-
-- `low`
-  - daha ucuz
-  - daha hizli
-  - gunluk antrenman review icin uygun
-- `high`
-  - daha pahali
-  - daha fazla gorsel baglam kullanir
-  - demo, coach review ve daha kritik seanslar icin uygun
-
-`low` profil onceki cost-aware mantigin devamidir. `high` profil ise daha zengin frame orneklemesi ve daha guclu model ayarlariyla calisir.
-
-### 3. Element basina kontrollu frame butcesi
-
-`low` profil icinde adaptif frame butcesi kullaniliyor:
-
-- cok kisa pencere: 2 frame
-- tipik element penceresi: 3 frame
-- daha uzun pencere: 4 frame
-
-`high` profil ise daha fazla frame kullanabilir; bu nedenle daha pahali ama genelde daha guvenilir review verir.
-
-### 4. Image detail kalite profiline gore degisiyor
-
-OpenAI Responses API image detail seviyelerini destekliyor.
-
-- `low` profil: `detail: "low"`
-- `high` profil: `detail: "high"`
-
-Bu onemli, cunku OpenAI vision fiyatlamasi image detail seviyesinden etkileniyor.
-
-### 5. Daha kucuk frame payload'i
-
-JPEG encode etmeden once ornek frame'ler kalite profiline gore resize ve compress edilebiliyor:
-
-- `low` profil icinde daha kucuk max dimension
-- `low` profil icinde daha dusuk JPEG quality
-
-Bu payload boyutunu dusurur ve istegi hafifletir.
-
-### 6. Compact RAG context
-
-Local skating RAG baglami `low` profil icinde kisaltiliyor:
-
-- daha az dokuman cekiliyor
-- her dokumandan daha az cue aliniyor
-- istege bagli karakter limiti uygulanabiliyor
-
-Bu, elemente ozel skating baglamini korurken text token miktarini azaltir.
-
-### 7. Ikinci LLM pass sadece gerekirse
-
-Sporcuya yonelik aciklama passi hala opsiyonel.
-
-Eger `--include-llm-feedback` kullanilmazsa, sistem ek OpenAI aciklama cagrisi yapmaz; sadece deterministic review ve local feedback dondurur.
-
-## Guncel CLI kullanimi
-
-Temel VLM review:
-
+### Günlük ve Daha Ucuz Review:
 ```bash
 python -m src.vision "video.mp4" "plan.json" --quality low
 ```
 
-Gunluk ve daha ucuz review:
-
-```bash
-python -m src.vision "video.mp4" "plan.json" --quality low
-```
-
-Daha yuksek ayrinti ile calistirmak:
-
+### Daha Yüksek Ayrıntı:
 ```bash
 python -m src.vision "video.mp4" "plan.json" --quality high
 ```
 
-Sonucu dosyaya yazmak:
-
+### Sonucu Dosyaya Yazmak:
 ```bash
 python -m src.vision "video.mp4" "plan.json" --output review_result.json
 ```
 
-Opsiyonel LLM aciklamasi:
-
+### Opsiyonel LLM Açıklaması:
 ```bash
 python -m src.vision "video.mp4" "plan.json" --quality high --include-llm-feedback --language Turkish
 ```
 
-## Bilinen sinirlar
+---
 
-- Sistem, planned timeline kalitesine bagimlidir.
-- Sporcu approximate bir plan JSON'u eliyle uretirse skorlar yon gosterebilir ama tam dogru olmaz.
-- Frame tabanli VLM review hala MVP seviyesinde bir heuristic; tam hareket rekonstruksiyonu degil.
-- Music alignment, resmi hakem mantigindan degil; planned timing ve gorunen peak anlarindan cikariliyor.
-- Birden fazla kisi olan sahneler, kotu framing veya ciddi motion blur confidence'i dusurebilir.
-- `high` profil bile resmi judging dogrulugu iddia etmez; sadece `low` profile gore daha zengin review verir.
+## Frontend İçin Okunacak Ana Alanlar
 
-## Onerilen sonraki iyilestirmeler
+Vision review JSON içinde frontend'in ilk aşamada odaklanması gereken alanlar:
+- `overall.overall_match_score`
+- `overall.average_start_score`
+- `overall.average_duration_score`
+- `overall.average_stability_score`
+- `overall.average_music_alignment_score`
+- `elements[]`
+  - `name`
+  - `scores.execution_match_score`
+  - `timing_comparison`
+  - `local_feedback`
 
-- OpenAI response icinden request-level usage loglamak
-- frontend icinde cost control ayarlari acmak
-- hizli bir first-pass ve sadece gerekirse pahali second-pass retry stratejisi eklemek
-- review run'larini ve planlari tarihsel karsilastirma icin birlikte saklamak
-- music analysis pipeline'indan beat marker bilgisini opsiyonel olarak eklemek
+## Önerilen Sonraki İyileştirmeler
+- OpenAI response içinden request-level usage loglamak
+- Frontend içinde cost control ayarları açmak
+- Hızlı bir first-pass ve sadece gerekirse pahalı second-pass retry stratejisi eklemek
+- Review run'larını ve planları tarihsel karşılaştırma için birlikte saklamak
+- Music analysis pipeline'ından beat marker bilgisini opsiyonel olarak eklemek
+- `high` profil doğruluğunu daha da zenginleştirmek

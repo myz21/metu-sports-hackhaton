@@ -1,0 +1,34 @@
+@startuml
+title Hybrid Voice Coaching Workflow
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor Athlete
+rectangle "Music Input\nmusic/test-voice.m4a" as Music
+component "AudioAnalyzer\nLibrosa + ffmpeg fallback" as Analyzer
+component "CoachingEngine\nGemini 2.5 Flash\nStructured JSON" as Gemini
+component "TTSEngine\nCue-based parallel TTS" as TTS
+component "Programmatic Mixer\npydub overlay + latency compensation" as Mixer
+database "Firebase\noptional upload/report" as Firebase
+artifact "output_test.mp3" as Output
+
+Athlete --> Music : uploads/selects track
+Music --> Analyzer : load + beat extraction
+Analyzer --> Gemini : BPM, beat_times, energy_profile
+Gemini --> TTS : [{time, text}, ...]
+TTS --> Mixer : cue_000.mp3, cue_001.mp3...
+Music --> Mixer : original background music
+Mixer --> Output : high-quality mixed session
+Mixer --> Firebase : upload + save cues
+Output --> Athlete : synchronized coaching audio
+
+note right of Gemini
+Prep cues are generated for beat-aligned
+times near target - 2.0s.
+Trigger cues are generated for latency-
+compensated beats near target - 0.35s.
+end note
+
+@enduml
