@@ -19,6 +19,7 @@ for path in (VOICE_DIR,):
 
 from audio_analyzer import AudioAnalyzer
 from main import process_voice_coaching
+from program_planner import ProgramPlanner
 
 AUDIO_PATH = os.path.join(ROOT_DIR, "music", "test-voice.m4a")
 OUTPUT_PATH = os.path.join(VOICE_DIR, "output_test.mp3")
@@ -43,11 +44,8 @@ async def main():
     print(f"   ✅ Energy segments: {[f'{e:.3f}' for e in audio_data['energy_profile']]}")
 
     print("\n📝 Step 2: Generating Gemini-ready Program...")
-    dynamic_program = [
-        {"time": min(18.0, audio_data["duration"] * 0.18), "action": "Spin"},
-        {"time": min(57.0, audio_data["duration"] * 0.42), "action": "Double Axel"},
-        {"time": min(106.0, audio_data["duration"] * 0.72), "action": "Jump"},
-    ]
+    planner = ProgramPlanner(audio_data)
+    dynamic_program = planner.generate_program()
     print(json.dumps(dynamic_program, ensure_ascii=False, indent=2))
 
     print("\n🎤 Step 3: Running Hybrid Coaching Pipeline...")

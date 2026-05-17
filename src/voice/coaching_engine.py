@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 load_dotenv()
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
-DEFAULT_GEMINI_API_KEY = "AIzaSyB7HCzzzDJAamdlLatFrddbt9B8UoKUqng"
 
 
 class CueModel(BaseModel):
@@ -48,11 +47,7 @@ class CoachingEngine:
         self.model = model
         self.reaction_lead_seconds = reaction_lead_seconds
         self.prep_lead_seconds = prep_lead_seconds
-        self.gemini_api_key = (
-            gemini_api_key
-            or os.getenv("GEMINI_API_KEY")
-            or DEFAULT_GEMINI_API_KEY
-        )
+        self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         self.client = genai.Client(api_key=self.gemini_api_key)
 
     def _nearest_beat(self, target_time: float) -> float:
@@ -66,7 +61,11 @@ class CoachingEngine:
         duration = float(self.audio_data.get("duration", 0))
         for item in self.planned_program:
             action = str(item["action"]).strip()
-            target_time = max(0.0, min(float(item["time"]), duration))
+            raw_target_time = max(0.0, min(float(item["time"]), duration))
+            
+            # 1. HİBRİT ADIMI ZORUNLU KIL: Hedef zamanı en yakın Librosa vuruşuna (beat) mıknatısla
+            target_time = self._nearest_beat(raw_target_time)
+            
             prep_anchor = max(0.0, target_time - self.prep_lead_seconds)
             trigger_anchor = max(0.0, target_time - self.reaction_lead_seconds)
             prep_beat = self._nearest_beat(prep_anchor)
@@ -152,34 +151,51 @@ class CoachingEngine:
         timing_plan = self._build_timing_plan()
         system_prompt, user_prompt = self._build_prompt(timing_plan)
 
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=user_prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.5,
-                response_mime_type="application/json",
-                response_schema={
-                    "type": "object",
-                    "properties": {
-                        "cues": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "time": {"type": "number"},
-                                    "text": {"type": "string"},
-                                },
-                                "required": ["time", "text"],
+        for attempt in range(3):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=user_prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.5,
+                        response_mime_type="application/json",
+                        response_schema={
+                            "type": "object",
+                            "properties": {
+                                "cues": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "time": {"type": "number"},
+                                            "text": {"type": "string"},
+                                        },
+                                        "required": ["time", "text"],
+                                    },
+                                }
                             },
-                        }
-                    },
-                    "required": ["cues"],
-                },
-                system_instruction=system_prompt,
-                max_output_tokens=2048,
-            ),
-        )
-        return self._normalize_response(response.text)
+                            "required": ["cues"],
+                        },
+                        system_instruction=system_prompt,
+                        max_output_tokens=4096,
+                    ),
+                )
+                
+                response_text = response.text.strip()
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                if response_text.startswith("```"):
+                    response_text = response_text[3:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
+                response_text = response_text.strip()
+                
+                return self._normalize_response(response_text)
+            except Exception as e:
+                print(f"CoachingEngine Attempt {attempt+1} failed: {e}")
+                if attempt == 2:
+                    raise e
+        return []
 
 
 if __name__ == "__main__":

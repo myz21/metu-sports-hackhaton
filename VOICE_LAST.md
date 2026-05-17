@@ -4,10 +4,14 @@ Bu sürümde sesli koçluk hattı, `VOICE.md` içindeki hibrit stratejiye sadık
 
 ## Ne değişti?
 
+* `src/voice/program_planner.py` (YENİ)
+  Müziğin süresi ve enerji profili (Librosa çıktısı) kullanılarak Gemini 2.5 Flash ile yarışma standartlarına uygun 10-15 hareketlik otonom bir koreografi üretimi (Program Planner) eklendi.
+  (Testlerdeki 3 manuel hareketlik dummy_program kaldırıldı.)
+
 * `src/voice/coaching_engine.py`
-  Gemini 2.5 Flash ile yapılandırılmış JSON cue üretimi yapıyor.
-  Librosa'dan gelen BPM, beat listesi ve enerji profilini prompt içine koyuyor.
-  Hazırlık cue'ları için yaklaşık `target - 2.0s`, tetikleyici cue'lar için yaklaşık `target - 0.35s` latency telafili beat noktaları hesaplanıyor.
+  **Zorunlu "Snap to Beat" / Mıknatıs Katmanı:** LLM metin üretmeden hemen önce devreye giren bir matematik katmanı eklendi. LLM'in hedef hareket süreleri (`target_time`), Librosa'nın çıkardığı küsuratlı ritim vuruşlarına (`beat_times`) zorla yapıştırılarak tam senkronizasyon sağlandı.
+  Büyük JSON çıktıları için token limiti artırıldı (`max_output_tokens=4096`) ve hatalara karşı 3 aşamalı Retry/Cleanup döngüsü eklendi.
+  Ayrıca hazırlık cue'ları için yaklaşık `target - 2.0s`, tetikleyici cue'lar için yaklaşık `target - 0.35s` latency telafili beat noktaları hesaplanıyor.
 
 * `src/voice/tts_engine.py`
   Tek parça metin yerine her cue için ayrı ses klibi üretiyor.
@@ -32,15 +36,23 @@ Bu sürümde sesli koçluk hattı, `VOICE.md` içindeki hibrit stratejiye sadık
 
 `python src/voice/test_voice.py` çalıştırıldığında:
 
-* Gemini dinamik cue JSON üretti.
-* Her cue için ayrı TTS klibi oluşturuldu.
-* Miksaj loglarında milisaniye seviyesinde overlay pozisyonları görüldü.
+* `ProgramPlanner` müziğin enerjisine göre tüm parçaya dağılmış **17 farklı hareket** belirledi.
+* "Snap to beat" çalışarak hareketleri tam Librosa vuruşlarına mıknatısladı.
+* Her hareket için hazırlık ve tetikleyici dahil toplam **34 cue (ses klibi)** oluşturuldu.
+* Miksaj loglarında milisaniye seviyesinde (örn: `166.255s`) overlay pozisyonları görüldü.
 * `src/voice/output_test.mp3` başarıyla üretildi.
 * Çıktı süresi giriş müziğiyle eşleşti (`169.5s`).
 
-## Diyagram kaynakları
+## Diyagramlar
 
-* [workflows/voice_hybrid_workflow.puml](/home/neo/Downloads/METU%20SPORTS%20HACKHATON/metu-sports-hackhaton/workflows/voice_hybrid_workflow.puml)
-* [workflows/voice_hybrid_sequence.puml](/home/neo/Downloads/METU%20SPORTS%20HACKHATON/metu-sports-hackhaton/workflows/voice_hybrid_sequence.puml)
+### Hybrid Voice Coaching Workflow
 
-Bu oturumda PlantUML MCP veya yerel `plantuml` binary'si mevcut olmadığı için `.svg` render alınmadı; fakat `.puml` kaynakları doğrudan hazırlandı.
+![Hybrid Voice Coaching Workflow](workflows/voice_hybrid_workflow.svg)
+
+* Kaynak: [workflows/voice_hybrid_workflow.puml](workflows/voice_hybrid_workflow.puml)
+
+### Hybrid Voice Coaching Sequence
+
+![Hybrid Voice Coaching Sequence](workflows/voice_hybrid_sequence.svg)
+
+* Kaynak: [workflows/voice_hybrid_sequence.puml](workflows/voice_hybrid_sequence.puml)
