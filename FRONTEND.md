@@ -1,68 +1,76 @@
-# 🎨 SkateSync AI Frontend Mimari ve Kullanıcı Deneyimi (UX/UI)
+# 🎨 SkateSync AI Frontend Architecture and User Experience (UX/UI)
 
-Bu doküman, arka plandaki `VOICE_LAST.md` (Hibrit Sesli Koçluk) ve `VISION.md` (VLM tabanlı Video Analizi) stratejilerini baz alarak, frontend katmanında kullanıcının (sporcu veya koç) SkateSync AI ile nasıl etkileşime gireceğini detaylandırır.
+This document details how the user (athlete or coach) will interact with SkateSync AI on the frontend layer, based on the backend strategies `VOICE_LAST.md` (Hybrid Voice Coaching) and `VISION.md` (VLM-based Video Analysis).
 
-SAYFA BASİT OLACAK Kİ TEKNİK OLMAYAN KULLANICI ANLASIN
+THE PAGE MUST BE SIMPLE SO NON-TECHNICAL USERS CAN UNDERSTAND IT
 
+## 1. Core Functions and Interface Components
 
-## 1. Temel İşlevler ve Arayüz Bileşenleri
+### A. Movement Catalog and AI-Known Movements
+The knowledge base in the `knowledge/` folder should be used as a visible feature on the frontend. The user must clearly see which movements the system recognizes. This section should not be technical; it should be reassuring and easy to understand.
 
-### A. Hareket Kataloğu ve AI'nin Bildiği Hareketler
-`knowledge/` klasöründeki bilgi tabanı frontend tarafında görünür bir özellik olarak kullanılmalıdır. Kullanıcı sistemin hangi hareketleri tanıdığını açıkça görmelidir. Bu bölüm teknik değil, güven verici ve anlaşılır olmalıdır.
-
-- **Hareket Kataloğu Kartları:** Arayüzde AI'nin tanıdığı temel hareket aileleri kartlar halinde gösterilir.
-  - `Atlayışlar:` Axel, Salchow, Loop, Toe Loop, Flip, Lutz
-  - `Dönüşler:` Sit Spin, Camel Spin, Upright Spin, Scratch Spin, Layback Spin, Biellmann
+- **Movement Catalog Cards:** The core movement families recognized by the AI are displayed as cards in the interface.
+  - `Jumps:` Axel, Salchow, Loop, Toe Loop, Flip, Lutz
+  - `Spins:` Sit Spin, Camel Spin, Upright Spin, Scratch Spin, Layback Spin, Biellmann
   - `Step / Turn:` Three Turns, Bracket, Rocker and Counter, Mohawk, Twizzle
-  - `Geçiş ve Vurgu Hareketleri:` Spiral, Ina Bauer, Spread Eagle, Lunge, Cantilever, Choreographic Sequence, Final Pose
-- **Basit Açıklama Metni:** Her hareket için 1 cümlelik sade açıklama gösterilir. Amaç teknik eğitim vermek değil, kullanıcının "AI bu hareketi biliyor" hissini almasıdır.
-- **Kategori Filtreleme:** Kullanıcı isterse sadece `Jump`, `Spin`, `Transition`, `Turns` gibi kategorileri görebilir.
-- **Koçluk İpucu Önizlemesi:** Bilgi tabanındaki `coaching_cues`, `timing_cues`, `stability_cues` gibi alanlar doğrudan ham veri gibi değil; küçük, doğal dilde ipucu kartları olarak sunulmalıdır.
-- **Kullanım Amacı Açıklaması:** Bu bölümde kısa bir metin yer almalı:
-  "SkateSync AI bu hareket sözlüğünü kullanarak plan üretir, videoyu inceler ve geri bildirim verir."
+  - `Transitions and Choreographic Movements:` Spiral, Ina Bauer, Spread Eagle, Lunge, Cantilever, Choreographic Sequence, Final Pose
+- **Simple Description Text:** A simple, 1-sentence description is shown for each movement. The goal is not technical education, but to give the user the feeling that "AI knows this movement."
+- **Category Filtering:** The user can filter to see specific categories like `Jump`, `Spin`, `Transition`, `Turns`.
+- **Coaching Cue Preview:** Fields like `coaching_cues`, `timing_cues`, `stability_cues` from the knowledge base should not be presented as raw data, but as small, natural language cue cards.
+- **Purpose Explanation:** A short text should be included in this section:
+  "SkateSync AI uses this movement dictionary to generate plans, analyze video, and provide feedback."
 
-### B. Müzik Yükleme ve Sesli Koçluk (Voice Coaching)
-Bu bölüm, sistemin otonom olarak müzik analizini yapıp sporcuya dinamik bir koreografi planı hazırladığı aşamadır.
+### B. Music Upload and Voice Coaching
+This section is where the system autonomously analyzes the music and prepares a dynamic choreography plan for the athlete.
 
-- **Müzik Yükleme Arayüzü:** Kullanıcı, kullanacağı antrenman müziğini sisteme yükler.
-- **Otonom Koreografi Çizelgesi (Timeline):** Arka plan (Gemini Flash + Librosa), müzik enerjisine göre 10-15 hareketlik bir plan oluşturduğunda, frontend bu planı interaktif bir zaman çizelgesinde (Timeline) gösterir. Hangi saniyede (örn: `166.255s`) hangi hareketin tetikleneceği pinler halinde işaretlenir.
-  Bu timeline içindeki hareket isimleri doğrudan `knowledge` klasöründeki katalogla tutarlı olmalıdır. Örneğin kullanıcı planda `Sit Spin`, `Toe Loop`, `Ina Bauer` veya `Final Pose` gibi hareketleri görmelidir.
-- **Miksajlı Ses Çalar (Audio Player):** Sistem, sesli yönlendirmelerin (cue) "Snap to Beat" algoritmasıyla müziğe tam oturtulmuş halini miksleyerek (`output_test.mp3`) kullanıcıya dinletir. 
+- **Music Upload Interface:** The user uploads the training music they will use.
+- **Autonomous Choreography Timeline:** When the backend (Gemini Flash + Librosa) generates a 10-15 movement plan based on music energy, the frontend displays this plan on an interactive Timeline. At what second (e.g., `166.255s`) which movement will be triggered is marked with pins.
+  The movement names in this timeline must be consistent with the catalog in the `knowledge` folder. For example, the user should see movements like `Sit Spin`, `Toe Loop`, `Ina Bauer`, or `Final Pose` in the plan.
+- **Mixed Audio Player:** The system mixes the voice coaching cues perfectly synced to the music using the "Snap to Beat" algorithm (`output_test.mp3`) and plays it for the user.
+- **Dynamic Movement Animation (Voice Feature):** There are 5 movement animations (MP4s/GIFs) located in `public/media/movements`. During the voice coaching playback, these movements will animate on the screen simultaneously. It includes two key features:
+  1. **Exporting:** The ability to export this visual and audio choreography sequence.
+  2. **Scrolling Lyrics-Style Sync:** While the music is playing, the text output of the coaching cues and the corresponding MP4 animation for that text section (limited to the 5 available movements) will appear on the screen synchronously, flowing similarly to the scrolling lyrics feature on Spotify.
 
-### C. Video İnceleme ve Skorlama (Vision Review)
-Sporcu antrenmanı tamamladıktan sonra performansını yükleyerek AI değerlendirmesini bu modülde yapar.
+### C. Video Review and Scoring (Vision Review)
+After completing the training, the athlete uploads their performance and gets the AI evaluation in this module.
 
-- **Video ve Plan Eşleştirme:** Kullanıcı çektiği videoyu sisteme yükler ve daha önce hazırlanan "Planlı Koreografi (Planned Timeline)" ile eşleştirir.
-- **Analiz Kalite Seçimi (Maliyet & Hız Kontrolü):** 
-  VLM inceleme sistemine uygun olarak kullanıcı arayüzde iki farklı profil seçeneği görür:
-  - `Hızlı İnceleme (Low Quality):` Günlük rutin antrenmanlar için ucuz, az frame harcayan hızlı mod.
-  - `Detaylı İnceleme (High Quality):` Koç seviyesinde, yüksek çözünürlüklü ve fazla frame tarayan pahalı/kritik seans modu.
-  - *(Opsiyonel)* "AI Detaylı Koçluk Yorumu İstiyorum" şeklinde bir Toggle (Switch) butonu ile ekstra LLM maliyeti kontrol edilebilir.
-- **Sonuç ve Skor Ekranı:**
-  - **Skor Kartları:** Element bazında hesaplanan `execution_match_score`, `start_score`, `stability_score` ve `music_alignment_score` UI üzerinde dairesel barlar (Progress rings) veya Radar grafikleriyle gösterilir.
-  - **Zamanlama Rozetleri:** Arka planda deterministik olarak hesaplanan zamanlama hataları "Erken", "Tam Zamanında", "Geç" gibi renkli rozetlerle (Badge) belirtilir.
-  - **Sohbet Tarzı Geri Bildirim:** Opsiyonel LLM açıklamaları, doğrudan bir koçun ağzından yazılmış gibi kartlar içinde doğal dille sunulur.
-  - **Hareket Bazlı Yorum:** Review ekranında analiz edilen eleman, katalogdaki adıyla gösterilmelidir. Örneğin:
-    - `Camel Spin - Stabilite iyi, merkez az miktarda geziyor`
-    - `Toe Loop - Kalkış ritmi doğru, iniş akışı kısa kaldı`
-    - `Final Pose - Müzik kapanışıyla senkron`
+- **Video and Plan Matching:** The user uploads their recorded video and matches it with the previously prepared "Planned Timeline".
+- **Analysis Quality Selection (Cost & Speed Control):** 
+  In line with the VLM review system, the user sees two different profile options on the interface:
+  - `Fast Review (Low Quality):` A cheap, fast mode that uses fewer frames for daily routine training.
+  - `Detailed Review (High Quality):` An expensive/critical session mode that scans high resolution and more frames at a coach level.
+  - *(Optional)* An extra LLM cost control with a Toggle Switch saying "I want detailed AI coaching commentary".
+- **Result and Scoring Screen:**
+  - **Score Cards:** `execution_match_score`, `start_score`, `stability_score`, and `music_alignment_score` calculated per element are shown with circular progress rings or radar charts on the UI.
+  - **Timing Badges:** Timing errors calculated deterministically in the background are indicated with colored badges like "Early", "On Time", "Late".
+  - **Chat-Style Feedback:** Optional LLM explanations are presented in natural language inside cards, as if written directly by a coach.
+  - **Movement-Based Commentary:** In the review screen, the analyzed element should be displayed with its catalog name. For example:
+    - `Camel Spin - Good stability, center slightly drifts`
+    - `Toe Loop - Takeoff rhythm is correct, landing flow was short`
+    - `Final Pose - Synced with the music ending`
 
-## 2. Kullanıcı Akışı (User Flow)
+## 2. User Flow
 
-Sistemin başından sonuna kullanım senaryosu şu şekilde gerçekleşir:
+The use case scenario of the system from start to finish happens as follows:
 
-1. **Hazırlık:** Sporcu, web arayüzüne antrenman müziğini yükler.
-2. **Hareket Bilgisi Görme:** Sporcu isterse sistemin bildiği hareketleri katalog ekranında görür ve hangi hareket mantığıyla plan üretildiğini anlar.
-3. **Planlama:** Sistem müziğin ruhunu anlar, hareket planını ve bu hareketlerin kulağa söyleneceği sesli yönergeleri içeren mikslenmiş bir MP3 dosyası sunar.
-4. **Aksiyon:** Sporcu kulaklığını takar, web arayüzündeki MP3'ü başlatır ve sistemden gelen yönergelere göre hareketleri gerçekleştirir. Bu esnada videoya kaydedilir.
-5. **Analiz İsteme:** Sporcu videoyu sisteme yükler, analiz profili seçer (`Low` veya `High`).
-6. **Rapor İnceleme:** Sistem, sporcunun ne kadar senkronize olduğunu planla karşılaştırarak yüzdelik skorlar ve teknik ipuçlarıyla dolu antrenman özetini ekrana yansıtır.
+1. **Preparation:** The athlete uploads their training music to the web interface.
+2. **Viewing Movement Knowledge:** The athlete can view the movements known to the system on the catalog screen and understand the logic behind the generated plans.
+3. **Planning:** The system understands the spirit of the music and provides a mixed MP3 file containing the movement plan and voice instructions to be spoken into the ear.
+4. **Action:** The athlete puts on their earphones, starts the MP3 on the web interface, and performs the movements according to the instructions coming from the system. They are recorded on video during this time.
+5. **Requesting Analysis:** The athlete uploads the video to the system and selects the analysis profile (`Low` or `High`).
+6. **Reviewing the Report:** The system reflects a training summary full of percentage scores and technical tips by comparing how synchronized the athlete was with the plan.
 
-## 3. Frontend Geliştirme Notları (Teknik Beklentiler)
+## 3. Frontend Development Notes (Technical Expectations)
 
-- **Kullanım Kolaylığı (Sadelik):** Hedef kitle sporcular ve antrenörler olduğu için, frontend **teknik olmayan kullanıcılar için olabildiğince basit**, anlaşılır ve karmaşadan uzak (minimalist) olmalıdır. Gereksiz teknik ayarlar arka planda halledilmeli, kullanıcıya sadece "Yükle ve Başla" rahatlığı sunulmalıdır.
-- **Bileşen Kütüphaneleri:** Modern ve akıcı bir arayüz için `Tailwind CSS` ve `Framer Motion` (mikro-animasyonlar) kullanılmalıdır. Uygulama bir "Spor Uygulaması" ruhu taşımalı (koyu mod, yüksek kontrastlı renkler, dinamik his).
-- **Zaman Çizelgesi Entegrasyonu:** Müzik ve video oynatıcılar (Player), saniye bazlı JSON marker'ları ile senkronize çalışacak şekilde geliştirilmelidir. Videonun tam "peak" (zirve) noktasında UI tarafında vurgulu bir efekt verilebilir.
-- **Durum Yönetimi:** Analiz (Vision) katmanının işlenmesi uzun sürebileceğinden, analiz boyunca kullanıcıya süreci anlatan güzel loading ekranları (iskelet yükleyiciler veya ilerleme çubukları) gösterilmelidir.
-- **Knowledge Entegrasyonu:** `knowledge/figure_skating_knowledge.json` ve `knowledge/skating-movement-catalog.md` frontend için sadece arka plan verisi değildir; kullanıcıya görünür katalog, örnek hareket kartları, timeline isimleri ve review etiketleri bu ortak sözlükten beslenmelidir.
-- **İsim Tutarlılığı:** Frontend'de kullanılan hareket adları ile AI planlama / vision review katmanında kullanılan hareket adları birebir aynı tutulmalıdır. Böylece kullanıcı `Sit Spin` gördüğünde hem planda hem de analiz sonucunda aynı terimi görür.
+- **Ease of Use (Simplicity):** Since the target audience is athletes and coaches, the frontend must be **as simple as possible for non-technical users**, understandable, and clutter-free (minimalist). Unnecessary technical settings should be handled in the background, offering the user the comfort of simply "Upload and Start".
+- **Design System & Aesthetics ("Glacial Tech"):** The frontend must strictly adhere to the `DESIGN.md` guidelines.
+  - **Theme:** Use the deep "Abyssal Blue" (`#0F172A`) base instead of a generic dark mode. Implement **Glassmorphism** for surfaces (frosted ice effect, background blur, semi-transparent overlays) to evoke a lightweight yet structured feel.
+  - **Color Palette:** Accentuate active states and AI energy with **Electric Purple**, and use **Glacial Cyan** for precision markers and data visualization. Use Crisp White strictly for typography/icons to ensure high contrast.
+  - **Typography:** Use **Sora** for stable, dynamic headlines and **Geist** for body text/data labels to create a technical, developer-centric "instrument panel" vibe.
+  - **UI Depth & Components:** Avoid heavy drop shadows. Create depth via tonal layers and 1px inner borders (top/left) on frosted glass containers. Primary buttons should use a Purple-to-Cyan gradient, and input fields should feature a glowing Cyan bottom-border on focus. Standardly use cohesive rounded corners (`8px` to `16px`).
+- **Component Libraries:** `Tailwind CSS` and `Framer Motion` (micro-animations) should be used to seamlessly implement the Glacial Tech design language and provide a fluid interface.
+- **Timeline Integration:** Music and video players should be developed to work in sync with second-based JSON markers. An emphasized UI effect can be given exactly at the "peak" point of the video.
+- **State Management:** Since processing the Vision layer can take a long time, beautiful loading screens (skeleton loaders or progress bars) explaining the process should be shown to the user during the analysis.
+- **Knowledge Integration:** `knowledge/figure_skating_knowledge.json` and `knowledge/skating-movement-catalog.md` are not just background data for the frontend; the visible user catalog, sample movement cards, timeline names, and review labels must feed from this common dictionary.
+- **Name Consistency:** Movement names used in the frontend must be exactly the same as the movement names used in the AI planning / vision review layer. This way, when the user sees `Sit Spin`, they see the same term in both the plan and the analysis result.
+- **Background Animation:** The file `animation(ortası alınacak, yavaşlatılacak).mp4` will be utilized as an atmospheric background animation for the page. A 5-8 second segment from the middle of the video will be extracted, slowed down (slow motion), and seamlessly looped to create a dynamic and premium visual experience.

@@ -1,9 +1,9 @@
 export function FrostBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute left-[-8%] top-[-4%] h-80 w-80 rounded-full bg-ice-200/75 blur-3xl animate-drift" />
-      <div className="absolute right-[-10%] top-[8%] h-96 w-96 rounded-full bg-cyan-100/80 blur-3xl animate-drift-delayed" />
-      <div className="absolute bottom-[-14%] left-[24%] h-72 w-72 rounded-full bg-sky-100/60 blur-3xl animate-drift" />
+      <div className="absolute left-[-8%] top-[-4%] h-80 w-80 rounded-full bg-ice-400/20 blur-3xl animate-drift" />
+      <div className="absolute right-[-10%] top-[8%] h-96 w-96 rounded-full bg-violet-500/20 blur-3xl animate-drift-delayed" />
+      <div className="absolute bottom-[-14%] left-[24%] h-72 w-72 rounded-full bg-cyan-200/12 blur-3xl animate-drift" />
     </div>
   );
 }
@@ -12,7 +12,7 @@ export function GlassPanel({ className = "", style, children }) {
   return (
     <section
       style={style}
-      className={`rounded-[28px] border border-white/70 bg-white/68 shadow-[0_20px_60px_rgba(13,27,63,0.08)] backdrop-blur-xl ${className}`}
+      className={`glass-panel glass-highlight rounded-[24px] ${className}`}
     >
       {children}
     </section>
@@ -21,14 +21,14 @@ export function GlassPanel({ className = "", style, children }) {
 
 export function Tag({ tone = "default", children }) {
   const tones = {
-    default: "border-white/75 bg-white/60 text-slate-500",
-    soft: "border-ice-200 bg-ice-50/80 text-sky-800",
-    bright: "border-white/80 bg-white text-navy",
+    default: "border-white/10 bg-white/5 text-white/72",
+    soft: "border-ice-300/30 bg-ice-300/10 text-ice-100",
+    bright: "border-violet-300/30 bg-violet-400/12 text-white",
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] ${tones[tone]}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] ${tones[tone]}`}
     >
       {children}
     </span>
@@ -46,15 +46,15 @@ export function SectionHeader({
     <div className={`flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between ${className}`}>
       <div>
         {eyebrow ? (
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-700/55">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-navy">
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-white/64">
             {description}
           </p>
         ) : null}
@@ -76,31 +76,31 @@ export function StatCard({
   return (
     <GlassPanel className={`p-5 sm:p-6 ${className}`} style={style}>
       <div
-        className={`inline-flex rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-900/70 ${accent}`}
+        className={`inline-flex rounded-full bg-gradient-to-r px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-950 ${accent}`}
       >
         Metric
       </div>
-      <p className="mt-5 text-sm font-semibold tracking-wide text-slate-500">
+      <p className="mt-5 text-sm font-semibold tracking-wide text-white/64">
         {label}
       </p>
       <div className="mt-3 flex items-end gap-1">
-        <span className="text-4xl font-semibold tracking-tight text-navy">
+        <span className="text-4xl font-semibold tracking-tight text-white">
           {value}
         </span>
         {progress !== undefined ? (
-          <span className="pb-1 text-sm font-medium text-slate-400">/100</span>
+          <span className="pb-1 text-sm font-medium text-white/38">/100</span>
         ) : null}
       </div>
       {progress !== undefined ? (
-        <div className="mt-4 h-2 rounded-full bg-slate-100">
+        <div className="mt-4 h-2 rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-ice-200"
+            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-violet-400 to-ice-300"
             style={{ width: `${progress}%` }}
           />
         </div>
       ) : null}
       {detail ? (
-        <p className="mt-4 text-sm leading-6 text-slate-500">{detail}</p>
+        <p className="mt-4 text-sm leading-6 text-white/64">{detail}</p>
       ) : null}
     </GlassPanel>
   );
@@ -108,9 +108,9 @@ export function StatCard({
 
 export function InfoRow({ label, value }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[18px] border border-white/75 bg-white/52 px-4 py-3">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-semibold text-navy">{value}</span>
+    <div className="flex items-center justify-between gap-3 rounded-[18px] border border-white/8 bg-white/5 px-4 py-3">
+      <span className="text-sm text-white/56">{label}</span>
+      <span className="text-sm font-semibold text-white">{value}</span>
     </div>
   );
 }
@@ -121,12 +121,12 @@ export function ProgressList({ items }) {
       {items.map((item) => (
         <div key={item.label}>
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-navy">{item.label}</p>
-            <p className="text-sm text-slate-400">{item.value}%</p>
+            <p className="text-sm font-semibold text-white">{item.label}</p>
+            <p className="text-sm text-white/40">{item.value}%</p>
           </div>
-          <div className="mt-2 h-2 rounded-full bg-slate-100">
+          <div className="mt-2 h-2 rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-ice-200"
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 via-violet-400 to-ice-300"
               style={{ width: `${item.value}%` }}
             />
           </div>
@@ -145,14 +145,14 @@ export function WaveAccent({ className = "" }) {
     >
       <defs>
         <linearGradient id="waveA" x1="0%" x2="100%" y1="0%" y2="0%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.14" />
-          <stop offset="55%" stopColor="#b9e3fb" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.28" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
+          <stop offset="55%" stopColor="#ddb7ff" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#a2eeff" stopOpacity="0.3" />
         </linearGradient>
         <linearGradient id="waveB" x1="0%" x2="100%" y1="0%" y2="0%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
-          <stop offset="60%" stopColor="#d9f3ff" stopOpacity="0.92" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.3" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.05" />
+          <stop offset="60%" stopColor="#a2eeff" stopOpacity="0.88" />
+          <stop offset="100%" stopColor="#ddb7ff" stopOpacity="0.25" />
         </linearGradient>
       </defs>
 
@@ -176,7 +176,7 @@ export function WaveAccent({ className = "" }) {
         d="M167 154C283 133 378 141 480 171C562 194 645 233 739 238"
         fill="none"
         stroke="#ffffff"
-        strokeOpacity="0.82"
+        strokeOpacity="0.55"
         strokeWidth="10"
         strokeLinecap="round"
       />
