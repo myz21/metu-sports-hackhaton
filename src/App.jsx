@@ -20,6 +20,13 @@ import {
 
 const movementPreview = ["Axel", "Sit Spin", "Camel Spin", "Spiral", "Final Pose"];
 const demoCoachingMixSrc = "/media/demo/coaching_mix.mp3";
+const movementPreviewMap = {
+  Axel: "/media/movements/axel.mp4",
+  "Camel Spin": "/media/movements/camel-spin.mp4",
+  Spiral: "/media/movements/spiral.mp4",
+  "One Foot Glide": "/media/movements/one-foot-glide.mp4",
+  "Two Foot Glide": "/media/movements/two-foot-glide.mp4",
+};
 const demoOffsetPattern = [0.12, -0.18, 0.24, -0.11, 0.08, 0.19, -0.14, 0.15, -0.09, 0.21];
 const demoStabilityPattern = [94, 91, 89, 92, 90, 87, 93, 88, 90, 86];
 const demoAdherencePattern = [95, 90, 88, 92, 89, 86, 91, 87, 90, 85];
@@ -1530,29 +1537,39 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                         <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 flex flex-col items-center justify-center gap-4 relative overflow-hidden min-h-[220px]">
                           <div className="absolute inset-0 bg-radial-gradient from-sky-100/10 via-transparent to-transparent"></div>
 
-                          {/* Skater posture graphic simulator */}
-                          <div className="w-28 h-28 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 relative transition-transform duration-700">
-                            {isPlaying ? (
-                              <div className="absolute inset-0 rounded-full border border-sky-500/20 animate-ping"></div>
-                            ) : null}
+                          {/* Active movement preview */}
+                          {movementPreviewMap[currentCue.name] ? (
+                            <div className="relative w-full max-w-[250px] overflow-hidden rounded-[24px] border border-sky-100 bg-white/75 shadow-[0_18px_40px_rgba(56,189,248,0.12)]">
+                              {isPlaying ? (
+                                <div className="pointer-events-none absolute inset-0 z-10 rounded-[24px] ring-2 ring-sky-300/40 ring-offset-2 ring-offset-white/60" />
+                              ) : null}
+                              <video
+                                key={currentCue.name}
+                                src={movementPreviewMap[currentCue.name]}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="h-[180px] w-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-28 h-28 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 relative transition-transform duration-700">
+                              {isPlaying ? (
+                                <div className="absolute inset-0 rounded-full border border-sky-500/20 animate-ping"></div>
+                              ) : null}
 
-                            {/* Adaptive SVG for 5 skater movements */}
-                            {currentCue.name === "Spiral" && (
-                              <svg className="w-14 h-14 text-sky-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
-                            )}
-                            {currentCue.name === "Salchow" && (
-                              <svg className="w-14 h-14 text-purple-500 animate-spin" style={{ animationDuration: "3s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17m-.5 15v-5h-.581m0 0a8.003 8.003 0 11-15.357-2H5" /></svg>
-                            )}
-                            {currentCue.name === "Twizzle" && (
-                              <svg className="w-14 h-14 text-teal-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            )}
-                            {currentCue.name === "Camel Spin" && (
-                              <svg className="w-14 h-14 text-pink-500 animate-spin" style={{ animationDuration: "1s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
-                            )}
-                            {currentCue.name === "Final Pose" && (
-                              <svg className="w-14 h-14 text-violet-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.475 3.475 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.475 3.475 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.475 3.475 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.475 3.475 0 013.138-3.138z" /></svg>
-                            )}
-                          </div>
+                              {currentCue.name === "Salchow" && (
+                                <svg className="w-14 h-14 text-purple-500 animate-spin" style={{ animationDuration: "3s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17m-.5 15v-5h-.581m0 0a8.003 8.003 0 11-15.357-2H5" /></svg>
+                              )}
+                              {currentCue.name === "Twizzle" && (
+                                <svg className="w-14 h-14 text-teal-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                              )}
+                              {currentCue.name === "Final Pose" && (
+                                <svg className="w-14 h-14 text-violet-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.475 3.475 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.475 3.475 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.475 3.475 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.475 3.475 0 013.138-3.138z" /></svg>
+                              )}
+                            </div>
+                          )}
 
                           <div className="text-center">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aktif Hareket</span>
