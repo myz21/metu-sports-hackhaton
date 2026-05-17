@@ -1,13 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import movementKnowledge from "../knowledge/figure_skating_knowledge.json";
+import pageBackground from "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg";
+import brandLogo from "../skatesync-logo-Photoroom.png";
+import landingFigure from "../skatesync-landing.png";
 
 const movementPreview = ["Axel", "Sit Spin", "Camel Spin", "Spiral", "Final Pose"];
-const pageBackground = new URL(
-  "../abstract-wave-trendy-geometric-abstract-background-with-white-and-blue-gradient-vector.jpg",
-  import.meta.url,
-).href;
-const brandLogo = new URL("../skatesync-logo-Photoroom.png", import.meta.url).href;
-const landingFigure = new URL("../skatesync-landing.png", import.meta.url).href;
 
 function GoogleMark() {
   return (
@@ -46,7 +43,7 @@ function PasswordIcon() {
   );
 }
 
-function LogoMark() {
+function LogoMark({ theme = "light" }) {
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-20 w-20 shrink-0 items-center justify-center sm:h-[5.5rem] sm:w-[5.5rem]">
@@ -57,10 +54,10 @@ function LogoMark() {
         />
       </div>
       <div className="min-w-0">
-        <p className="font-display text-[1.55rem] font-semibold leading-none text-slate-900 sm:text-[1.8rem]">
+        <p className={`font-display text-[1.55rem] font-semibold leading-none sm:text-[1.8rem] ${theme === "dark" ? "text-white" : "text-slate-900"}`}>
           SkateSync AI
         </p>
-        <p className="mt-2 text-[0.68rem] uppercase tracking-[0.42em] text-slate-400 sm:text-xs">
+        <p className={`mt-2 text-[0.68rem] uppercase tracking-[0.42em] sm:text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-400"}`}>
           Precision in Motion
         </p>
       </div>
@@ -68,22 +65,30 @@ function LogoMark() {
   );
 }
 
-function TopBar({ onNavigate }) {
+function TopBar({ onNavigate, theme = "light" }) {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-      <LogoMark />
+      <LogoMark theme={theme} />
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={() => onNavigate("login")}
-          className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50"
+          className={`inline-flex h-11 items-center justify-center rounded-2xl border px-5 text-sm font-semibold transition ${
+            theme === "dark"
+              ? "border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
+              : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
+          }`}
         >
           Login
         </button>
         <button
           type="button"
           onClick={() => onNavigate("overview")}
-          className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-800 px-5 text-sm font-semibold text-white transition hover:bg-slate-700"
+          className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${
+            theme === "dark"
+              ? "bg-slate-100 text-slate-900 hover:bg-white"
+              : "bg-slate-800 text-white hover:bg-slate-700"
+          }`}
         >
           Get Started
         </button>
@@ -337,92 +342,1065 @@ function LandingScreen({ onNavigate }) {
             </div>
           ))}
         </section>
+
+        <section className="mt-8 rounded-[32px] border border-slate-100 bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+          <div className="text-center mb-10">
+            <h2 className="font-display text-3xl font-bold text-slate-900">Simple, transparent pricing</h2>
+            <p className="mt-3 text-base text-slate-500">Pick a plan that fits your training volume.</p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {[
+              {
+                name: "Free",
+                price: "$0",
+                desc: "Basic movement catalog & daily plan.",
+                features: ["Up to 3 plans/month", "Standard timing feedback", "Movement catalog access"],
+                btnText: "Start for free",
+                btnStyle: "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              },
+              {
+                name: "Standard",
+                price: "$20",
+                desc: "Perfect for daily routines.",
+                features: ["Unlimited fast reviews", "Low latency scoring", "Basic voice coaching"],
+                btnText: "Get Standard",
+                btnStyle: "bg-slate-800 text-white hover:bg-slate-700",
+                highlight: true
+              },
+              {
+                name: "Pro Coach",
+                price: "$50",
+                desc: "Detailed, high-quality analysis.",
+                features: ["Detailed coach-style reviews", "High quality (more frames)", "Scrolling lyrics sync"],
+                btnText: "Get Pro",
+                btnStyle: "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+              }
+            ].map((plan) => (
+              <div key={plan.name} className={`flex flex-col rounded-[24px] p-6 ${plan.highlight ? 'border-2 border-slate-800 bg-slate-50/50' : 'border border-slate-100 bg-white shadow-sm'}`}>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">{plan.name}</p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-4xl font-bold tracking-tight text-slate-900">{plan.price}</span>
+                  <span className="text-sm font-medium text-slate-500">/month</span>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-slate-500">{plan.desc}</p>
+                <ul className="mt-6 flex-1 space-y-4 text-sm text-slate-600">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-start gap-3">
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="mt-[2px] h-4 w-4 text-slate-800 shrink-0"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" /></svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button type="button" className={`mt-8 w-full h-12 rounded-2xl px-4 text-sm font-semibold transition ${plan.btnStyle}`}>
+                  {plan.btnText}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
 }
 
 function OverviewScreen({ onNavigate }) {
-  const knownMovements = useMemo(
-    () => movementPreview.filter((name) => movementKnowledge.some((item) => item.title === name)),
-    [],
-  );
+  const [activeTab, setActiveTab] = useState("profile");
+  
+  // Profile States
+  const [athleteLevel, setAthleteLevel] = useState("Junior");
+  const [skateChoice, setSkateChoice] = useState("edea");
+  const [showProfileToast, setShowProfileToast] = useState(false);
+  
+  // Music States
+  const [isMusicUploading, setIsMusicUploading] = useState(false);
+  const [isMusicUploaded, setIsMusicUploaded] = useState(false);
+  const [uploadedMusicName, setUploadedMusicName] = useState("");
+  const [targetScore, setTargetScore] = useState(80);
+  const [isPlanGenerating, setIsPlanGenerating] = useState(false);
+  const [isPlanGenerated, setIsPlanGenerated] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playTime, setPlayTime] = useState(0);
+  const [checkedMovements, setCheckedMovements] = useState({
+    "Axel": true, "Salchow": true, "Loop": true, "Toe Loop": true, "Flip": false, "Lutz": false,
+    "Sit Spin": true, "Camel Spin": true, "Upright Spin": true, "Scratch Spin": false, "Layback Spin": false, "Biellmann": false,
+    "Three Turns": true, "Bracket": false, "Rocker and Counter": false, "Mohawk": true, "Twizzle": true,
+    "Spiral": true, "Ina Bauer": true, "Spread Eagle": false, "Lunge": true, "Cantilever": false, "Final Pose": true
+  });
+
+  // Video States
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [isVideoUploaded, setIsVideoUploaded] = useState(false);
+  const [reviewMode, setReviewMode] = useState("Fast");
+  const [detailedCommentary, setDetailedCommentary] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalysisFinished, setIsAnalysisFinished] = useState(false);
+
+  // Playback timer for wave player & scrolling sync cues
+  useEffect(() => {
+    let interval;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setPlayTime((prev) => {
+          if (prev >= 110) {
+            setIsPlaying(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 500); // 1 tick = ~1 second (simulated faster playback)
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  // Handle Profile Save
+  const handleSaveProfile = () => {
+    setShowProfileToast(true);
+    setTimeout(() => setShowProfileToast(false), 3000);
+  };
+
+  // Handle Music Upload Simulation
+  const handleMusicUploadSimulate = () => {
+    setIsMusicUploading(true);
+    setTimeout(() => {
+      setIsMusicUploading(false);
+      setIsMusicUploaded(true);
+      setUploadedMusicName("swan_lake_climax_edit.mp3");
+    }, 1500);
+  };
+
+  // Handle Plan Generation Simulation
+  const handleGeneratePlanSimulate = () => {
+    setIsPlanGenerating(true);
+    setTimeout(() => {
+      setIsPlanGenerating(false);
+      setIsPlanGenerated(true);
+    }, 1500);
+  };
+
+  // Handle Video Upload Simulation
+  const handleVideoUploadSimulate = () => {
+    setIsVideoUploading(true);
+    setTimeout(() => {
+      setIsVideoUploading(false);
+      setIsVideoUploaded(true);
+    }, 1800);
+  };
+
+  // Handle Video Analysis Simulation
+  const handleStartAnalysisSimulate = () => {
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      setIsAnalysisFinished(true);
+    }, 2000);
+  };
+
+  // Mock catalog data
+  const movementCategories = [
+    { 
+      name: "Jumps", 
+      items: [
+        { name: "Axel", desc: "Edge jump starting forward, extra half rotation in the air." },
+        { name: "Salchow", desc: "Takeoff from back inside edge of one foot, land on back outside of the other." },
+        { name: "Loop", desc: "Takeoff from back outside edge, landing on back outside edge." },
+        { name: "Toe Loop", desc: "Toe-assisted jump taking off from back outside edge." },
+        { name: "Flip", desc: "Toe-assisted jump from back inside edge with outer edge entry." },
+        { name: "Lutz", desc: "Counter-rotated toe jump taking off from back outside edge." }
+      ] 
+    },
+    { 
+      name: "Spins", 
+      items: [
+        { name: "Sit Spin", desc: "Spin performed in a deep squat position with free leg extended." },
+        { name: "Camel Spin", desc: "Spin performed with the body in an airplane (spiral) posture." },
+        { name: "Upright Spin", desc: "Classic vertical spin, includes variations like layback." },
+        { name: "Scratch Spin", desc: "Fast upright spin crossing the free leg in front." },
+        { name: "Layback Spin", desc: "Upright spin where head and shoulders lean backward." },
+        { name: "Biellmann", desc: "Exquisite spin grabbing the blade and pulling it overhead." }
+      ] 
+    },
+    { 
+      name: "Step & Turn", 
+      items: [
+        { name: "Three Turns", desc: "One-foot turn changing edge and direction, resembling a '3'." },
+        { name: "Bracket", desc: "Difficult one-foot turn with the cusp pointing outward." },
+        { name: "Rocker & Counter", desc: "Body rotation turn maintaining or reversing circular trajectory." },
+        { name: "Mohawk", desc: "Two-foot turn changing foot but maintaining the edge style." },
+        { name: "Twizzle", desc: "Multi-rotational traveling turn on one foot." }
+      ] 
+    },
+    { 
+      name: "Transitions & Choreography", 
+      items: [
+        { name: "Spiral", desc: "Sailing posture holding the free leg high above hip level." },
+        { name: "Ina Bauer", desc: "Two-foot gliding transition with knees bent, tracking parallel lines." },
+        { name: "Spread Eagle", desc: "Gliding on both feet with toes turned out 180 degrees." },
+        { name: "Lunge", desc: "Deep forward flex glide dragging the back knee on the ice." },
+        { name: "Cantilever", desc: "Low-altitude glide bending back parallel to the ice surface." },
+        { name: "Final Pose", desc: "Choreographic ending posture locked to the final beat of music." }
+      ] 
+    }
+  ];
+
+  // Energy-aware planned program
+  const plannedProgram = [
+    { time: 5, name: "Spiral", zone: "Sakin Giriş", cue: "Dış kenarını koru, süzül." },
+    { time: 22, name: "Salchow", zone: "İlk Yükseliş", cue: "Ritime odaklan... Sıçra!" },
+    { time: 54, name: "Twizzle", zone: "Ritmik Bölüm", cue: "Dönüş hızını koru... Ritimle ak." },
+    { time: 82, name: "Camel Spin", zone: "Climax (Peak)", cue: "Climax! Vücudunu gergin tut, merkezi koru." },
+    { time: 105, name: "Final Pose", zone: "Final Vurgusu", cue: "Harika bitiriş! Duruşunu sabitle ve gülümse." }
+  ];
+
+  // Active cue index based on current playback time
+  const getActiveCueIndex = () => {
+    let activeIdx = 0;
+    for (let i = 0; i < plannedProgram.length; i++) {
+      if (playTime >= plannedProgram[i].time) {
+        activeIdx = i;
+      }
+    }
+    return activeIdx;
+  };
+  const activeCueIdx = getActiveCueIndex();
+  const currentCue = plannedProgram[activeCueIdx];
+
+  // Map boot choice to full name
+  const bootNames = {
+    edea: "Edea Ice Fly + John Wilson Gold Seal",
+    jackson: "Jackson Premiere + MK Professional",
+    riedell: "Riedell Royal + Eclipse Titanium"
+  };
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center"
+      className="min-h-screen bg-cover bg-center text-slate-800 transition-all duration-300"
       style={{
-        backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,251,253,0.96) 100%), url("${pageBackground}")`,
+        backgroundImage: `linear-gradient(180deg, rgba(248,250,252,0.92) 0%, rgba(255,255,255,0.96) 100%), url("${pageBackground}")`,
       }}
     >
-      <TopBar onNavigate={onNavigate} />
+      <TopBar onNavigate={onNavigate} theme="light" />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-14 pt-4 sm:px-6 lg:pb-20">
-        <section className="rounded-[32px] border border-slate-100 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-          <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Get Started</p>
-          <h2 className="mt-3 font-display text-4xl font-bold text-slate-900">
-            A calmer first look at the product
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-500">
-            This page keeps things light: what the app does, which movement language it
-            understands, and the two main review modes.
-          </p>
-        </section>
+      {/* Profile Saved Toast notification */}
+      {showProfileToast && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-teal-50 border border-teal-200 px-5 py-4 shadow-xl animate-rise">
+          <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="text-sm font-semibold text-teal-800">Sporcu profili başarıyla güncellendi!</p>
+        </div>
+      )}
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[28px] border border-slate-100 bg-white p-6">
-            <p className="text-lg font-semibold text-slate-900">What you can do</p>
-            <div className="mt-4 space-y-3">
-              {[
-                "Upload one practice track",
-                "Preview a clean planned timeline",
-                "Upload one training video for review",
-              ].map((item) => (
-                <div key={item} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                  {item}
-                </div>
-              ))}
-            </div>
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-14 pt-4 sm:px-6 lg:pb-20">
+        
+        {/* Navigation & Tab Bar */}
+        <section className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white/70 backdrop-blur-md p-5 sm:p-6 shadow-lg">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-slate-900 tracking-tight">
+              SkateSync AI Dashboard
+            </h2>
+            <p className="mt-1 text-sm text-slate-500 font-medium">
+              Otonom Koreografi Planlama ve Görüntü İşleme Analizi
+            </p>
           </div>
-
-          <div className="rounded-[28px] border border-slate-100 bg-white p-6">
-            <p className="text-lg font-semibold text-slate-900">Review modes</p>
-            <div className="mt-4 space-y-3">
-              {[
-                ["Fast Review", "Quick daily feedback with lower processing cost."],
-                ["Detailed Review", "Coach-style notes with stronger analysis depth."],
-              ].map(([title, text]) => (
-                <div key={title} className="rounded-2xl bg-slate-50 px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-900">{title}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-[28px] border border-slate-100 bg-white p-6">
-          <p className="text-lg font-semibold text-slate-900">Known movements</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {knownMovements.map((item) => (
-              <div
-                key={item}
-                className="rounded-full border border-sky-100 bg-sky-50 px-4 py-2 text-sm font-medium text-slate-700"
+          
+          <div className="flex bg-slate-100/80 rounded-2xl p-1.5 border border-slate-200/50 shadow-inner">
+            {[
+              { id: "profile", label: "Profil & Geçmiş" },
+              { id: "music", label: "Müzik & Planlama" },
+              { id: "video", label: "Video & Analiz" },
+              { id: "catalog", label: "Hareket Kataloğu" }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                  activeTab === tab.id 
+                    ? "bg-white text-sky-600 shadow-md border border-slate-200/30 scale-[1.02]" 
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/40"
+                }`}
               >
-                {item}
-              </div>
+                {tab.label}
+              </button>
             ))}
           </div>
-          <p className="mt-4 text-sm leading-6 text-slate-500">
-            These names stay consistent between planning and video review.
-          </p>
         </section>
+
+        {/* Tab 1: Profile & History */}
+        {activeTab === "profile" && (
+          <section className="grid gap-6 md:grid-cols-[1.1fr_1.9fr] animate-rise">
+            {/* Profile editor */}
+            <div className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 shadow-md flex flex-col gap-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Sporcu Profili</h3>
+                <p className="text-slate-500 text-xs mt-1">Antrenman planlarını şekillendirecek fiziksel ve teknik seviye ayarları.</p>
+              </div>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sporcu Adı</label>
+                  <input
+                    type="text"
+                    defaultValue="Derin Yıldız"
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white/80 px-4 text-sm text-slate-700 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">Sporcu Seviyesi</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["Novice", "Junior", "Senior"].map((lvl) => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={() => setAthleteLevel(lvl)}
+                        className={`h-11 rounded-xl text-xs font-bold border transition ${
+                          athleteLevel === lvl 
+                            ? "bg-sky-50 border-sky-300 text-sky-600 shadow-sm" 
+                            : "bg-white/80 border-slate-200 text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">Buz Pateni Seçimi</label>
+                  <select
+                    value={skateChoice}
+                    onChange={(e) => setSkateChoice(e.target.value)}
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white/80 px-4 text-sm text-slate-700 outline-none focus:border-sky-400 transition"
+                  >
+                    <option value="edea">Edea Ice Fly + Gold Seal</option>
+                    <option value="jackson">Jackson Premiere + MK Pro</option>
+                    <option value="riedell">Riedell Royal + Eclipse Titanium</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  className="w-full h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition shadow-sm mt-2"
+                >
+                  Profili Kaydet
+                </button>
+              </div>
+            </div>
+
+            {/* Previous history lists */}
+            <div className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 shadow-md flex flex-col gap-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Analiz &amp; Koreografi Geçmişi</h3>
+                <p className="text-slate-500 text-xs mt-1">Daha önce sistem tarafından kaydedilmiş çalışmalar ve koç analiz raporları.</p>
+              </div>
+
+              <div className="space-y-5">
+                {/* Previous Video Analyses */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Daha Önceki Analiz Geçmişi</h4>
+                  <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white/80 shadow-sm">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Tarih</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Koreografi</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Uyum Skoru</th>
+                          <th className="px-4 py-3 font-semibold text-slate-500">Derece</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {[
+                          { date: "10.05.2026", track: "Swan Lake Climax", score: "92%", grade: "A" },
+                          { date: "05.05.2026", track: "Riverdance Upbeat", score: "86%", grade: "B+" },
+                          { date: "28.04.2026", track: "Moonlight Sonata Act 1", score: "78%", grade: "B-" }
+                        ].map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="px-4 py-3 font-medium text-slate-600">{row.date}</td>
+                            <td className="px-4 py-3 font-semibold text-slate-800">{row.track}</td>
+                            <td className="px-4 py-3 font-semibold text-sky-600">{row.score}</td>
+                            <td className="px-4 py-3"><span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-100">{row.grade}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Previous Choreographies & Coach Reports */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Önceki Müzikli Koreografiler</h4>
+                    <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                      {[
+                        { title: "Swan Lake Cinematic", bpm: "120 BPM", elCount: "12 hareket" },
+                        { title: "Riverdance Mix", bpm: "132 BPM", elCount: "15 hareket" }
+                      ].map((item, idx) => (
+                        <div key={idx} className="p-3 rounded-xl border border-slate-100 bg-white/80 flex justify-between items-center shadow-xs">
+                          <div>
+                            <p className="text-xs font-bold text-slate-800">{item.title}</p>
+                            <p className="text-[10px] text-slate-400 font-medium mt-0.5">{item.bpm} • {item.elCount}</p>
+                          </div>
+                          <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-sky-50 text-sky-500">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Önceki Coach Feedback Raporları</h4>
+                    <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                      {[
+                        "Double axel sıçrama ritmi harika, oturma dönüşünde kalçayı biraz daha aşağıda tutmaya odaklan.",
+                        "Adım dizilerinde stabilite ve dış kenarı tutuş süren belirgin şekilde iyileşmiş."
+                      ].map((report, idx) => (
+                        <div key={idx} className="p-3 rounded-xl border border-slate-100 bg-white/80 shadow-xs">
+                          <p className="text-[11px] leading-5 text-slate-500 font-medium italic">"{report}"</p>
+                          <p className="text-[9px] text-sky-500 font-bold uppercase tracking-wider mt-1 text-right">— Elena (AI Coach)</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Tab 2: Music & Planning */}
+        {activeTab === "music" && (
+          <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Müzik Yükleme &amp; AI Koreografi Planlama</h3>
+                <p className="text-slate-500 text-xs mt-1">
+                  Yüklenen müziğin BPM ve enerji değişimlerini analiz ederek otonom koreografi rotası oluşturun.
+                </p>
+              </div>
+
+              {!isMusicUploaded ? (
+                <button
+                  onClick={handleMusicUploadSimulate}
+                  disabled={isMusicUploading}
+                  className="rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:bg-sky-400 text-white px-5 py-3 text-sm font-semibold transition shadow-sm flex items-center gap-2"
+                >
+                  {isMusicUploading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      BPM Hesaplanıyor...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      Simüle Müzik Yükle
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 px-4 py-2.5 rounded-2xl">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{uploadedMusicName}</span>
+                </div>
+              )}
+            </div>
+
+            {/* If music is not uploaded, show a gorgeous upload zone */}
+            {!isMusicUploaded && (
+              <div className="border-2 border-dashed border-sky-200 bg-sky-50/20 rounded-[24px] p-10 flex flex-col items-center justify-center text-center gap-4 min-h-[260px] transition hover:bg-sky-50/30">
+                <div className="w-16 h-16 rounded-full bg-sky-50 flex items-center justify-center text-sky-500 border border-sky-100 shadow-xs">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Antrenman Müziğinizi Sürükleyin ve Bırakın</p>
+                  <p className="text-xs text-slate-400 mt-1">Desteklenen formatlar: MP3, WAV, AAC (Maks 10MB)</p>
+                </div>
+                <button
+                  onClick={handleMusicUploadSimulate}
+                  className="rounded-xl border border-sky-200 bg-white hover:bg-sky-50 text-sky-600 text-xs font-bold px-4 py-2 transition"
+                >
+                  Dosya Seçin
+                </button>
+              </div>
+            )}
+
+            {/* If uploaded, show planning parameters, interactive timeline and generate action */}
+            {isMusicUploaded && (
+              <div className="grid gap-6 lg:grid-cols-[1.8fr_1.2fr]">
+                <div className="flex flex-col gap-6">
+                  {/* Music metrics display */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {[
+                      { label: "BPM Ritim Skoru", val: "118 BPM", color: "text-sky-600 bg-sky-50" },
+                      { label: "Toplam Vuruş", val: "142 Vuruş", color: "text-purple-600 bg-purple-50" },
+                      { label: "Enerji Profili", val: "Dinamik Yüksek", color: "text-pink-600 bg-pink-50" },
+                      { label: "Climax / Zirve", val: "74.8s / 104.6s", color: "text-amber-600 bg-amber-50" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xs flex flex-col gap-1">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{item.label}</span>
+                        <span className={`text-base font-extrabold ${item.color} px-2.5 py-1 rounded-xl self-start mt-1`}>{item.val}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Energy Timeline Bar */}
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">İnteraktif Enerji Dağılımı ve Hareket Önerileri</h4>
+                    
+                    <div className="h-10 w-full rounded-xl overflow-hidden flex font-bold text-[10px] text-white">
+                      <div className="w-[15%] bg-sky-400 flex items-center justify-center px-1 shadow-inner" title="Sakin Giriş">0-15s Sakin</div>
+                      <div className="w-[23%] bg-sky-500 flex items-center justify-center px-1 shadow-inner" title="İlk Yükseliş">15-40s Yükseliş</div>
+                      <div className="w-[32%] bg-purple-500 flex items-center justify-center px-1 shadow-inner" title="Ritmik Bölüm">40-75s Ritim</div>
+                      <div className="w-[20%] bg-pink-500 flex items-center justify-center px-1 shadow-inner" title="Climax">75-100s Climax</div>
+                      <div className="w-[10%] bg-violet-600 flex items-center justify-center px-1 shadow-inner" title="Final">100s+ Final</div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[11px] font-semibold text-slate-500 pt-2 border-t border-slate-50">
+                      <div>
+                        <span className="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block mr-1"></span>
+                        <strong>Sakin Giriş:</strong>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Öneri: Spiral / Geçiş</p>
+                      </div>
+                      <div>
+                        <span className="w-2.5 h-2.5 rounded-full bg-sky-500 inline-block mr-1"></span>
+                        <strong>İlk Yükseliş:</strong>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Öneri: Salchow / Jump</p>
+                      </div>
+                      <div>
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block mr-1"></span>
+                        <strong>Ritmik Bölüm:</strong>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Öneri: Adım Dizisi</p>
+                      </div>
+                      <div>
+                        <span className="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block mr-1"></span>
+                        <strong>Climax:</strong>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Öneri: Camel Spin</p>
+                      </div>
+                      <div>
+                        <span className="w-2.5 h-2.5 rounded-full bg-violet-600 inline-block mr-1"></span>
+                        <strong>Final:</strong>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Öneri: Final Pose</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Planning generation settings */}
+                  {!isPlanGenerated && (
+                    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">AI Koreografi Hazırlığı</h4>
+                        <p className="text-slate-500 text-xs mt-0.5">Yapay zekanın koreografide kullanmasını istediğiniz parametreler ve hareketler.</p>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+                            <span>Hedef Zorluk Puanı</span>
+                            <span className="text-sky-600 font-bold">{targetScore} Puan</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="40" 
+                            max="100" 
+                            value={targetScore} 
+                            onChange={(e) => setTargetScore(parseInt(e.target.value))}
+                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-xs font-semibold text-slate-500 block">Düzey / Seviye</span>
+                          <span className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg inline-block w-full">{athleteLevel} Seviye Kuralları</span>
+                        </div>
+                      </div>
+
+                      {/* Doable movements selection */}
+                      <div className="space-y-2">
+                        <span className="text-xs font-semibold text-slate-500 block">Koreografide Kullanılabilecek Hareketler</span>
+                        <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto pr-1">
+                          {Object.keys(checkedMovements).map((mName) => (
+                            <button
+                              key={mName}
+                              type="button"
+                              onClick={() => setCheckedMovements(prev => ({ ...prev, [mName]: !prev[mName] }))}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                                checkedMovements[mName]
+                                  ? "bg-purple-50 border-purple-200 text-purple-600"
+                                  : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                              }`}
+                            >
+                              {mName}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleGeneratePlanSimulate}
+                        disabled={isPlanGenerating}
+                        className="h-12 w-full rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-purple-400 text-white text-sm font-bold transition shadow-md mt-2 flex items-center justify-center gap-2"
+                      >
+                        {isPlanGenerating ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Plan Hazırlanıyor...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            Otonom AI Planı Oluştur
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* If plan generated, show scrolling sync visualizer */}
+                  {isPlanGenerated && (
+                    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                      <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                        <h4 className="text-sm font-bold text-slate-900">Müzik Senkronize Sesli Komutlar ve Akış</h4>
+                        <div className="flex items-center gap-2">
+                          <button className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-100 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition">
+                            PDF Dışa Aktar
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Visual animation and lyrics wrapper */}
+                      <div className="grid md:grid-cols-[1fr_1.3fr] gap-4">
+                        {/* Skeleton looping athlete model animation */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 flex flex-col items-center justify-center gap-4 relative overflow-hidden min-h-[220px]">
+                          <div className="absolute inset-0 bg-radial-gradient from-sky-100/10 via-transparent to-transparent"></div>
+                          
+                          {/* Skater posture graphic simulator */}
+                          <div className="w-28 h-28 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 relative transition-transform duration-700">
+                            {isPlaying ? (
+                              <div className="absolute inset-0 rounded-full border border-sky-500/20 animate-ping"></div>
+                            ) : null}
+                            
+                            {/* Adaptive SVG for 5 skater movements */}
+                            {currentCue.name === "Spiral" && (
+                              <svg className="w-14 h-14 text-sky-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                            )}
+                            {currentCue.name === "Salchow" && (
+                              <svg className="w-14 h-14 text-purple-500 animate-spin" style={{ animationDuration: "3s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17m-.5 15v-5h-.581m0 0a8.003 8.003 0 11-15.357-2H5" /></svg>
+                            )}
+                            {currentCue.name === "Twizzle" && (
+                              <svg className="w-14 h-14 text-teal-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                            )}
+                            {currentCue.name === "Camel Spin" && (
+                              <svg className="w-14 h-14 text-pink-500 animate-spin" style={{ animationDuration: "1s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                            )}
+                            {currentCue.name === "Final Pose" && (
+                              <svg className="w-14 h-14 text-violet-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.475 3.475 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.475 3.475 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.475 3.475 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.475 3.475 0 013.138-3.138z" /></svg>
+                            )}
+                          </div>
+                          
+                          <div className="text-center">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aktif Hareket</span>
+                            <p className="text-sm font-extrabold text-slate-800 mt-0.5">{currentCue.name}</p>
+                          </div>
+                        </div>
+
+                        {/* Ticker scrolling cues */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 flex flex-col justify-center relative overflow-hidden min-h-[220px]">
+                          <div className="absolute top-3 left-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Scrolling Lyrics Sync</div>
+                          
+                          <div className="flex flex-col gap-5 relative z-10 transition-transform duration-500">
+                            {plannedProgram.map((item, idx) => {
+                              const isCueActive = idx === activeCueIdx;
+                              const isCuePast = idx < activeCueIdx;
+                              return (
+                                <div 
+                                  key={idx} 
+                                  className={`flex items-start gap-4 transition-all duration-300 ${
+                                    isCueActive 
+                                      ? "opacity-100 scale-102 font-semibold" 
+                                      : isCuePast 
+                                        ? "opacity-30 line-through" 
+                                        : "opacity-40"
+                                  }`}
+                                >
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 border ${
+                                    isCueActive ? "bg-purple-100 border-purple-200 text-purple-600" : "bg-slate-100 border-slate-200 text-slate-500"
+                                  }`}>
+                                    {item.time}s
+                                  </span>
+                                  <div>
+                                    <p className={`text-xs font-bold ${isCueActive ? "text-purple-600" : "text-slate-700"}`}>
+                                      {item.name}
+                                    </p>
+                                    <p className={`text-[13px] mt-0.5 ${isCueActive ? "text-slate-900 font-medium" : "text-slate-500"}`}>
+                                      "{item.cue}"
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Custom Audio Player Widget */}
+                      <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={() => setIsPlaying(!isPlaying)}
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-sky-600 hover:bg-sky-500 text-white transition shadow-md"
+                          >
+                            {isPlaying ? (
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                            )}
+                          </button>
+                          
+                          {/* Pulsating Visual Wave */}
+                          <div className="flex-1 mx-6 flex items-center gap-1.5 h-10 overflow-hidden relative">
+                            {Array.from({ length: 42 }).map((_, waveIdx) => {
+                              // Dynamic wave height based on play status and time
+                              const randomWaveH = isPlaying ? Math.floor(Math.sin((waveIdx + playTime) * 0.5) * 16) + 20 : 12;
+                              const isWavePast = (waveIdx / 42) * 110 < playTime;
+                              return (
+                                <span
+                                  key={waveIdx}
+                                  className={`w-1 rounded-full transition-all duration-300 ${
+                                    isWavePast ? "bg-sky-500" : "bg-slate-200"
+                                  }`}
+                                  style={{ height: `${randomWaveH}px` }}
+                                ></span>
+                              );
+                            })}
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <p className="text-xs font-bold text-slate-700">
+                              {Math.floor(playTime / 60)}:{(playTime % 60).toString().padStart(2, "0")}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">/ 01:50</p>
+                          </div>
+                        </div>
+
+                        {/* Visual progression track */}
+                        <div className="relative pt-1">
+                          <div className="overflow-hidden h-1.5 text-xs flex rounded-full bg-slate-200">
+                            <div
+                              style={{ width: `${(playTime / 110) * 100}%` }}
+                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-sky-400 to-purple-500 transition-all duration-500"
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Planned items timeline sidebar */}
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs overflow-y-auto max-h-[500px]">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Program Koreografi Rotası</h4>
+                  
+                  {isPlanGenerated ? (
+                    <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-[11px] before:w-px before:bg-slate-200 mt-2">
+                      {plannedProgram.map((item, idx) => {
+                        const isCueActive = idx === activeCueIdx;
+                        return (
+                          <div key={idx} className="relative pl-8 animate-rise" style={{ animationDelay: `${idx * 0.1}s` }}>
+                            <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white z-10 transition-all duration-300 shadow-sm ${
+                              isCueActive ? 'bg-sky-500 scale-110 ring-4 ring-sky-100' : 'bg-slate-300'
+                            }`}></div>
+                            <span className="text-[9px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-100 uppercase tracking-wider">{item.zone}</span>
+                            <p className={`font-bold text-sm mt-1.5 transition-colors ${isCueActive ? 'text-sky-600' : 'text-slate-800'}`}>{item.name}</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5 font-medium">{item.time}s • {item.cue}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 flex flex-col items-center justify-center gap-3">
+                      <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <p className="text-xs font-semibold text-slate-400 leading-5">Plan hazırlamak için yukarıdan "Simüle Müzik Yükle" yaptıktan sonra otonom plan butonuna tıklayın.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Tab 3: Video & Review */}
+        {activeTab === "video" && (
+          <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Vision Görüntü Analizi &amp; Skorlama</h3>
+                <p className="text-slate-500 text-xs mt-1">
+                  Antrenman videonuzu yükleyerek planlanan timeline ile ritim ve stabilite karşılaştırmasını yapın.
+                </p>
+              </div>
+
+              {!isVideoUploaded ? (
+                <button
+                  onClick={handleVideoUploadSimulate}
+                  disabled={isVideoUploading}
+                  className="rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:bg-sky-400 text-white px-5 py-3 text-sm font-semibold transition shadow-sm flex items-center gap-2"
+                >
+                  {isVideoUploading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      Video Yükleniyor...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      Simüle Video Yükle
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 px-4 py-2.5 rounded-2xl">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">practice_session_video.mp4</span>
+                </div>
+              )}
+            </div>
+
+            {/* If video is not uploaded, show a gorgeous upload zone */}
+            {!isVideoUploaded && (
+              <div className="border-2 border-dashed border-sky-200 bg-sky-50/20 rounded-[24px] p-10 flex flex-col items-center justify-center text-center gap-4 min-h-[260px] transition hover:bg-sky-50/30">
+                <div className="w-16 h-16 rounded-full bg-sky-50 flex items-center justify-center text-sky-500 border border-sky-100 shadow-xs">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Antrenman Videosunu Sürükleyin ve Bırakın</p>
+                  <p className="text-xs text-slate-400 mt-1">Desteklenen formatlar: MP4, MOV, AVI (Maks 50MB)</p>
+                </div>
+                <button
+                  onClick={handleVideoUploadSimulate}
+                  className="rounded-xl border border-sky-200 bg-white hover:bg-sky-50 text-sky-600 text-xs font-bold px-4 py-2 transition"
+                >
+                  Dosya Seçin
+                </button>
+              </div>
+            )}
+
+            {/* If uploaded, show analysis quality options and analysis button */}
+            {isVideoUploaded && !isAnalysisFinished && (
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xs flex flex-col gap-6">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Analiz Profili Ayarları</h4>
+                  <p className="text-slate-500 text-xs mt-0.5">Maliyet ve hız kontrolü için görüntü işleme derinliğini seçin.</p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[
+                    { id: "Fast", title: "Fast Review (Low Quality)", desc: "Günlük hızlı antrenman kontrolleri için daha az kare analizi yapan ucuz ve hızlı mod." },
+                    { id: "Detailed", title: "Detailed Review (High Quality)", desc: "Resmi program provaları için yüksek çözünürlüklü ve detaylı koç seviyesi analiz modudur." }
+                  ].map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setReviewMode(mode.id)}
+                      className={`p-4 rounded-2xl border text-left flex flex-col gap-2 transition-all ${
+                        reviewMode === mode.id
+                          ? "bg-sky-50 border-sky-300 shadow-md scale-[1.01]"
+                          : "bg-white border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <span className={`text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-xl self-start ${
+                        reviewMode === mode.id ? "bg-sky-100 text-sky-600" : "bg-slate-100 text-slate-500"
+                      }`}>
+                        {mode.id === "Fast" ? "HIZLI VE UCUZ" : "DETAYLI PRO"}
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-1">{mode.title}</p>
+                      <p className="text-xs text-slate-500 leading-5">{mode.desc}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Additional detailed commentary toggle */}
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-bold text-slate-700">Detaylı Yapay Zeka Koç Yorumu</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Bireysel teknik hatalar ve duruş ipuçlarını içeren koç metin raporu üretilir.</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={detailedCommentary} 
+                      onChange={() => setDetailedCommentary(!detailedCommentary)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                  </label>
+                </div>
+
+                <button
+                  onClick={handleStartAnalysisSimulate}
+                  disabled={isAnalyzing}
+                  className="h-12 w-full rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-purple-400 text-white text-sm font-bold transition shadow-md flex items-center justify-center gap-2"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      Video Analiz Ediliyor (MediaPipe + VLM)...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.475 3.475 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.475 3.475 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.475 3.475 0 01-3.138-3.138z" /></svg>
+                      Görüntü İşleme Analizini Başlat
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* If analysis finished, show visual scores, planned vs actual grid and coach comment */}
+            {isAnalysisFinished && (
+              <div className="flex flex-col gap-6 animate-rise">
+                
+                {/* Scoring cards dashboard */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { label: "Müzikal Ritim Uyumu", score: "88%", desc: "Beat Vurgusu Senkronu", color: "text-sky-600 bg-sky-50 border-sky-100" },
+                    { label: "Denge & Stabilite", score: "92%", desc: "Landmark Sapma Payı", color: "text-purple-600 bg-purple-50 border-purple-100" },
+                    { label: "Programa Sadakat", score: "85%", desc: "Plan Karşılaştırma", color: "text-pink-600 bg-pink-50 border-pink-100" },
+                    { label: "Genel Değerlendirme", score: "A-", desc: "Coach Pro Puanı", color: "text-slate-800 bg-slate-50 border-slate-200" }
+                  ].map((scoreCard, idx) => (
+                    <div key={idx} className={`rounded-2xl border p-5 flex flex-col items-center justify-center text-center shadow-xs ${scoreCard.color}`}>
+                      <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">{scoreCard.label}</span>
+                      <span className="text-3xl font-extrabold tracking-tight mt-2.5 mb-1">{scoreCard.score}</span>
+                      <span className="text-[10px] font-semibold opacity-50">{scoreCard.desc}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Planned vs Actual Grid Table */}
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest border-b border-slate-50 pb-2">Planlanan Zamanlama vs Gerçekleşen Uyum</h4>
+                  
+                  <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xs">
+                    <table className="min-w-full divide-y divide-slate-100 text-left text-xs">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Hareket Adı</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Plan Zamanı</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Gerçekleşen</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Zamanlama Durumu</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-500">Milisecond Offset</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {[
+                          { name: "Spiral", plan: "5.0s", act: "5.2s", badge: "bg-teal-50 text-teal-600 border-teal-100", status: "On Time", offset: "+200ms" },
+                          { name: "Salchow", plan: "22.0s", act: "20.1s", badge: "bg-purple-50 text-purple-600 border-purple-100", status: "Early", offset: "-1900ms" },
+                          { name: "Twizzle", plan: "54.0s", act: "57.5s", badge: "bg-amber-50 text-amber-600 border-amber-100", status: "Late", offset: "+3500ms" },
+                          { name: "Camel Spin", plan: "82.0s", act: "82.2s", badge: "bg-teal-50 text-teal-600 border-teal-100", status: "On Time", offset: "+200ms" },
+                          { name: "Final Pose", plan: "105.0s", act: "105.1s", badge: "bg-teal-50 text-teal-600 border-teal-100", status: "On Time", offset: "+100ms" }
+                        ].map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="px-4 py-3.5 font-bold text-slate-800">{row.name}</td>
+                            <td className="px-4 py-3.5 font-medium text-slate-500">{row.plan}</td>
+                            <td className="px-4 py-3.5 font-bold text-slate-600">{row.act}</td>
+                            <td className="px-4 py-3.5">
+                              <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase border ${row.badge}`}>
+                                {row.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-400 font-medium">{row.offset}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Natural Language AI Coach Commentary */}
+                {detailedCommentary && (
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs flex flex-col gap-4">
+                    <div className="flex items-center gap-3 border-b border-slate-50 pb-3">
+                      <div className="relative">
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
+                        <span className="w-10 h-10 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 font-bold text-sm">E</span>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Elena (AI Coach) Yorumu</h4>
+                        <p className="text-[10px] text-slate-400 font-medium">Bireysel ve sanatsal performans geri bildirimi</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl bg-sky-50/30 border border-sky-100/50 p-4 leading-7 text-sm text-slate-600 font-medium shadow-inner">
+                      <p>
+                        "Harika bir antrenman çıkardın Derin! <strong>Swan Lake</strong> ritmine uyumun genel olarak mükemmel. Özellikle final pozunu tam bitiş vurgusuyla saniyelik senkronize etmen tek kelimeyle göz kamaştırıcı."
+                      </p>
+                      <p className="mt-3">
+                        "Salchow sıçrayışına biraz erken girdin (yaklaşık 1.9s erken), bu da havadaki dönüş ve iniş dengesini biraz etkileyerek stabilite skorunu <strong>%92</strong> seviyesine çekti. Twizzle adım dizisinde de müzik hızına adapte olurken bir miktar geç kaldın. Bir dahaki sefere adım dizisinde dış kenarı daha uzun ve kararlı tutmaya çalış. Tebrikler, program genel hazır duruma çok yaklaşıyor!"
+                      </p>
+                    </div>
+
+                    {/* Simple exercise guidance cards */}
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {[
+                        { title: "Salchow Denge Odağı", cue: "Zıplamadan önce kollarını daha yakın tut, takeoff ritmini koru." },
+                        { title: "Twizzle Adım Çalışması", cue: "Dönüş esnasında bakışını tek bir noktaya sabitle, hızı koru." },
+                        { title: "Final Vurgusu Kontrolü", cue: "Kolları uzatırken başını kaldır, hakemlere doğru odaklan." }
+                      ].map((card, idx) => (
+                        <div key={idx} className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 shadow-xs">
+                          <p className="text-xs font-bold text-slate-800">{card.title}</p>
+                          <p className="text-[11px] text-slate-500 mt-1.5 leading-5 font-medium">{card.cue}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Tab 4: Movement Catalog */}
+        {activeTab === "catalog" && (
+          <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Hareket Kataloğu (Movement Dictionary)</h3>
+              <p className="text-slate-500 text-xs mt-1">
+                SkateSync AI uses this movement dictionary to generate plans, analyze video, and provide feedback.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {movementCategories.map((cat) => (
+                <div key={cat.name} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col gap-3">
+                  <h4 className="text-sm font-extrabold text-sky-600 uppercase tracking-widest border-b border-slate-50 pb-2">{cat.name}</h4>
+                  
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                    {cat.items.map((item) => (
+                      <div key={item.name} className="p-3 rounded-xl bg-slate-50 border border-slate-100/50 flex flex-col gap-1 transition hover:bg-slate-100/30">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-800">{item.name}</span>
+                          <span className="text-[9px] font-bold text-teal-600 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
+                            AI Bilinen
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 leading-5 mt-1 font-medium">{item.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
       </main>
     </div>
   );
-}
-
-export default function App() {
+}export default function App() {
   const [screen, setScreen] = useState("landing");
 
   if (screen === "login") {
