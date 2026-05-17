@@ -148,6 +148,31 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const mockEmail = "derin.yildiz@skatesync.ai";
+      const mockName = "Derin Yıldız";
+      const mockChoice = "edea";
+      let user;
+      try {
+        // Try logging in the mock user first
+        user = await dbLogin(mockEmail, "mock_google_pass");
+      } catch (err) {
+        // If not registered yet under mock DB, register
+        user = await dbRegister(mockEmail, "mock_google_pass", mockName, mockChoice);
+      }
+      setActiveUser(user);
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      setError("Google ile giriş yapılırken hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -290,7 +315,9 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
 
           <button
             type="button"
-            className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50 disabled:opacity-50"
           >
             <GoogleMark />
             Google ile devam et
@@ -539,6 +566,9 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
 
 function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
+  const musicInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const [uploadedVideoName, setUploadedVideoName] = useState("");
   
   // Profile States
   const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
@@ -634,13 +664,19 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     }
   };
 
-  // Handle Music Upload Simulation
+  // Handle Music Upload File Selector
   const handleMusicUploadSimulate = () => {
+    musicInputRef.current?.click();
+  };
+
+  const handleMusicFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setIsMusicUploading(true);
+    setUploadedMusicName(file.name);
     setTimeout(() => {
       setIsMusicUploading(false);
       setIsMusicUploaded(true);
-      setUploadedMusicName("swan_lake_climax_edit.mp3");
     }, 1500);
   };
 
@@ -654,7 +690,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
       if (activeUser) {
         try {
           const newChoreo = {
-            title: uploadedMusicName ? uploadedMusicName.replace(".mp3", "") : "swan_lake_climax_edit",
+            title: uploadedMusicName ? uploadedMusicName.replace(/\.[^/.]+$/, "") : "swan_lake_climax_edit",
             bpm: "128 BPM",
             elCount: `${selectedMovements.length} hareket`,
             movements: selectedMovements
@@ -668,9 +704,16 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     }, 1500);
   };
 
-  // Handle Video Upload Simulation
+  // Handle Video Upload File Selector
   const handleVideoUploadSimulate = () => {
+    videoInputRef.current?.click();
+  };
+
+  const handleVideoFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setIsVideoUploading(true);
+    setUploadedVideoName(file.name);
     setTimeout(() => {
       setIsVideoUploading(false);
       setIsVideoUploaded(true);
@@ -989,6 +1032,13 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         {/* Tab 2: Music & Planning */}
         {activeTab === "music" && (
           <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <input
+              type="file"
+              ref={musicInputRef}
+              accept="audio/*"
+              className="hidden"
+              onChange={handleMusicFileChange}
+            />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Müzik Yükleme &amp; AI Koreografi Planlama</h3>
@@ -1011,7 +1061,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                      Simüle Müzik Yükle
+                      Müzik Dosyası Yükle
                     </>
                   )}
                 </button>
@@ -1348,7 +1398,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <div className="text-center py-10 flex flex-col items-center justify-center gap-3">
                       <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <p className="text-xs font-semibold text-slate-400 leading-5">Plan hazırlamak için yukarıdan "Simüle Müzik Yükle" yaptıktan sonra otonom plan butonuna tıklayın.</p>
+                      <p className="text-xs font-semibold text-slate-400 leading-5">Plan hazırlamak için yukarıdan "Müzik Dosyası Yükle" yaptıktan sonra otonom plan butonuna tıklayın.</p>
                     </div>
                   )}
                 </div>
@@ -1360,6 +1410,13 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         {/* Tab 3: Video & Review */}
         {activeTab === "video" && (
           <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <input
+              type="file"
+              ref={videoInputRef}
+              accept="video/*"
+              className="hidden"
+              onChange={handleVideoFileChange}
+            />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Vision Görüntü Analizi &amp; Skorlama</h3>
@@ -1382,14 +1439,14 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                      Simüle Video Yükle
+                      Video Dosyası Yükle
                     </>
                   )}
                 </button>
               ) : (
                 <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 px-4 py-2.5 rounded-2xl">
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">practice_session_video.mp4</span>
+                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{uploadedVideoName || "practice_session_video.mp4"}</span>
                 </div>
               )}
             </div>
