@@ -163,25 +163,6 @@ export const uploadSections = [
   },
 ];
 
-export const analysisQualityOptions = [
-  {
-    id: "low",
-    label: "Low Cost",
-    eyebrow: "Faster review",
-    detail:
-      "Uses fewer sampled frames, compact skating context, and a cheaper vision pass for regular practice checks.",
-    meta: "Best for daily runthroughs",
-  },
-  {
-    id: "high",
-    label: "High Quality",
-    eyebrow: "Deeper review",
-    detail:
-      "Uses a richer frame sample and more expensive vision setup for stronger demo, coach, or presentation runs.",
-    meta: "Best for demos and key sessions",
-  },
-];
-
 export const analysisFrames = [
   {
     label: "Jump landing stability",
@@ -251,70 +232,48 @@ export const librarySections = [
   },
 ];
 
-export const movementKnowledgeCatalog = {
-  eyebrow: "AI Knowledge",
-  title: "Shared skating movement catalog",
-  description:
-    "The interface and the review engine use the same movement families so plan names, library items, and VLM feedback stay consistent.",
-  sources: [
-    {
-      label: "Reference markdown",
-      path: "src/vision/knowledge/skating-movement-catalog.md",
-    },
-    {
-      label: "RAG knowledge base",
-      path: "src/vision/knowledge/figure_skating_knowledge.json",
-    },
-  ],
-  groups: [
-    {
-      title: "Jumps",
-      detail:
-        "Takeoff, rotation, landing, and timing language used in planning and feedback.",
-      items: ["Axel", "Salchow", "Loop", "Toe Loop", "Flip", "Lutz"],
-    },
-    {
-      title: "Spins",
-      detail:
-        "Core spin families plus training and presentation variations used in review windows.",
-      items: [
-        "Upright Spin",
-        "Scratch Spin",
-        "Layback Spin",
-        "Biellmann Spin",
-        "Sit Spin",
-        "Camel Spin",
-        "Flying Spins",
-        "Two Foot Spin",
-        "One Foot Spin",
-      ],
-    },
-    {
-      title: "Steps & Turns",
-      detail:
-        "Footwork vocabulary for direction changes, edge control, and rhythmic passages.",
-      items: [
-        "Three-Turn",
-        "Bracket",
-        "Rocker & Counter",
-        "Mohawk",
-        "Choctaw",
-        "Twizzle",
-      ],
-    },
-    {
-      title: "Field Moves & Transitions",
-      detail:
-        "Line-driven highlight moves that shape the phrase between technical elements.",
-      items: [
-        "Spiral",
-        "Spread Eagle",
-        "Ina Bauer",
-        "Lunge",
-        "Cantilever",
-        "Final Pose",
-      ],
-    },
+export const movementReferenceClips = [
+  {
+    name: "Axel",
+    category: "Jump",
+    src: "/media/movements/axel.mp4",
+    note: "Featured jump reference for forward takeoff timing and landing flow.",
+  },
+  {
+    name: "Camel Spin",
+    category: "Spin",
+    src: "/media/movements/camel-spin.mp4",
+    note: "Line, axis, and centered rotation reference for longer spin shapes.",
+  },
+  {
+    name: "One Foot Glide",
+    category: "Transition",
+    src: "/media/movements/one-foot-glide.mp4",
+    note: "Basic edge control and balance reference for clean single-foot travel.",
+  },
+  {
+    name: "Spiral",
+    category: "Transition",
+    src: "/media/movements/spiral.mp4",
+    note: "Extension and line reference for longer phrase-driven glide moments.",
+  },
+  {
+    name: "Two Foot Glide",
+    category: "Foundation",
+    src: "/media/movements/two-foot-glide.mp4",
+    note: "Starter balance reference used to support early movement understanding.",
+  },
+];
+
+export const movementKnowledgeNote = {
+  eyebrow: "Knowledge Support",
+  title: "Visual references for the movement vocabulary",
+  detail:
+    "These clips live in the library as athlete-facing references, while the AI movement knowledge remains a separate structured glossary. Together they help keep movement naming and review language aligned.",
+  bullets: [
+    "Library holds the actual videos athletes can watch.",
+    "Knowledge holds the movement definitions the product refers to.",
+    "This MVP includes 5 featured clips as a starter reference set.",
   ],
 };
 

@@ -1,0 +1,41 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1256" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9FDFF"/>
+      <stop offset="0.38" stop-color="#EEF8FF"/>
+      <stop offset="1" stop-color="#F7FBFF"/>
+    </linearGradient>
+    <linearGradient id="waveA" x1="120" y1="262" x2="834" y2="262" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="0.55" stop-color="#B9E3FB" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.28"/>
+    </linearGradient>
+    <linearGradient id="waveB" x1="83" y1="234" x2="842" y2="234" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="0.6" stop-color="#D9F3FF" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.3"/>
+    </linearGradient>
+    <filter id="blurA" x="-220" y="-220" width="720" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="60"/>
+    </filter>
+    <filter id="blurB" x="940" y="510" width="760" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="68"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" rx="36" fill="url(#bg)"/>
+
+  <g opacity="0.78" filter="url(#blurA)">
+    <circle cx="160" cy="140" r="120" fill="#CDEAF9"/>
+  </g>
+
+  <g opacity="0.84" filter="url(#blurB)">
+    <circle cx="1370" cy="930" r="150" fill="#D5F4FF"/>
+  </g>
+
+  <g opacity="0.85" transform="translate(530 320) scale(1.18)">
+    <path d="M120 315C239 244 345 220 463 236C589 254 685 315 834 288" stroke="url(#waveA)" stroke-width="54" stroke-linecap="round"/>
+    <path d="M83 228C201 188 303 182 423 206C559 233 673 298 842 270" stroke="url(#waveB)" stroke-width="32" stroke-linecap="round"/>
+    <path d="M167 154C283 133 378 141 480 171C562 194 645 233 739 238" stroke="white" stroke-opacity="0.82" stroke-width="10" stroke-linecap="round"/>
+  </g>
+</svg>
