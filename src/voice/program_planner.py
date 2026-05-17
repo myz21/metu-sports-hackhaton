@@ -30,7 +30,15 @@ PLANNER_ALLOWED_MOVEMENTS = {
         "Twizzle",
     ],
     "sequence": ["Step Sequence"],
-    "transition": ["Spiral", "Spread Eagle", "Ina Bauer", "Lunge", "Cantilever"],
+    "transition": [
+        "Spiral",
+        "Spread Eagle",
+        "Ina Bauer",
+        "Lunge",
+        "Cantilever",
+        "One Foot Glide",
+        "Two Foot Glide",
+    ],
 }
 
 PLANNER_NAME_ALIASES = {
@@ -70,8 +78,8 @@ PLANNER_NAME_ALIASES = {
     "lunge": "Lunge",
     "cantilever": "Cantilever",
     "final pose": "Ina Bauer",
-    "one foot glide": "Spiral",
-    "two foot glide": "Spread Eagle",
+    "one foot glide": "One Foot Glide",
+    "two foot glide": "Two Foot Glide",
 }
 
 PROGRAM_SCHEMA = {

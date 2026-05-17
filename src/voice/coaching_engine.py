@@ -26,9 +26,6 @@ TRIGGER_LEADS = {
     "pose": 0.1,
 }
 
-PRIMARY_CUE_SPACING_SECONDS = 3.5
-
-
 class CoachingEngine:
     def __init__(
         self,
@@ -46,7 +43,7 @@ class CoachingEngine:
         self.model = model
         self.language = language
         self.knowledge_path = knowledge_path
-        self.client = client if client is not None else _build_openai_client(api_key)
+        self.client = client
 
     def build_timing_plan(self) -> list[dict[str, Any]]:
         beat_times = [float(item) for item in self.audio_data.get("beat_times", [])]
@@ -87,12 +84,9 @@ class CoachingEngine:
     def generate_cues(self) -> list[dict[str, Any]]:
         timing_plan = self.build_timing_plan()
         cues: list[dict[str, Any]] = []
-        last_primary_time = -999.0
         for plan in timing_plan:
             trigger_text = _movement_callout(str(plan["name"]), str(plan["type"]))
             cue_time = float(plan["trigger_time"])
-            if cue_time - last_primary_time < PRIMARY_CUE_SPACING_SECONDS:
-                continue
 
             cues.append(
                 {
@@ -104,11 +98,10 @@ class CoachingEngine:
                     "text": trigger_text,
                 }
             )
-            last_primary_time = cue_time
 
             if str(plan["type"]) == "spin" and float(plan["duration_seconds"]) >= 5.5:
                 focus_time = float(plan["focus_time"])
-                if focus_time - last_primary_time >= 1.8:
+                if focus_time - cue_time >= 1.8:
                     cues.append(
                         {
                             "element_index": plan["element_index"],
@@ -119,7 +112,6 @@ class CoachingEngine:
                             "text": _spin_count_callout(str(plan["name"])),
                         }
                     )
-                    last_primary_time = focus_time
 
         cues.sort(key=lambda item: (float(item["time"]), int(item["element_index"])))
         return cues
@@ -140,28 +132,72 @@ def _snap_to_nearest_beat(
 
 
 def _movement_callout(element_name: str, element_type: str) -> str:
-    spoken_name = element_name.replace("&", "").strip()
-    if element_type == "jump":
-        return spoken_name
-    if element_type == "spin":
-        return spoken_name
-    if element_type == "sequence":
-        return "Step sequence"
-    if element_type == "turns":
-        return spoken_name
-    return spoken_name
+    callout_map = {
+        "Axel": "Bir iki üç, aksel",
+        "Salchow": "Bir iki üç, salchow",
+        "Loop": "Bir iki üç, loop",
+        "Toe Loop": "Bir iki üç, toe loop",
+        "Flip": "Bir iki üç, flip",
+        "Lutz": "Bir iki üç, lutz",
+        "Upright Spin": "Upright spin, merkezi koru",
+        "Scratch Spin": "Scratch spin, hızlan",
+        "Layback Spin": "Layback spin, açıl",
+        "Biellmann Spin": "Biellmann spin, yukarı çek",
+        "Sit Spin": "Sit spin, aşağıda kal",
+        "Camel Spin": "Camel spin, hattı uzat",
+        "Flying Spins": "Flying spin, merkeze otur",
+        "Three-Turn": "Three turn, çevir",
+        "Bracket": "Bracket, kenarı koru",
+        "Rocker & Counter": "Rocker counter, ritmi taşı",
+        "Mohawk & Choctaw": "Mohawk choctaw, geçişi temizle",
+        "Twizzle": "Twizzle, merkezde kal",
+        "Step Sequence": "Step sequence, ritmi taşı",
+        "Spiral": "Spiral, çizgiyi uzat",
+        "Spread Eagle": "Spread eagle, açıl",
+        "Ina Bauer": "Ina Bauer, açıl",
+        "Lunge": "Lunge, derine in",
+        "Cantilever": "Cantilever, hattı koru",
+        "One Foot Glide": "One foot glide, dengeyi koru",
+        "Two Foot Glide": "Two foot glide, akışı koru",
+    }
+    return callout_map.get(element_name, _spoken_movement_name(element_name))
 
 
 def _spin_count_callout(element_name: str) -> str:
-    if "sit" in element_name.lower():
-        return "Bir iki uc, sit spin"
-    if "camel" in element_name.lower():
-        return "Bir iki uc, camel spin"
-    if "layback" in element_name.lower():
-        return "Bir iki uc, layback spin"
-    if "scratch" in element_name.lower():
-        return "Bir iki uc, scratch spin"
-    return "Bir iki uc, spin"
+    return f"Bir iki üç, {_spoken_movement_name(element_name)}"
+
+
+def _spoken_movement_name(element_name: str) -> str:
+    name = element_name.strip()
+    spoken_map = {
+        "Axel": "aksel",
+        "Salchow": "salchow",
+        "Loop": "loop",
+        "Toe Loop": "toe loop",
+        "Flip": "flip",
+        "Lutz": "lutz",
+        "Upright Spin": "upright spin",
+        "Scratch Spin": "scratch spin",
+        "Layback Spin": "layback spin",
+        "Biellmann Spin": "biellmann spin",
+        "Sit Spin": "sit spin",
+        "Camel Spin": "camel spin",
+        "Flying Spins": "flying spin",
+        "Three-Turn": "three turn",
+        "Bracket": "bracket",
+        "Rocker & Counter": "rocker counter",
+        "Mohawk & Choctaw": "mohawk choctaw",
+        "Twizzle": "twizzle",
+        "Step Sequence": "step sequence",
+        "Spiral": "spiral",
+        "Spread Eagle": "spread eagle",
+        "Ina Bauer": "ina bauer",
+        "Lunge": "lunge",
+        "Cantilever": "cantilever",
+        "One Foot Glide": "one foot glide",
+        "Two Foot Glide": "two foot glide",
+    }
+    return spoken_map.get(name, name.replace("&", "").lower())
 
 
 def _build_openai_client(api_key: str | None):

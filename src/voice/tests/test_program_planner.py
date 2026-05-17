@@ -83,7 +83,7 @@ class ProgramPlannerNormalizationTests(unittest.TestCase):
             for name in names
         }
         self.assertTrue(all(item["name"] in allowed_names for item in normalized))
-        self.assertEqual(normalized[0]["name"], "Spiral")
+        self.assertEqual(normalized[0]["name"], "One Foot Glide")
         self.assertEqual(normalized[1]["name"], "Mohawk & Choctaw")
         self.assertEqual(normalized[2]["name"], "Loop")
 

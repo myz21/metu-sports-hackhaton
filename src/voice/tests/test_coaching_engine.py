@@ -53,12 +53,12 @@ class CoachingEngineTests(unittest.TestCase):
         )
         cues = engine.generate_cues()
         self.assertEqual(len(cues), 3)
-        self.assertEqual(cues[0]["text"], "Sit Spin")
+        self.assertEqual(cues[0]["text"], "Sit spin, aşağıda kal")
         self.assertEqual(cues[1]["cue_kind"], "count")
         self.assertIn("spin", cues[1]["text"].lower())
-        self.assertEqual(cues[2]["text"], "Axel")
+        self.assertEqual(cues[2]["text"], "Bir iki üç, aksel")
 
-    def test_generate_cues_skips_only_when_elements_are_too_close(self):
+    def test_generate_cues_reads_every_planned_element(self):
         engine = CoachingEngine(
             audio_data={
                 "tempo": 120,
@@ -91,7 +91,10 @@ class CoachingEngineTests(unittest.TestCase):
             client={},
         )
         cues = engine.generate_cues()
-        self.assertEqual([cue["text"] for cue in cues], ["Spiral", "Three-Turn", "Loop"])
+        self.assertEqual(
+            [cue["text"] for cue in cues],
+            ["Spiral, çizgiyi uzat", "Three turn, çevir", "Bir iki üç, loop"],
+        )
 
 
 if __name__ == "__main__":
