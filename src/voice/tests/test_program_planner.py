@@ -84,8 +84,50 @@ class ProgramPlannerNormalizationTests(unittest.TestCase):
         }
         self.assertTrue(all(item["name"] in allowed_names for item in normalized))
         self.assertEqual(normalized[0]["name"], "Spiral")
-        self.assertEqual(normalized[1]["name"], "Loop")
-        self.assertEqual(normalized[2]["name"], "Mohawk & Choctaw")
+        self.assertEqual(normalized[1]["name"], "Step Sequence")
+        self.assertEqual(normalized[2]["name"], "Loop")
+
+    def test_normalize_planned_elements_avoids_back_to_back_jump_spin_stack(self):
+        planned_elements = [
+            {
+                "name": "Axel",
+                "type": "jump",
+                "start_time": 5.0,
+                "end_time": 7.0,
+                "music_peak_time": 6.0,
+            },
+            {
+                "name": "Camel Spin",
+                "type": "spin",
+                "start_time": 7.1,
+                "end_time": 10.0,
+                "music_peak_time": 8.5,
+            },
+            {
+                "name": "Lutz",
+                "type": "jump",
+                "start_time": 10.1,
+                "end_time": 12.2,
+                "music_peak_time": 11.2,
+            },
+            {
+                "name": "Sit Spin",
+                "type": "spin",
+                "start_time": 12.3,
+                "end_time": 15.0,
+                "music_peak_time": 13.5,
+            },
+        ]
+
+        normalized = normalize_planned_elements(
+            planned_elements,
+            120.0,
+            target_density={"min_elements": 6, "max_elements": 8, "ideal_elements": 7},
+        )
+
+        major_sequence = [item["type"] for item in normalized if item["type"] in {"jump", "spin"}]
+        self.assertLessEqual(len(major_sequence), 2)
+        self.assertGreaterEqual(normalized[-1]["end_time"], 110.0)
 
 
 if __name__ == "__main__":

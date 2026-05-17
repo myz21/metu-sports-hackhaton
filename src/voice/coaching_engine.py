@@ -29,6 +29,8 @@ TRIGGER_LEADS = {
     "pose": 0.1,
 }
 
+PRIMARY_CUE_SPACING_SECONDS = 7.5
+
 CUE_TEXT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -122,15 +124,21 @@ class CoachingEngine:
 
     def generate_cues(self) -> list[dict[str, Any]]:
         timing_plan = self.build_timing_plan()
+        selected_plans = _select_priority_elements(
+            timing_plan,
+            float(self.audio_data.get("duration", 0)),
+        )
         input_items = [
             {
                 "role": "system",
                 "content": (
                     "Sen artistik buz pateni ve artistik roller skating icin deneyimli bir sesli kocsun. "
                     "Gorevin, sana verilen hareket timeline'ina gore cok kisa ama gercekci kulaklik cue'lari uretmek. "
+                    "Bu sistem her hareketi seslendirmez; sadece secilmis onemli anlar konusulur. "
                     "Dil dogal, teknik ve sporcuyu rahatsiz etmeyecek kadar kisa olmali. "
                     "Prep cue'lar 2-4 kelime olmali. Trigger cue'lar 1-3 kelime olmali. "
-                    "Ayni ifadeyi surekli tekrar etme. Hareketin tipine ve verilen teknik baglama uygun yaz. "
+                    "Ayni ifadeyi surekli tekrar etme. Tek basina 'Basla', 'Don' veya 'Atla' gibi bos ve jenerik komutlara kacma. "
+                    "Mumkun oldugunca hat, merkez, ritim, kenar, akis veya cikis gibi daha anlamli kelimeler sec. "
                     "Hakem gibi konusma; antrenor gibi yonlendir."
                 ),
             },
@@ -140,8 +148,9 @@ class CoachingEngine:
                     {
                         "language": self.language,
                         "tempo_bpm": round(float(self.audio_data.get("tempo", 0)), 2),
-                        "planned_elements": timing_plan,
+                        "planned_elements": selected_plans,
                         "requirements": [
+                            "Yalnizca verilen secili elementler icin metin uret.",
                             "Her element icin tam 1 prep_text ve 1 trigger_text uret.",
                             "focus_text yalnizca hareket 4 saniyeden uzunsa ve ek teknik hatirlatma gercekten gerekliyse dolu olsun; yoksa bos string kullan.",
                             "Metinler teknik olarak hareketin karakterine uysun.",
@@ -165,7 +174,8 @@ class CoachingEngine:
         }
 
         cues: list[dict[str, Any]] = []
-        for plan in timing_plan:
+        last_primary_time = -999.0
+        for plan in selected_plans:
             generated = generated_items.get(plan["element_index"], {})
             prep_text = _normalize_short_text(
                 generated.get("prep_text"),
@@ -176,38 +186,34 @@ class CoachingEngine:
                 fallback=_fallback_trigger_text(plan["type"], plan["name"]),
             )
             focus_text = _normalize_short_text(generated.get("focus_text"), fallback="", max_words=5)
+            cue_kind, cue_time, cue_text = _build_primary_cue(
+                plan,
+                prep_text,
+                trigger_text,
+                focus_text,
+            )
+            if cue_time - last_primary_time < PRIMARY_CUE_SPACING_SECONDS:
+                cue_kind, cue_time, cue_text = _build_primary_cue(
+                    plan,
+                    prep_text,
+                    trigger_text,
+                    focus_text,
+                    prefer_trigger=True,
+                )
+            if cue_time - last_primary_time < PRIMARY_CUE_SPACING_SECONDS:
+                continue
 
             cues.append(
                 {
                     "element_index": plan["element_index"],
                     "element_name": plan["name"],
                     "element_type": plan["type"],
-                    "cue_kind": "prep",
-                    "time": plan["prep_time"],
-                    "text": prep_text,
+                    "cue_kind": cue_kind,
+                    "time": cue_time,
+                    "text": cue_text,
                 }
             )
-            cues.append(
-                {
-                    "element_index": plan["element_index"],
-                    "element_name": plan["name"],
-                    "element_type": plan["type"],
-                    "cue_kind": "trigger",
-                    "time": plan["trigger_time"],
-                    "text": trigger_text,
-                }
-            )
-            if focus_text and plan["duration_seconds"] >= 4.0:
-                cues.append(
-                    {
-                        "element_index": plan["element_index"],
-                        "element_name": plan["name"],
-                        "element_type": plan["type"],
-                        "cue_kind": "focus",
-                        "time": plan["focus_time"],
-                        "text": focus_text,
-                    }
-                )
+            last_primary_time = float(cue_time)
 
         cues.sort(key=lambda item: (float(item["time"]), int(item["element_index"])))
         return cues
@@ -242,36 +248,103 @@ def _normalize_short_text(
     return text
 
 
+def _select_priority_elements(
+    timing_plan: list[dict[str, Any]],
+    duration: float,
+) -> list[dict[str, Any]]:
+    if not timing_plan:
+        return []
+
+    if duration < 95:
+        max_spoken_elements = 4
+    elif duration < 145:
+        max_spoken_elements = 5
+    else:
+        max_spoken_elements = 6
+
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for position, plan in enumerate(timing_plan):
+        element_type = str(plan["type"])
+        base_scores = {
+            "jump": 5.0,
+            "spin": 4.5,
+            "sequence": 3.5,
+            "turns": 3.0,
+            "transition": 2.5,
+            "pose": 2.0,
+        }
+        score = base_scores.get(element_type, 2.0)
+        score += min(float(plan["duration_seconds"]) / 6.0, 1.5)
+        if position == 0:
+            score += 1.0
+        if position == len(timing_plan) - 1:
+            score += 1.4
+        if plan["start_time"] >= duration * 0.65 and element_type in {"spin", "transition"}:
+            score += 0.7
+        scored.append((score, plan))
+
+    protected_indexes = {0, len(timing_plan) - 1}
+    selected: list[dict[str, Any]] = [
+        plan for plan in timing_plan if int(plan["element_index"]) in protected_indexes
+    ]
+
+    for _, plan in sorted(scored, key=lambda item: item[0], reverse=True):
+        if len(selected) >= max_spoken_elements:
+            break
+        if any(int(item["element_index"]) == int(plan["element_index"]) for item in selected):
+            continue
+        if any(abs(float(plan["start_time"]) - float(item["start_time"])) < 10.0 for item in selected):
+            continue
+        selected.append(plan)
+
+    selected.sort(key=lambda item: float(item["start_time"]))
+    return selected
+
+
+def _build_primary_cue(
+    plan: dict[str, Any],
+    prep_text: str,
+    trigger_text: str,
+    focus_text: str,
+    *,
+    prefer_trigger: bool = False,
+) -> tuple[str, float, str]:
+    element_type = str(plan["type"])
+    if element_type == "jump" and not prefer_trigger:
+        return "prep", float(plan["prep_time"]), prep_text or trigger_text
+    if element_type == "spin" and not prefer_trigger:
+        return "prep", float(plan["prep_time"]), prep_text or focus_text or trigger_text
+    if element_type in {"sequence", "transition", "turns"} and focus_text and float(plan["duration_seconds"]) >= 8.0:
+        return "focus", float(plan["focus_time"]), focus_text
+    return "trigger", float(plan["trigger_time"]), trigger_text or prep_text
+
+
 def _fallback_prep_text(element_type: str, element_name: str) -> str:
     if element_type == "jump":
-        return "Kalkisa hazirlan"
+        return "Ritmi topla"
     if element_type == "spin":
-        return "Merkezi kur"
+        return "Merkezi hisset"
     if element_type == "sequence":
-        return "Ritmi kur"
+        return "Ritmi tasi"
     if element_type == "turns":
-        return "Kenari kur"
+        return "Kenari hazirla"
     if element_type == "pose":
-        return "Finale hazirlan"
-    if "glide" in element_name.lower():
-        return "Dengeyi kur"
-    return "Hatti hazirla"
+        return "Finali kur"
+    return "Hatti uzat"
 
 
 def _fallback_trigger_text(element_type: str, element_name: str) -> str:
     if element_type == "jump":
-        return "Atla"
+        return "Temiz cik"
     if element_type == "spin":
-        return "Don"
+        return "Merkezi koru"
     if element_type == "sequence":
-        return "Isle"
+        return "Ritmi islet"
     if element_type == "turns":
-        return "Cevir"
+        return "Kenari cevir"
     if element_type == "pose":
         return "Tut"
-    if "glide" in element_name.lower():
-        return "Kay"
-    return "Ac"
+    return "Akisi ac"
 
 
 def _build_openai_client(api_key: str | None):

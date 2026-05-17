@@ -114,11 +114,19 @@ PROGRAM_SCHEMA = {
 }
 
 DEFAULT_DURATIONS = {
-    "jump": 1.2,
-    "spin": 2.2,
-    "turns": 1.3,
-    "sequence": 4.0,
-    "transition": 2.0,
+    "jump": 2.0,
+    "spin": 4.5,
+    "turns": 4.0,
+    "sequence": 10.0,
+    "transition": 8.0,
+}
+
+SEGMENT_WEIGHTS = {
+    "jump": 0.7,
+    "spin": 1.0,
+    "turns": 0.95,
+    "sequence": 1.45,
+    "transition": 1.3,
 }
 
 
@@ -169,16 +177,19 @@ class ProgramPlanner:
                         "planning_rules": {
                             "target_density": _target_density(duration),
                             "required_shape": [
-                                "opening flow or transition",
-                                "at least one spin",
+                                "opening flow or transition block",
+                                "at least one spin in the middle half",
                                 "at least one rhythm-driven section or turns/sequence",
-                                "a strong closing element from the allowed transition, spin, or sequence names",
+                                "a calm and expressive closing element from the allowed transition or spin names",
                             ],
                             "notes": [
                                 "Use only movement names listed in allowed_movements_by_type.",
                                 "Cover the full music duration from opening to closing.",
-                                "Longer expressive moments can be transitions or sequences.",
+                                "Think in larger choreography blocks, not in constant move spam.",
+                                "Do not stack jumps and spins back to back without a softer flow, turns, or sequence block between them.",
+                                "Longer expressive moments should usually be transitions, turns, or sequences.",
                                 "Jump windows should stay comparatively short.",
+                                "The program should feel skateable with breathing room, not overloaded.",
                             ],
                         },
                     },
@@ -209,7 +220,17 @@ def normalize_planned_elements(
     target_density: dict[str, int] | None = None,
 ) -> list[dict[str, Any]]:
     prepared: list[dict[str, Any]] = []
-    density = target_density or _target_density(duration)
+    density = dict(target_density or _target_density(duration))
+    density.setdefault(
+        "ideal_elements",
+        max(
+            density.get("min_elements", 5),
+            min(
+                density.get("max_elements", 7),
+                round((density.get("min_elements", 5) + density.get("max_elements", 7)) / 2),
+            ),
+        ),
+    )
 
     for raw in sorted(planned_elements, key=lambda item: float(item.get("start_time", 0.0))):
         element_type = _normalize_type(str(raw.get("type", "transition")))
@@ -225,27 +246,29 @@ def normalize_planned_elements(
         )
 
     prepared = _trim_element_count(prepared, density["max_elements"])
-    normalized = _normalize_timeline(prepared, duration)
 
-    if normalized and normalized[-1]["end_time"] < duration * 0.85:
-        coverage_end = float(normalized[-1]["end_time"])
-        scale = duration / max(coverage_end, 1.0)
-        scaled = [
-            {
-                **element,
-                "start_time": float(element["start_time"]) * scale,
-                "end_time": float(element["end_time"]) * scale,
-                "music_peak_time": float(element["music_peak_time"]) * scale,
-            }
-            for element in normalized
-        ]
-        normalized = _normalize_timeline(scaled, duration)
+    if not prepared:
+        prepared = _build_fallback_program(duration, density["ideal_elements"])
 
-    if not normalized or len(normalized) < density["min_elements"]:
-        fallback = _build_fallback_program(duration, density["min_elements"])
-        normalized = _normalize_timeline(fallback, duration)
+    blueprint = _build_macro_blueprint(
+        duration,
+        density["ideal_elements"],
+        prepared,
+    )
+    shaped = _shape_program_to_blueprint(
+        prepared,
+        duration,
+        blueprint,
+    )
 
-    return normalized
+    if len(shaped) < density["min_elements"]:
+        shaped = _shape_program_to_blueprint(
+            _build_fallback_program(duration, density["ideal_elements"]),
+            duration,
+            _build_macro_blueprint(duration, density["min_elements"], prepared),
+        )
+
+    return shaped
 
 
 def _normalize_timeline(
@@ -288,6 +311,62 @@ def _normalize_timeline(
             break
 
     return normalized
+
+
+def _shape_program_to_blueprint(
+    prepared: list[dict[str, Any]],
+    duration: float,
+    blueprint: list[str],
+) -> list[dict[str, Any]]:
+    if not blueprint:
+        return _normalize_timeline(prepared, duration)
+
+    pools: dict[str, list[str]] = {}
+    for element in prepared:
+        pools.setdefault(str(element["type"]), []).append(str(element["name"]))
+
+    inter_element_gap = 0.45
+    total_gap = inter_element_gap * max(0, len(blueprint) - 1)
+    usable_duration = max(duration - total_gap, float(len(blueprint)))
+    total_weight = sum(SEGMENT_WEIGHTS[element_type] for element_type in blueprint)
+    unit = usable_duration / max(total_weight, 1.0)
+
+    timeline: list[dict[str, Any]] = []
+    cursor = 0.0
+    previous_name = ""
+
+    for index, element_type in enumerate(blueprint):
+        allocated = max(DEFAULT_DURATIONS[element_type], unit * SEGMENT_WEIGHTS[element_type])
+        if index == len(blueprint) - 1:
+            end_time = duration
+        else:
+            end_time = min(duration, cursor + allocated)
+        if end_time <= cursor:
+            end_time = min(duration, cursor + DEFAULT_DURATIONS[element_type])
+
+        name = _next_name_for_type(
+            pools,
+            element_type,
+            previous_name=previous_name,
+            force_closing=(index == len(blueprint) - 1),
+        )
+        peak_ratio = 0.56 if element_type == "jump" else 0.62
+        peak_time = min(end_time, cursor + ((end_time - cursor) * peak_ratio))
+        timeline.append(
+            {
+                "name": name,
+                "type": element_type,
+                "start_time": round(cursor, 3),
+                "end_time": round(end_time, 3),
+                "music_peak_time": round(peak_time, 3),
+            }
+        )
+        previous_name = name
+        cursor = min(duration, round(end_time + inter_element_gap, 3))
+        if cursor >= duration:
+            break
+
+    return _normalize_timeline(timeline, duration)
 
 
 def _normalize_type(raw_type: str) -> str:
@@ -360,19 +439,16 @@ def _build_fallback_program(duration: float, element_count: int) -> list[dict[st
         ("transition", "Spiral"),
         ("sequence", "Step Sequence"),
         ("jump", "Salchow"),
-        ("spin", "Camel Spin"),
-        ("turns", "Three-Turn"),
         ("transition", "Spread Eagle"),
-        ("jump", "Loop"),
-        ("spin", "Sit Spin"),
+        ("spin", "Camel Spin"),
         ("turns", "Twizzle"),
         ("transition", "Ina Bauer"),
-        ("jump", "Lutz"),
+        ("jump", "Loop"),
         ("spin", "Layback Spin"),
     ]
 
     safe_count = max(1, element_count)
-    slot_length = max(duration / safe_count, 1.5)
+    slot_length = max(duration / safe_count, 6.0)
     plan: list[dict[str, Any]] = []
 
     for index in range(safe_count):
@@ -393,12 +469,78 @@ def _build_fallback_program(duration: float, element_count: int) -> list[dict[st
     return plan
 
 
+def _build_macro_blueprint(
+    duration: float,
+    ideal_elements: int,
+    prepared: list[dict[str, Any]],
+) -> list[str]:
+    jump_count = sum(1 for item in prepared if str(item["type"]) == "jump")
+    spin_count = sum(1 for item in prepared if str(item["type"]) == "spin")
+    prefer_second_major = "jump" if jump_count >= spin_count else "spin"
+
+    if ideal_elements <= 5:
+        return ["transition", "sequence", "jump", "spin", "transition"]
+    if ideal_elements == 6:
+        return ["transition", "sequence", "jump", "transition", "spin", "transition"]
+    if ideal_elements == 7:
+        return [
+            "transition",
+            "sequence",
+            "jump",
+            "transition",
+            "spin",
+            "turns",
+            "transition",
+        ]
+    if prefer_second_major == "jump":
+        return [
+            "transition",
+            "sequence",
+            "jump",
+            "transition",
+            "spin",
+            "turns",
+            "jump",
+            "transition",
+        ]
+    return [
+        "transition",
+        "sequence",
+        "jump",
+        "transition",
+        "spin",
+        "turns",
+        "spin",
+        "transition",
+    ]
+
+
+def _next_name_for_type(
+    pools: dict[str, list[str]],
+    element_type: str,
+    *,
+    previous_name: str,
+    force_closing: bool,
+) -> str:
+    if force_closing and element_type == "transition":
+        for closing_name in ("Ina Bauer", "Spread Eagle", "Spiral"):
+            if closing_name in PLANNER_ALLOWED_MOVEMENTS["transition"] and closing_name != previous_name:
+                return closing_name
+
+    candidates = pools.get(element_type, [])
+    while candidates:
+        candidate = candidates.pop(0)
+        if candidate != previous_name:
+            return candidate
+    return _fallback_allowed_name(element_type)
+
+
 def _target_density(duration: float) -> dict[str, int]:
     if duration < 110:
-        return {"min_elements": 6, "max_elements": 9}
+        return {"min_elements": 5, "max_elements": 7, "ideal_elements": 6}
     if duration < 160:
-        return {"min_elements": 8, "max_elements": 11}
-    return {"min_elements": 10, "max_elements": 14}
+        return {"min_elements": 6, "max_elements": 8, "ideal_elements": 7}
+    return {"min_elements": 7, "max_elements": 9, "ideal_elements": 8}
 
 
 def _build_openai_client(api_key: str | None):
