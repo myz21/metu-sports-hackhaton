@@ -5,7 +5,7 @@ Bu sürümde sesli koçluk hattı, `VOICE.md` içindeki hibrit stratejiye sadık
 ## Ne değişti?
 
 * `src/voice/program_planner.py` (YENİ)
-  Müziğin süresi ve enerji profili (Librosa çıktısı) kullanılarak Gemini 2.5 Flash ile yarışma standartlarına uygun 10-15 hareketlik otonom bir koreografi üretimi (Program Planner) eklendi.
+  Müziğin süresi ve enerji profili (Librosa çıktısı) kullanılarak Gemini 3.0 Flash ile yarışma standartlarına uygun 10-15 hareketlik otonom bir koreografi üretimi (Program Planner) eklendi.
   (Testlerdeki 3 manuel hareketlik dummy_program kaldırıldı.)
 
 * `src/voice/coaching_engine.py`

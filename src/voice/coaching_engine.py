@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.0-flash"
 
 
 class CueModel(BaseModel):
