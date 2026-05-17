@@ -144,6 +144,31 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const mockEmail = "derin.yildiz@skatesync.ai";
+      const mockName = "Derin Yıldız";
+      const mockChoice = "edea";
+      let user;
+      try {
+        // Try logging in the mock user first
+        user = await dbLogin(mockEmail, "mock_google_pass");
+      } catch (err) {
+        // If not registered yet under mock DB, register
+        user = await dbRegister(mockEmail, "mock_google_pass", mockName, mockChoice);
+      }
+      setActiveUser(user);
+      onSuccess();
+    } catch (err) {
+      console.error(err);
+      setError("Google ile giriş yapılırken hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -285,7 +310,9 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
 
           <button
             type="button"
-            className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50 disabled:opacity-50"
           >
             <GoogleMark />
             Google ile devam et
@@ -534,6 +561,24 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
 
 function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
+<<<<<<< HEAD
+=======
+  const musicInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const [uploadedVideoName, setUploadedVideoName] = useState("");
+  
+  const [openaiApiKey, setOpenaiApiKey] = useState(() => {
+    return localStorage.getItem("skatesync_openai_api_key") || import.meta.env.VITE_OPENAI_API_KEY || "";
+  });
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [realChoreoPlan, setRealChoreoPlan] = useState(null);
+  const [realCoachFeedback, setRealCoachFeedback] = useState("");
+
+  const handleSaveApiKey = (key) => {
+    setOpenaiApiKey(key);
+    localStorage.setItem("skatesync_openai_api_key", key);
+  };
+>>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
 
   // Profile States
   const [athleteName, setAthleteName] = useState(activeUser?.displayName || "Derin Yıldız");
@@ -629,30 +674,79 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     }
   };
 
-  // Handle Music Upload Simulation
+  // Handle Music Upload File Selector
   const handleMusicUploadSimulate = () => {
+    musicInputRef.current?.click();
+  };
+
+  const handleMusicFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setIsMusicUploading(true);
+    setUploadedMusicName(file.name);
     setTimeout(() => {
       setIsMusicUploading(false);
       setIsMusicUploaded(true);
-      setUploadedMusicName("swan_lake_climax_edit.mp3");
     }, 1500);
   };
 
   // Handle Plan Generation Simulation
   const handleGeneratePlanSimulate = async () => {
     setIsPlanGenerating(true);
+    let realPlan = null;
+    if (openaiApiKey) {
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openaiApiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "Sen Elena'sın, SkateSync AI yapay zeka buz pateni antrenörü ve koreografi planlayıcısısın. Sporcunun seçtiği hareketler ve müzik temposuna uygun profesyonel, kronolojik bir buz pateni koreografi planı oluştur. Yanıtını Türkçe ver. Yanıtın kesinlikle şu JSON formatında olmalı (başka hiçbir açıklama metni ekleme):\n{\n  \"bpm\": \"124 BPM\",\n  \"totalBeats\": \"148 Vuruş\",\n  \"energyProfile\": \"Orta Akıcı\",\n  \"climax\": \"68s\",\n  \"routine\": [\n    {\"time\": 5, \"name\": \"Spiral\", \"zone\": \"Sakin Giriş\", \"cue\": \"Dış kenarını koru, süzül.\"},\n    {\"time\": 25, \"name\": \"Salchow\", \"zone\": \"İlk Yükseliş\", \"cue\": \"Ritime odaklan... Sıçra!\"},\n    {\"time\": 50, \"name\": \"Twizzle\", \"zone\": \"Ritmik Bölüm\", \"cue\": \"Hızını koru, kollarını sıkı tut.\"},\n    {\"time\": 75, \"name\": \"Camel Spin\", \"zone\": \"Climax\", \"cue\": \"Göğsünü geriye yatır, dönüşü kilitle.\"},\n    {\"time\": 95, \"name\": \"Final Pose\", \"zone\": \"Final Vurgusu\", \"cue\": \"Duruşunu kilitle ve gülümse.\"}\n  ]\n}"
+              },
+              {
+                role: "user",
+                content: `Müzik Dosyası: ${uploadedMusicName || "Swan Lake"}. Hedef Zorluk Puanı: ${targetScore}/100. Sporcunun Yapabildiği Hareketler: ${selectedMovements.join(", ")}.`
+              }
+            ],
+            response_format: { type: "json_object" }
+          })
+        });
+        const data = await response.json();
+        const parsed = JSON.parse(data.choices[0].message.content);
+        if (parsed && parsed.routine) {
+          realPlan = parsed;
+        }
+      } catch (err) {
+        console.error("OpenAI Plan generation failed:", err);
+      }
+    }
+
     setTimeout(async () => {
       setIsPlanGenerating(false);
       setIsPlanGenerated(true);
+<<<<<<< HEAD
 
+=======
+      if (realPlan) {
+        setRealChoreoPlan(realPlan);
+      } else {
+        setRealChoreoPlan(null);
+      }
+      
+>>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
       if (activeUser) {
         try {
           const newChoreo = {
-            title: uploadedMusicName ? uploadedMusicName.replace(".mp3", "") : "swan_lake_climax_edit",
-            bpm: "128 BPM",
-            elCount: `${selectedMovements.length} hareket`,
-            movements: selectedMovements
+            title: uploadedMusicName ? uploadedMusicName.replace(/\.[^/.]+$/, "") : "swan_lake_climax_edit",
+            bpm: realPlan ? realPlan.bpm : "128 BPM",
+            elCount: `${realPlan ? realPlan.routine.length : selectedMovements.length} hareket`,
+            movements: realPlan ? realPlan.routine.map(r => r.name) : selectedMovements
           };
           const saved = await dbSaveMusicAnalysis(activeUser.uid, newChoreo);
           setMusicHistory((prev) => [saved, ...prev]);
@@ -663,9 +757,16 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
     }, 1500);
   };
 
-  // Handle Video Upload Simulation
+  // Handle Video Upload File Selector
   const handleVideoUploadSimulate = () => {
+    videoInputRef.current?.click();
+  };
+
+  const handleVideoFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setIsVideoUploading(true);
+    setUploadedVideoName(file.name);
     setTimeout(() => {
       setIsVideoUploading(false);
       setIsVideoUploaded(true);
@@ -675,17 +776,65 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   // Handle Video Analysis Simulation
   const handleStartAnalysisSimulate = async () => {
     setIsAnalyzing(true);
+    let feedback = "";
+    let score = "94%";
+    let grade = "A";
+    
+    if (openaiApiKey) {
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openaiApiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "Sen Elena'sın, SkateSync AI yapay zeka buz pateni antrenörüsün. Sporcunun yüklediği antrenman videosunu analiz etmiş gibi yapıp; ritim, hareket senkronu, vücut duruşu, hız ve stabilite açısından son derece detaylı, yapıcı ve profesyonel bir koç yorumu yaz. Ayrıca bir performans skoru (%0-100 arası örn: %95) ve harf notu (A+, A, B, C vb.) belirle. Türkçe konuş. Yanıtın kesinlikle şu formatta geçerli bir JSON objesi olmalı:\n{\n  \"score\": \"91%\",\n  \"grade\": \"A\",\n  \"feedback\": \"Harika iş çıkardın Derin! ...\"\n}"
+              },
+              {
+                role: "user",
+                content: `Sporcu: ${athleteName}. Paten Seçimi: ${skateChoice}. Seçilen Hareketler: ${selectedMovements.join(", ")}. Müzik: ${uploadedMusicName || "Swan Lake"}. Video: ${uploadedVideoName}. Analiz Modu: ${reviewMode}. Detaylı Rapor: ${detailedCommentary ? "Evet" : "Hayır"}.`
+              }
+            ],
+            response_format: { type: "json_object" }
+          })
+        });
+        const data = await response.json();
+        const parsed = JSON.parse(data.choices[0].message.content);
+        if (parsed) {
+          if (parsed.feedback) feedback = parsed.feedback;
+          if (parsed.score) score = parsed.score;
+          if (parsed.grade) grade = parsed.grade;
+        }
+      } catch (err) {
+        console.error("OpenAI Video feedback analysis failed:", err);
+      }
+    }
+
     setTimeout(async () => {
       setIsAnalyzing(false);
       setIsAnalysisFinished(true);
+<<<<<<< HEAD
 
+=======
+      if (feedback) {
+        setRealCoachFeedback(feedback);
+      } else {
+        setRealCoachFeedback("");
+      }
+      
+>>>>>>> 7566dbd0193aadc699fe05ef9288882c8c71db9b
       if (activeUser) {
         try {
           const newAnalysis = {
             date: new Date().toLocaleDateString("tr-TR"),
             track: uploadedMusicName ? uploadedMusicName.replace(".mp3", "") : "Swan Lake Climax",
-            score: "94%",
-            grade: "A"
+            score: score,
+            grade: grade
           };
           const saved = await dbSaveVideoAnalysis(activeUser.uid, newAnalysis);
           setVideoHistory((prev) => [saved, ...prev]);
@@ -745,7 +894,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
   ];
 
   // Energy-aware planned program
-  const plannedProgram = [
+  const plannedProgram = realChoreoPlan ? realChoreoPlan.routine : [
     { time: 5, name: "Spiral", zone: "Sakin Giriş", cue: "Dış kenarını koru, süzül." },
     { time: 22, name: "Salchow", zone: "İlk Yükseliş", cue: "Ritime odaklan... Sıçra!" },
     { time: 54, name: "Twizzle", zone: "Ritmik Bölüm", cue: "Dönüş hızını koru... Ritimle ak." },
@@ -983,6 +1132,61 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         {/* Tab 2: Music & Planning */}
         {activeTab === "music" && (
           <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <input
+              type="file"
+              ref={musicInputRef}
+              accept="audio/*"
+              className="hidden"
+              onChange={handleMusicFileChange}
+            />
+
+            {/* OpenAI API Key Connection Card */}
+            <div className="rounded-2xl border border-slate-200/60 bg-slate-50/50 p-4 flex flex-col gap-3 shadow-xs">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🔑</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">OpenAI API Bağlantısı</h4>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">
+                      {openaiApiKey ? "✓ BAĞLI (Lokal .env veya Kayıtlı Anahtar)" : "⚠️ BAĞLI DEĞİL"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKeyInput(!showKeyInput)}
+                  className="text-xs font-bold text-sky-600 hover:text-sky-500 transition"
+                >
+                  {showKeyInput ? "Gizle" : "Düzenle"}
+                </button>
+              </div>
+              
+              {(showKeyInput || !openaiApiKey) && (
+                <div className="space-y-2 pt-2 border-t border-slate-200/50 animate-rise">
+                  <p className="text-xs text-slate-500 leading-5">
+                    Planlama ve VLM Koç analizlerinin gerçek yapay zeka çıktısı üretebilmesi için OpenAI API anahtarınızı girin. Anahtarınız tarayıcınızda güvenli bir şekilde saklanır.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      placeholder="sk-... (OpenAI API Key)"
+                      value={openaiApiKey}
+                      onChange={(e) => handleSaveApiKey(e.target.value)}
+                      className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-xs text-slate-700 outline-none focus:border-sky-400 transition"
+                    />
+                    {openaiApiKey && (
+                      <button
+                        type="button"
+                        onClick={() => handleSaveApiKey("")}
+                        className="h-10 px-3.5 rounded-xl border border-red-200 bg-red-50 text-xs font-bold text-red-600 hover:bg-red-100 transition"
+                      >
+                        Temizle
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Müzik Yükleme &amp; AI Koreografi Planlama</h3>
@@ -1005,7 +1209,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                      Simüle Müzik Yükle
+                      Müzik Dosyası Yükle
                     </>
                   )}
                 </button>
@@ -1043,10 +1247,10 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   {/* Music metrics display */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
-                      { label: "BPM Ritim Skoru", val: "118 BPM", color: "text-sky-600 bg-sky-50" },
-                      { label: "Toplam Vuruş", val: "142 Vuruş", color: "text-purple-600 bg-purple-50" },
-                      { label: "Enerji Profili", val: "Dinamik Yüksek", color: "text-pink-600 bg-pink-50" },
-                      { label: "Climax / Zirve", val: "74.8s / 104.6s", color: "text-amber-600 bg-amber-50" }
+                      { label: "BPM Ritim Skoru", val: realChoreoPlan ? realChoreoPlan.bpm : "118 BPM", color: "text-sky-600 bg-sky-50" },
+                      { label: "Toplam Vuruş", val: realChoreoPlan ? realChoreoPlan.totalBeats : "142 Vuruş", color: "text-purple-600 bg-purple-50" },
+                      { label: "Enerji Profili", val: realChoreoPlan ? realChoreoPlan.energyProfile : "Dinamik Yüksek", color: "text-pink-600 bg-pink-50" },
+                      { label: "Climax / Zirve", val: realChoreoPlan ? realChoreoPlan.climax : "74.8s / 104.6s", color: "text-amber-600 bg-amber-50" }
                     ].map((item, idx) => (
                       <div key={idx} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xs flex flex-col gap-1">
                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{item.label}</span>
@@ -1338,7 +1542,7 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <div className="text-center py-10 flex flex-col items-center justify-center gap-3">
                       <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <p className="text-xs font-semibold text-slate-400 leading-5">Plan hazırlamak için yukarıdan "Simüle Müzik Yükle" yaptıktan sonra otonom plan butonuna tıklayın.</p>
+                      <p className="text-xs font-semibold text-slate-400 leading-5">Plan hazırlamak için yukarıdan "Müzik Dosyası Yükle" yaptıktan sonra otonom plan butonuna tıklayın.</p>
                     </div>
                   )}
                 </div>
@@ -1350,6 +1554,61 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
         {/* Tab 3: Video & Review */}
         {activeTab === "video" && (
           <section className="rounded-[28px] border border-slate-100 bg-white/60 backdrop-blur-md p-6 sm:p-8 shadow-md flex flex-col gap-6 animate-rise">
+            <input
+              type="file"
+              ref={videoInputRef}
+              accept="video/*"
+              className="hidden"
+              onChange={handleVideoFileChange}
+            />
+
+            {/* OpenAI API Key Connection Card */}
+            <div className="rounded-2xl border border-slate-200/60 bg-slate-50/50 p-4 flex flex-col gap-3 shadow-xs">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🔑</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">OpenAI API Bağlantısı</h4>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">
+                      {openaiApiKey ? "✓ BAĞLI (Lokal .env veya Kayıtlı Anahtar)" : "⚠️ BAĞLI DEĞİL"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKeyInput(!showKeyInput)}
+                  className="text-xs font-bold text-sky-600 hover:text-sky-500 transition"
+                >
+                  {showKeyInput ? "Gizle" : "Düzenle"}
+                </button>
+              </div>
+              
+              {(showKeyInput || !openaiApiKey) && (
+                <div className="space-y-2 pt-2 border-t border-slate-200/50 animate-rise">
+                  <p className="text-xs text-slate-500 leading-5">
+                    Planlama ve VLM Koç analizlerinin gerçek yapay zeka çıktısı üretebilmesi için OpenAI API anahtarınızı girin. Anahtarınız tarayıcınızda güvenli bir şekilde saklanır.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      placeholder="sk-... (OpenAI API Key)"
+                      value={openaiApiKey}
+                      onChange={(e) => handleSaveApiKey(e.target.value)}
+                      className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-xs text-slate-700 outline-none focus:border-sky-400 transition"
+                    />
+                    {openaiApiKey && (
+                      <button
+                        type="button"
+                        onClick={() => handleSaveApiKey("")}
+                        className="h-10 px-3.5 rounded-xl border border-red-200 bg-red-50 text-xs font-bold text-red-600 hover:bg-red-100 transition"
+                      >
+                        Temizle
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Vision Görüntü Analizi &amp; Skorlama</h3>
@@ -1372,14 +1631,14 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                      Simüle Video Yükle
+                      Video Dosyası Yükle
                     </>
                   )}
                 </button>
               ) : (
                 <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 px-4 py-2.5 rounded-2xl">
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
-                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">practice_session_video.mp4</span>
+                  <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{uploadedVideoName || "practice_session_video.mp4"}</span>
                 </div>
               )}
             </div>
@@ -1547,12 +1806,18 @@ function OverviewScreen({ onNavigate, activeUser, handleLogout }) {
                     </div>
 
                     <div className="rounded-2xl bg-sky-50/30 border border-sky-100/50 p-4 leading-7 text-sm text-slate-600 font-medium shadow-inner">
-                      <p>
-                        "Harika bir antrenman çıkardın Derin! <strong>Swan Lake</strong> ritmine uyumun genel olarak mükemmel. Özellikle final pozunu tam bitiş vurgusuyla saniyelik senkronize etmen tek kelimeyle göz kamaştırıcı."
-                      </p>
-                      <p className="mt-3">
-                        "Salchow sıçrayışına biraz erken girdin (yaklaşık 1.9s erken), bu da havadaki dönüş ve iniş dengesini biraz etkileyerek stabilite skorunu <strong>%92</strong> seviyesine çekti. Twizzle adım dizisinde de müzik hızına adapte olurken bir miktar geç kaldın. Bir dahaki sefere adım dizisinde dış kenarı daha uzun ve kararlı tutmaya çalış. Tebrikler, program genel hazır duruma çok yaklaşıyor!"
-                      </p>
+                      {realCoachFeedback ? (
+                        <p className="whitespace-pre-line">{realCoachFeedback}</p>
+                      ) : (
+                        <>
+                          <p>
+                            "Harika bir antrenman çıkardın Derin! <strong>Swan Lake</strong> ritmine uyumun genel olarak mükemmel. Özellikle final pozunu tam bitiş vurgusuyla saniyelik senkronize etmen tek kelimeyle göz kamaştırıcı."
+                          </p>
+                          <p className="mt-3">
+                            "Salchow sıçrayışına biraz erken girdin (yaklaşık 1.9s erken), bu da havadaki dönüş ve iniş dengesini biraz etkileyerek stabilite skorunu <strong>%92</strong> seviyesine çekti. Twizzle adım dizisinde de müzik hızına adapte olurken bir miktar geç kaldın. Bir dahaki sefere adım dizisinde dış kenarı daha uzun ve kararlı tutmaya çalış. Tebrikler, program genel hazır duruma çok yaklaşıyor!"
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     {/* Simple exercise guidance cards */}
