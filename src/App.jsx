@@ -14,7 +14,9 @@ import {
   dbGetMusicAnalyses,
   dbSaveVideoAnalysis,
   dbGetVideoAnalyses,
-  isFirebaseConfigured
+  firebaseMissingConfigKeys,
+  firebaseStatusMessage,
+  isFirebaseReady
 } from "./firebase";
 
 
@@ -251,7 +253,7 @@ function TopBar({ onNavigate, theme = "light", activeUser, onLogout }) {
             </button>
             <button
               type="button"
-              onClick={() => onNavigate("overview")}
+              onClick={() => onNavigate(activeUser ? "overview" : "login")}
               className={`inline-flex h-11 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition ${theme === "dark"
                 ? "bg-slate-100 text-slate-900 hover:bg-white"
                 : "bg-slate-800 text-white hover:bg-slate-700"
@@ -275,30 +277,11 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
   const [skateChoice, setSkateChoice] = useState("edea");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const authUnavailable = !isFirebaseReady;
+  const authBannerDetail = firebaseStatusMessage || "Firebase auth henuz hazir degil.";
 
   const handleGoogleSignIn = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const mockEmail = "derin.yildiz@skatesync.ai";
-      const mockName = "Derin Yıldız";
-      const mockChoice = "edea";
-      let user;
-      try {
-        // Try logging in the mock user first
-        user = await dbLogin(mockEmail, "mock_google_pass");
-      } catch (err) {
-        // If not registered yet under mock DB, register
-        user = await dbRegister(mockEmail, "mock_google_pass", mockName, mockChoice);
-      }
-      setActiveUser(user);
-      onSuccess();
-    } catch (err) {
-      console.error(err);
-      setError("Google ile giriş yapılırken hata oluştu.");
-    } finally {
-      setLoading(false);
-    }
+    setError("Google login bu build'de aktif degil. Once Firebase email/password akisinin tamamlanmasi gerekiyor.");
   };
 
   const handleSubmit = async (event) => {
@@ -328,6 +311,8 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
         errMsg = "Geçersiz e-posta adresi.";
       } else if (err.code === "auth/weak-password") {
         errMsg = "Şifre en az 6 karakter olmalıdır.";
+      } else if (err.code === "app/firebase-not-configured" || err.code === "app/firebase-init-failed") {
+        errMsg = err.message;
       } else {
         errMsg = err.message;
       }
@@ -350,6 +335,15 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
         </p>
       </div>
 
+      {!isFirebaseReady && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-left text-xs leading-6 text-amber-800">
+          <p className="font-bold uppercase tracking-[0.18em] text-amber-900">Auth Config Gerekli</p>
+          <p className="mt-2">{authBannerDetail}</p>
+          {!!firebaseMissingConfigKeys.length && (
+            <p className="mt-2 font-medium">Eksik env: {firebaseMissingConfigKeys.join(", ")}</p>
+          )}
+        </div>
+      )}
       {error && (
         <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-xs font-semibold text-red-600 animate-rise">
           ⚠️ {error}
@@ -427,7 +421,7 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
         <div className="space-y-4 pt-2">
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || authUnavailable}
             className={`flex h-16 w-full items-center justify-center rounded-2xl bg-slate-800 text-[1.05rem] font-semibold text-white transition hover:bg-slate-700 ${loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
           >
@@ -447,7 +441,7 @@ function LoginPanel({ onSuccess, activeUser, setActiveUser }) {
             className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-lg font-medium text-slate-900 transition hover:bg-slate-50 disabled:opacity-50"
           >
             <GoogleMark />
-            Google ile devam et
+            Google sign-in disabled
           </button>
         </div>
       </form>
@@ -580,7 +574,7 @@ function LandingScreen({ onNavigate, activeUser, handleLogout }) {
             <div className="mt-8 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => onNavigate("overview")}
+                onClick={() => onNavigate("login")}
                 className="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-800 px-6 text-sm font-semibold text-white transition hover:bg-slate-700"
               >
                 Get Started
@@ -2219,17 +2213,17 @@ export default function App() {
   useEffect(() => {
     return subscribeToAuth((user) => {
       setActiveUser(user);
-      if (user) {
-        if (screen === "landing" || screen === "login") {
-          setScreen("overview");
+      setScreen((currentScreen) => {
+        if (user && (currentScreen === "landing" || currentScreen === "login")) {
+          return "overview";
         }
-      } else {
-        if (screen === "overview") {
-          setScreen("landing");
+        if (!user && currentScreen === "overview") {
+          return "landing";
         }
-      }
+        return currentScreen;
+      });
     });
-  }, [screen]);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -2250,3 +2244,4 @@ export default function App() {
 
   return <LandingScreen onNavigate={setScreen} activeUser={activeUser} handleLogout={handleLogout} />;
 }
+
