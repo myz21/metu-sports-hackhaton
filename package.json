@@ -6,14 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "remotion:studio": "remotion studio remotion/index.jsx",
+    "remotion:render": "remotion render remotion/index.jsx SkateSyncPromo out/skatesync-ai.mp4"
   },
   "dependencies": {
+    "@remotion/google-fonts": "^4.0.462",
+    "@remotion/media": "^4.0.462",
     "firebase": "^12.13.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.462"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.462",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
