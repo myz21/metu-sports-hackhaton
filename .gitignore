@@ -1,13 +1,43 @@
-node_modules
-dist
-.DS_Store
-.env
-.env.*
-*.local
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Production Builds & Temporary Output
+dist/
+frontend/dist/
+out/
+.vite/
+frontend/.vite/
+
+# Python caching & Virtual Environments
 __pycache__/
 *.pyc
-data/
-hareketler/
-.vite/
-src/voice/output/
-/media/
+.venv/
+venv/
+env/
+backend/vision/venv/
+backend/voice/venv/
+
+# Environment Variables & Local Configs
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
+
+# Local Media and Remotion caches
+media/
+remotion/
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
