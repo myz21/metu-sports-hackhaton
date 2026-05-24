@@ -33,57 +33,87 @@ metu-sports-hackhaton/
 
 ---
 
-## 🚀 Başlangıç
+## 🚀 Başlangıç & Kurulum Kılavuzu
 
 ### 🖥️ 1. Ön Yüz (Frontend) Kurulumu ve Çalıştırma
 
-Ön yüz uygulaması **React**, **Vite** ve **TailwindCSS** ile geliştirilmiştir. Firebase Auth/Firestore entegrasyonuna ve yerel veri yedekleme mekanizmasına sahiptir.
+Ön yüz uygulaması **React**, **Vite** ve **TailwindCSS** ile geliştirilmiştir.
 
-1. **Ön Yüz Dizinine Geçin:**
-   ```bash
-   cd frontend
-   ```
-
-2. **Bağımlılıkları Yükleyin:**
-   ```bash
-   npm install
-   ```
-
-3. **Geliştirme Sunucusunu Başlatın:**
-   ```bash
-   npm run dev
-   ```
-   *Uygulama yerel olarak `http://localhost:5173` adresinde çalışacaktır.*
-
-4. **Production Build Alın:**
-   ```bash
-   npm run build
-   ```
+1.  **Ön Yüz Dizinine Geçin:**
+    ```bash
+    cd frontend
+    ```
+2.  **Bağımlılıkları Yükleyin:**
+    ```bash
+    npm install
+    ```
+3.  **Geliştirme Sunucusunu Başlatın:**
+    ```bash
+    npm run dev
+    ```
+    *Uygulama yerel olarak `http://localhost:5173` adresinde çalışacaktır.*
 
 ---
 
 ### 🐍 2. Yapay Zeka Motorları (Backend) Kurulumu
 
-Python modülleri, ritim analizini (`librosa` tabanlı) ve antrenman videoları ile planlanan koreografi zamanlamasını karşılaştıran VLM (`vision` motoru) süreçlerini yürütür.
+Yapay zeka motorları, ritim analizini (`librosa` tabanlı) ve sporcu videolarını planlanan zamanlamalarla karşılaştıran VLM (`vision` motoru) süreçlerini yürütür.
 
-1. **Ses ve Ritim Analiz Motoru (Voice Engine):**
-   ```bash
-   cd backend/voice
-   pip install -r requirements.txt
-   python -m src.voice --help
-   ```
-
-2. **Görüntü ve VLM Analiz Motoru (Vision Engine):**
-   ```bash
-   cd backend/vision
-   pip install -r requirements.txt
-   python -m src.vision --help
-   ```
+1.  **Arka Uç Dizinine Geçin ve Sanal Ortam Oluşturun:**
+    ```bash
+    cd backend
+    python -m venv .venv
+    source .venv/bin/activate  # Windows için: .venv\Scripts\Activate.ps1
+    ```
+2.  **Modern PEP 621 Yöntemi ile Bağımlılıkları Yükleyin:**
+    ```bash
+    pip install -e .
+    ```
+3.  **Motorları CLI Üzerinden Çalıştırın:**
+    *   **Ses & Ritim Analiz Motoru (Voice Engine):**
+        ```bash
+        python -m voice --help
+        ```
+    *   **Görüntü & VLM Analiz Motoru (Vision Engine):**
+        ```bash
+        python -m vision --help
+        ```
 
 ---
 
-## 📊 Entegre Veri Akışı
+### 🔄 3. Full-Stack Entegre Akış Kurulumu
 
-1. **Müzik Analizi (Voice Engine):** Sporcu müziğini yükler. Sistem tempoları (BPM), ritim vuruşlarını analiz eder ve koreografi için planlanabilir zaman pencerelerini (`planned_elements.json`) çıkartır.
-2. **Koreografi Planlama (Frontend):** Sporcu veya antrenör, ön yüz arayüzünden müzik zaman tüneline uygun teknik hareketleri yerleştirir.
-3. **Video Karşılaştırma (Vision Engine):** Sporcu antrenman videosunu sisteme yüklediğinde, VLM motoru planlanan zaman pencerelerine karşılık gelen video karelerini çıkararak timing farklarını offset analiz raporu olarak sunar.
+SkateSync AI, müzik ritim analizi ile koreografi planlamasını ve ardından video karşılaştırmayı bir zincir halinde yürütür. Tam entegre bir geliştirme veya test akışı için aşağıdaki adımları sırasıyla izleyin:
+
+1.  **Müzik Analizi (Ses Motoru):**
+    Sporcu müziği yüklendiğinde, ses motoru tempoları (BPM) ve ritimleri analiz ederek koreografi planlama için gerekli olan zaman aralıklarını (`planned_elements.json`) çıkartır:
+    ```bash
+    # backend/ dizinindeyken:
+    python -m voice analyze --file input.mp3 --output planned_elements.json
+    ```
+2.  **Koreografi Planlama (Ön Yüz):**
+    Oluşan `planned_elements.json` verisi veya ön yüzdeki müzik zaman tüneli aracılığıyla sporcu/antrenör teknik hareketleri (Jump, Spin vb.) zaman tüneline yerleştirir. Ön yüz geliştirme sunucusu aktifken arayüzden bunu görsel olarak yönetebilirsiniz:
+    ```bash
+    # frontend/ dizinindeyken:
+    npm run dev
+    ```
+3.  **Performans & Video Değerlendirme (Görüntü Motoru):**
+    Sporcu antrenman videosunu yüklediğinde, görüntü motoru planlanan zaman pencerelerine denk gelen kareleri VLM ile analiz ederek timing sapmalarını (offset farklarını) ve teknik puanları raporlar:
+    ```bash
+    # backend/ dizinindeyken:
+    python -m vision review --video performance.mp4 --plan planned_elements.json
+    ```
+
+---
+
+## 📊 Entegre Veri Akış Modeli
+
+```mermaid
+graph TD
+    A[Müzik Yükleme] -->|Voice Engine / Librosa| B(Ritim & Tempo Analizi)
+    B -->|planned_elements.json| C[Frontend Zaman Tüneli & Planlama]
+    C -->|Koreografi Planı| D[SkateSync UI]
+    E[Antrenman Videosu] -->|Vision Engine / VLM| F(Kare Saptama & Zaman Karşılaştırma)
+    D -->|Zaman Karşılaştırma| F
+    F -->|Timing Offset Raporu| G[Sporcu Geri Bildirim Ekranı]
+```
