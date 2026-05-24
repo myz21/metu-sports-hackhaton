@@ -1,5 +1,10 @@
 # SkateSync AI - Workspace Monorepo
 
+> ### 🏆 ODTU TEKNOKENT Sports Tech Hackathon | 3rd Place Winner
+> **[click for post](https://www.linkedin.com/) | [click for github](https://github.com/myz21/metu-sports-hackhaton) — May 2025**
+>
+> Won 3rd place at ODTU TEKNOKENT Hackathon by building **SkateSync AI**, the first platform to unify voice and vision AI for figure skating coaching with no direct marketplace equivalent, integrating BPM rhythm analysis, an LLM coaching engine, and VLM-based video evaluation into a single full-stack application in 24 hours.
+
 Bu depo, **SkateSync AI** projesinin tüm ön uç (React/Vite/Tailwind) ve yapay zeka/arka uç (Python Vision & Voice Engines) modüllerini temiz, modüler ve ölçeklenebilir bir monorepo yapısında bir araya getirir.
 
 ---
