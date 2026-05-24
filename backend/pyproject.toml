@@ -1,0 +1,30 @@
+[project]
+name = "skatesync-ai-backend"
+version = "0.1.0"
+description = "SkateSync AI - AI Coaching Vision and Voice Engines"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "openai>=1.0",
+    "opencv-python>=4.8.0",
+    "python-dotenv>=1.0.0",
+    "librosa>=0.10.0",
+    "numpy>=1.26.0",
+    "imageio-ffmpeg>=0.5.0",
+    "pydub>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.2.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I"]
