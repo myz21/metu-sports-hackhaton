@@ -2,19 +2,13 @@
 
 **SkateSync AI**, artistik patinaj (figure skating) sporcuları ve antrenörleri için ses ve görüntü yapay zekasını (Voice & Vision AI) tek bir çatı altında birleştiren yenilikçi ve öncü bir koçluk platformudur. Müzik ritmi (BPM) analizi, LLM koçluk motoru ve VLM (Vision-Language Model) tabanlı video değerlendirmesini entegre ederek sporcuların koreografi zamanlamalarını mükemmelleştirmelerini sağlar.
 
+
+Bu yenilikçi proje, **ODTÜ TEKNOKENT Sports Tech Hackathon** kapsamında 24 saat gibi kısa bir sürede sıfırdan full-stack olarak geliştirilmiş ve jüri tarafından **3.lük Ödülü'ne** layık görülmüştür.
+
+
+---
+
 Bu depo, projenin tüm ön uç (React/Vite/Tailwind) ve yapay zeka/arka uç (Python Vision & Voice Engines) modüllerini temiz, modüler ve ölçeklenebilir bir monorepo yapısında bir araya getirir.
-
----
-
-### 🏆 ODTÜ TEKNOKENT Hackathon Başarısı
-
-Bu yenilikçi proje, **ODTÜ TEKNOKENT Sports Tech Hackathon** kapsamında 24 saat gibi kısa bir sürede sıfırdan full-stack olarak geliştirilmiş ve jüri tarafından **3.lük Ödülü'ne (3rd Place Winner)** layık görülmüştür!
-
-- **LinkedIn Paylaşımı:** [click for post](https://www.linkedin.com/)
-- **GitHub Deposu:** [click for github](https://github.com/myz21/metu-sports-hackhaton)
-- **Tarih:** Mayıs 2025
-
----
 
 ## 📂 Monorepo Yapısı
 
