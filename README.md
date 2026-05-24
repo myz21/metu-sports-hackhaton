@@ -1,79 +1,89 @@
-# SkateSync AI - Unified System
+# SkateSync AI - Workspace Monorepo
 
-Bu proje, SkateSync AI uygulaması için geliştirilmiş React (Vite/Tailwind) frontend uygulaması ile Librosa-tabanlı ritim analizi, LLM/VLM koçluk motoru ve video değerlendirme modüllerini (ai-core) bir araya getirir.
+Bu depo, **SkateSync AI** projesinin tüm ön uç (React/Vite/Tailwind) ve yapay zeka/arka uç (Python Vision & Voice Engines) modüllerini temiz, modüler ve ölçeklenebilir bir monorepo yapısında bir araya getirir.
+
+---
+
+## 📂 Monorepo Yapısı
+
+Sürdürülebilirlik ve bağımsız ölçeklenebilirlik kuralları gereği, proje endüstri standartlarında bir monorepo düzenine ayrılmıştır:
+
+```text
+metu-sports-hackhaton/
+├── frontend/               # React + Vite + Tailwind CSS Uygulaması
+│   ├── src/                # Arayüz kodları, App.jsx, firebase vb.
+│   ├── public/             # Statik varlıklar (resim, ses, video)
+│   ├── knowledge/          # Figür pateni hareket katalogları ve JSON verileri
+│   ├── package.json        # Ön uç bağımlılıkları ve betikleri
+│   └── vite.config.js      # Vite yapılandırması
+│
+├── backend/                # Yapay Zeka & Analiz Motorları (Python 3.10+)
+│   ├── vision/             # VLM timing ve video analiz motoru (vlm_review.py vb.)
+│   └── voice/              # Librosa ritim analizi ve ses koçluk motoru (audio_analyzer.py vb.)
+│
+├── docs/                   # Genel sistem mimarisi, tasarım ve akış şemaları (Workflows)
+│   ├── CONTEXT.md          # Proje bağlamı ve genel vizyon
+│   ├── DESIGN.md           # Sistem tasarımı ve mimari kararlar
+│   └── workflows/          # SVG Akış şemaları ve sekans diyagramları
+│
+├── .gitignore              # Global git yoksayma dosyası
+├── netlify.toml            # Ön uç otomatik dağıtım (deploy) yapılandırması
+└── README.md               # Bu belge (Ana çalışma alanı açıklaması)
+```
 
 ---
 
 ## 🚀 Başlangıç
 
-### Ön Koşullar
-Bilgisayarınızda **Node.js** (v18+) ve **Python 3.10+** kurulu olduğundan emin olun.
+### 🖥️ 1. Ön Yüz (Frontend) Kurulumu ve Çalıştırma
 
-### Kurulum ve Çalıştırma
+Ön yüz uygulaması **React**, **Vite** ve **TailwindCSS** ile geliştirilmiştir. Firebase Auth/Firestore entegrasyonuna ve yerel veri yedekleme mekanizmasına sahiptir.
 
-1. **Bağımlılıkları Yükleyin**
-   Gerekli kütüphaneleri yüklemek için aşağıdaki komutu çalıştırın:
+1. **Ön Yüz Dizinine Geçin:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Bağımlılıkları Yükleyin:**
    ```bash
    npm install
    ```
 
-2. **Geliştirme Sunucusunu Başlatın**
-   Uygulamayı yerel olarak ayağa kaldırmak için:
+3. **Geliştirme Sunucusunu Başlatın:**
    ```bash
    npm run dev
    ```
+   *Uygulama yerel olarak `http://localhost:5173` adresinde çalışacaktır.*
 
-3. **Tarayıcıda Görüntüleyin**
-   Terminalde beliren adrese (genellikle `http://localhost:5173/`) giderek uygulamayı kullanmaya başlayabilirsiniz.
-
----
-
-## 🛠️ Derleme ve Dağıtım
-
-- **Uygulamayı Canlı İçin Derleme (Build):**
-  ```bash
-  npm run build
-  ```
-
-- **Derlenmiş Hali Önizleme:**
-  ```bash
-  npm run preview
-  ```
+4. **Production Build Alın:**
+   ```bash
+   npm run build
+   ```
 
 ---
 
-## 📂 Proje Yapısı
+### 🐍 2. Yapay Zeka Motorları (Backend) Kurulumu
 
-### Frontend (`src/`)
-- `src/App.jsx`: Ana uygulama bileşeni ve Hash-tabanlı router.
-- `src/pages/`: Alt sayfalar (`LandingPage`, `DashboardPage`, `MusicAnalysisPage`, `ChoreographyPage`, `VideoAnalysisPage`, `LibraryPage`).
-- `src/components/`: Ortak kullanılan UI bileşenleri.
-- `src/data/mockData.js`: Arayüzde kullanılan statik/mock veriler.
-- `src/data/db.js`: Firebase entegrasyonu ve LocalStorage fallback veritabanı bağdaştırıcısı.
+Python modülleri, ritim analizini (`librosa` tabanlı) ve antrenman videoları ile planlanan koreografi zamanlamasını karşılaştıran VLM (`vision` motoru) süreçlerini yürütür.
 
-### Voice Engine (`src/voice/`)
-Librosa ritim analizi ve OpenAI/Gemini koçluk motorunu barındırır.
-- `src/voice/audio_analyzer.py`
-- `src/voice/program_planner.py`
-- `src/voice/coaching_engine.py`
-- `src/voice/tts_engine.py`
-- `src/voice/main.py`
-- `src/voice/cli.py`
+1. **Ses ve Ritim Analiz Motoru (Voice Engine):**
+   ```bash
+   cd backend/voice
+   pip install -r requirements.txt
+   python -m src.voice --help
+   ```
 
-### Vision Engine (`src/vision/`)
-Antrenman videosu ile planlanan timeline'ı karşılaştıran VLM modülünü içerir.
-- `src/vision/vlm_review.py`
-- `src/vision/frame_extractor.py`
-- `src/vision/rag.py`
-- `src/vision/llm_feedback.py`
-- `src/vision/cli.py`
+2. **Görüntü ve VLM Analiz Motoru (Vision Engine):**
+   ```bash
+   cd backend/vision
+   pip install -r requirements.txt
+   python -m src.vision --help
+   ```
 
 ---
 
 ## 📊 Entegre Veri Akışı
 
-1. **Müzik Analizi:** Kullanıcı müzik dosyasını yükler. `src.voice` modülü ritmi çıkarır, tempoları (BPM) ölçer ve `planned_elements.json` ile `coaching_cues.json` dosyalarını üretir.
-2. **Koreografi Planlama:** Kullanıcı hareket sözlüğünü kullanarak müziğe uygun koreografiyi planlar.
-3. **Video Analizi:** Kullanıcı antrenman videosunu yüklediğinde `src.vision` VLM motoru, planlanan zaman pencerelerine göre frame'leri çeker ve timing farklarını offset olarak çıkarıp final analiz raporunu hazırlar.
-4. **Firebase Kaydı:** Giriş yapmış kullanıcıların tüm profilleri, program taslakları ve analiz geçmişleri Firestore veri tabanında (veya LocalStorage fallback üzerinde) saklanır.
->>>>>>> 154559e7b224235f4875a7b7fb25cf4265221f75
+1. **Müzik Analizi (Voice Engine):** Sporcu müziğini yükler. Sistem tempoları (BPM), ritim vuruşlarını analiz eder ve koreografi için planlanabilir zaman pencerelerini (`planned_elements.json`) çıkartır.
+2. **Koreografi Planlama (Frontend):** Sporcu veya antrenör, ön yüz arayüzünden müzik zaman tüneline uygun teknik hareketleri yerleştirir.
+3. **Video Karşılaştırma (Vision Engine):** Sporcu antrenman videosunu sisteme yüklediğinde, VLM motoru planlanan zaman pencerelerine karşılık gelen video karelerini çıkararak timing farklarını offset analiz raporu olarak sunar.
