@@ -1,11 +1,18 @@
-# SkateSync AI - Workspace Monorepo
+# SkateSync AI - AI-Powered Figure Skating Coach
 
-> ### 🏆 ODTU TEKNOKENT Sports Tech Hackathon | 3rd Place Winner
-> **[click for post](https://www.linkedin.com/) | [click for github](https://github.com/myz21/metu-sports-hackhaton) — May 2025**
->
-> Won 3rd place at ODTU TEKNOKENT Hackathon by building **SkateSync AI**, the first platform to unify voice and vision AI for figure skating coaching with no direct marketplace equivalent, integrating BPM rhythm analysis, an LLM coaching engine, and VLM-based video evaluation into a single full-stack application in 24 hours.
+**SkateSync AI**, artistik patinaj (figure skating) sporcuları ve antrenörleri için ses ve görüntü yapay zekasını (Voice & Vision AI) tek bir çatı altında birleştiren yenilikçi ve öncü bir koçluk platformudur. Müzik ritmi (BPM) analizi, LLM koçluk motoru ve VLM (Vision-Language Model) tabanlı video değerlendirmesini entegre ederek sporcuların koreografi zamanlamalarını mükemmelleştirmelerini sağlar.
 
-Bu depo, **SkateSync AI** projesinin tüm ön uç (React/Vite/Tailwind) ve yapay zeka/arka uç (Python Vision & Voice Engines) modüllerini temiz, modüler ve ölçeklenebilir bir monorepo yapısında bir araya getirir.
+Bu depo, projenin tüm ön uç (React/Vite/Tailwind) ve yapay zeka/arka uç (Python Vision & Voice Engines) modüllerini temiz, modüler ve ölçeklenebilir bir monorepo yapısında bir araya getirir.
+
+---
+
+### 🏆 ODTÜ TEKNOKENT Hackathon Başarısı
+
+Bu yenilikçi proje, **ODTÜ TEKNOKENT Sports Tech Hackathon** kapsamında 24 saat gibi kısa bir sürede sıfırdan full-stack olarak geliştirilmiş ve jüri tarafından **3.lük Ödülü'ne (3rd Place Winner)** layık görülmüştür!
+
+- **LinkedIn Paylaşımı:** [click for post](https://www.linkedin.com/)
+- **GitHub Deposu:** [click for github](https://github.com/myz21/metu-sports-hackhaton)
+- **Tarih:** Mayıs 2025
 
 ---
 
